@@ -1,0 +1,8 @@
+database:
+  endpoint: ws://localhost:8182
+service:
+  port: 5000
+lakes:
+  - provider: aws
+    store: athena
+    address: db=default&output_location=s3://results

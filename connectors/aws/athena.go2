@@ -1,0 +1,43 @@
+package aws
+
+import (
+	"database/sql"
+	"fmt"
+	_ "github.com/segmentio/go-athena"
+)
+
+var (
+	db *sql.DB
+	err error
+)
+
+func Connect(athenaEndpoint string)  *sql.DB {
+	db, err = sql.Open("athena", athenaEndpoint)
+	if err != nil {
+		fmt.Printf("Unable to establish connection: %s", err)
+	}
+
+	return db
+}
+
+func Query(queryString string) *sql.Rows {
+	rows, err := db.Query(queryString)
+
+	if err != nil {
+		fmt.Printf("Unable to perform query: %s", err)
+	}
+	return rows
+}
+
+func ReadRows(type T)(rows *sql.Rows) {
+
+	for rows.Next() {
+		var tables string
+		err = rows.Scan(&tables)
+		if err != nil{
+			fmt.Printf("Unable to scan row: %s", err)
+	 	}
+	 	fmt.Printf("Row: %s", tables)
+	}
+
+}
