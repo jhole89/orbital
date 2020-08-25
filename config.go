@@ -8,8 +8,8 @@ import (
 
 type Config struct {
 	Database DatabaseConfig `yaml:"database"`
-	Service ServiceConfig `yaml:"service"`
-	Lakes []LakeConfig `yaml:"lakes"`
+	Service  ServiceConfig  `yaml:"service"`
+	Lakes    []LakeConfig   `yaml:"lakes"`
 }
 
 type DatabaseConfig struct {
@@ -22,8 +22,8 @@ type ServiceConfig struct {
 
 type LakeConfig struct {
 	Provider string `yaml:"provider"`
-	Store string `yaml:store`
-	Address string `yaml:address`
+	Store    string `yaml:"store"`
+	Address  string `yaml:"address"`
 }
 
 func (c *Config) getConf() *Config {

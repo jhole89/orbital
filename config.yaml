@@ -5,4 +5,4 @@ service:
 lakes:
   - provider: aws
     store: athena
-    address: db=default&output_location=s3://results
+    address: db=default&region=us-west-2&output_location=s3://manta-innovations.queries

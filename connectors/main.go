@@ -1,14 +1,15 @@
 package connectors
 
-import (
-	"database/sql"
-	"github.com/jhole89/discovery-backend/connectors/aws"
-)
+import "database/sql"
 
-var Driver = map[string] map[string] func(address string) *sql.DB  {
-	"aws": awsDrivers,
+type Driver interface {
+	Connect(address string) *sql.DB
+	Query(query string) *sql.Rows
+	Index() []*Node
 }
 
-var awsDrivers = map[string] func(address string) *sql.DB {
-	"athena": aws.Connect,
+type Node struct {
+	Name string
+	Context string
+	Children []*Node
 }

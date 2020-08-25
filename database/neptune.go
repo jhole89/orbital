@@ -8,61 +8,85 @@ import (
 	"net/http"
 )
 
-var (
-	db gremtune.Client
-	err error
-)
+var err error
 
-func Start(endpoint string)  {
+type AwsNeptuneDB struct {
+	Address string
+	Connection gremtune.Client
+}
+
+func (n *AwsNeptuneDB) Connect()  {
 	errs := make(chan error)
 	go func(chan error) {
 		err := <-errs
 		log.Fatal("Lost connection to the database: " + err.Error())
-	}(errs) // Example of connection error handling logic
+	}(errs)
 
-	dialer := gremtune.NewDialer(endpoint) // Returns a WebSocket dialer to connect to Gremlin Server
-	db, err = gremtune.Dial(dialer, errs)  // Returns a gremtune client to interact with
+	dialer := gremtune.NewDialer(n.Address)
+	n.Connection, err = gremtune.Dial(dialer, errs)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 		return
 	}
+	n.clean()
 }
 
-func Read(w http.ResponseWriter) []byte {
-
-	drop()
-
-	query(w,"g.addV('data').property('name', 'footable').property('location', 'some-uri')")
-	query(w,"g.addV('data').property('name', 'bartable').property('location', 'some-uri2')")
-	query(w,"g.addV('field').property('name', 'foofield')")
-	query(w, "g.addE('has_field').from(g.V().has('data', 'name', 'footable')).to(g.V().has('field', 'name', 'foofield'))")
-	query(w, "g.addE('has_field').from(g.V().has('data', 'name', 'bartable')).to(g.V().has('field', 'name', 'foofield'))")
-
-	return query(w, "g.V().has('field', 'name', 'foofield').in('has_field').values('name')")
+func (n *AwsNeptuneDB) clean() string {
+	return n.Query("g.V().drop().iterate()")
 }
 
-func query(w http.ResponseWriter, queryString string) []byte {
-	res, err := db.Execute(queryString)
+func (n *AwsNeptuneDB) CreateEntity(e Entity) string {
+	queryString := fmt.Sprintf("g.addV('%s').property('name', '%s')", e.Context, e.Name)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	for _, property := range e.Properties {
+		queryString += fmt.Sprintf(".property('%s', '%s')", property.Attribute, property.Value)
 	}
+	return n.Query(queryString)
+}
 
-	j, err := json.Marshal(res[0].Result.Data) // res will return a list of resultsets,  where the data is a json.RawMessage
+func (n *AwsNeptuneDB) CreateRelationship(r Relationship) string {
+	queryString := fmt.Sprintf("g.addE('%s').from(g.V().has('%s', 'name', '%s')).to(g.V().has('%s', 'name', '%s'))", r.Context, r.From.Context, r.From.Name, r.To.Context, r.To.Name)
+
+	return n.Query(queryString)
+}
+
+func (n *AwsNeptuneDB) Query(queryString string) string {
+	resp, err := n.runQuery(queryString)
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%s", unmarshall(resp))
+}
+
+func (n *AwsNeptuneDB) runQuery(queryString string) ([]gremtune.Response, error) {
+	resp, err := n.Connection.Execute(queryString)
+	if err != nil {
+		log.Printf("Unable to execute query: %s. Err: %s\n", queryString, err.Error())
+		return nil, err
+	}
+	return resp, nil
+}
+
+func unmarshall(resp []gremtune.Response) []byte {
+	j, err := json.Marshal(resp[0].Result.Data)
 
 	if err != nil {
-		fmt.Println("Unable to unpack result")
-		panic(err)
+		log.Printf("Unable to unpack result: %s\n", err.Error())
+		return []byte{}
 	}
 
 	return j
 }
 
-func drop() {
-	_, err = db.Execute("g.V().drop().iterate()")
-	if err != nil {
-		fmt.Println("Unable to empty db")
-		panic(err)
-	}
+func (n *AwsNeptuneDB) Read(w http.ResponseWriter) []byte {
+	return n.httpQuery(w, "g.V().has('field', 'name', 'foofield').in('has_field').values('name')")
 }
 
+func (n *AwsNeptuneDB) httpQuery(w http.ResponseWriter, queryString string) []byte {
+	resp, err := n.runQuery(queryString)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	return unmarshall(resp)
+}
