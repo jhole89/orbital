@@ -13,6 +13,7 @@ type Config struct {
 }
 
 type DatabaseConfig struct {
+	Type     string `yaml:"type"`
 	Endpoint string `yaml:"endpoint"`
 }
 
@@ -30,12 +31,11 @@ func (c *Config) getConf() *Config {
 
 	yamlFile, err := ioutil.ReadFile("config.yaml")
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		log.Printf("Unable to read config.yaml: %s\n", err.Error())
 	}
 	err = yaml.Unmarshal(yamlFile, c)
 	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+		log.Fatalf("Unable to expand config.yaml: %s\n", err.Error())
 	}
-
 	return c
 }

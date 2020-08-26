@@ -19,7 +19,7 @@ func (n *AwsNeptuneDB) Connect()  {
 	errs := make(chan error)
 	go func(chan error) {
 		err := <-errs
-		log.Fatal("Lost connection to the database: " + err.Error())
+		log.Fatalf("Lost connection to the database: %s\n", err.Error())
 	}(errs)
 
 	dialer := gremtune.NewDialer(n.Address)

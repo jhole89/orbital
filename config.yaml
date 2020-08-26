@@ -1,4 +1,5 @@
 database:
+  type: Gremlin
   endpoint: ws://localhost:8182
 service:
   port: 5000
