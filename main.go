@@ -18,12 +18,11 @@ func main() {
 	conf.getConf()
 
 	graph := database.GetGraph(conf.Database.Type, conf.Database.Endpoint)
-	graph.Connect()
 
 	for _, lake := range conf.Lakes {
-		driver := &connectors.AwsAthenaConnector{Address: lake.Address}
-		conn := driver.Connect()
-		dbTopology := driver.Index(conn)
+		driver := connectors.GetDriver(fmt.Sprintf("%s%s", lake.Provider, lake.Store), lake.Address)
+
+		dbTopology := driver.Index()
 		for _, node := range dbTopology {
 			nodeToGraph(graph, node)
 		}

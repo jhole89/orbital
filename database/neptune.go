@@ -11,18 +11,17 @@ import (
 var err error
 
 type AwsNeptuneDB struct {
-	Address string
 	Connection gremtune.Client
 }
 
-func (n *AwsNeptuneDB) Connect()  {
+func (n *AwsNeptuneDB) Connect(address string)  {
 	errs := make(chan error)
 	go func(chan error) {
 		err := <-errs
 		log.Fatalf("Lost connection to the database: %s\n", err.Error())
 	}(errs)
 
-	dialer := gremtune.NewDialer(n.Address)
+	dialer := gremtune.NewDialer(address)
 	n.Connection, err = gremtune.Dial(dialer, errs)
 	if err != nil {
 		panic(err)
