@@ -17,7 +17,7 @@ func main() {
 	var conf Config
 	conf.getConf()
 
-	graph = &database.AwsNeptuneDB{Address: conf.Database.Endpoint}
+	graph := database.GetGraph(conf.Database.Type, conf.Database.Endpoint)
 	graph.Connect()
 
 	for _, lake := range conf.Lakes {
