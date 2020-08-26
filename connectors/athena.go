@@ -6,8 +6,10 @@ import (
 	_ "github.com/segmentio/go-athena"
 )
 
+var err error
+
 type AwsAthenaConnector struct {
-	Address string
+	Connection *sql.DB
 }
 
 type AwsAthenaTableDetails struct {
@@ -15,16 +17,15 @@ type AwsAthenaTableDetails struct {
 	Value sql.NullString
 }
 
-func (d *AwsAthenaConnector) Connect() *sql.DB {
-	db, err := sql.Open("athena", d.Address)
+func (d *AwsAthenaConnector) Connect(address string) {
+	d.Connection, err = sql.Open("athena", address)
 	if err != nil {
 		fmt.Printf("Unable to establish connection: %s\n", err)
 	}
-	return db
 }
 
-func (d *AwsAthenaConnector) Query(db *sql.DB, queryString string) *sql.Rows {
-	rows, err := db.Query(queryString)
+func (d *AwsAthenaConnector) Query(queryString string) *sql.Rows {
+	rows, err := d.Connection.Query(queryString)
 
 	if err != nil {
 		fmt.Printf("Unable to perform query: %s\n", err)
@@ -32,8 +33,8 @@ func (d *AwsAthenaConnector) Query(db *sql.DB, queryString string) *sql.Rows {
 	return rows
 }
 
-func (d *AwsAthenaConnector) getDatabases(db *sql.DB) []string {
-	query := d.Query(db, "SHOW SCHEMAS")
+func (d *AwsAthenaConnector) getDatabases() []string {
+	query := d.Query("SHOW SCHEMAS")
 	var databases []string
 
 	for query.Next() {
@@ -47,8 +48,8 @@ func (d *AwsAthenaConnector) getDatabases(db *sql.DB) []string {
 	return databases
 }
 
-func (d *AwsAthenaConnector) getTables(db *sql.DB, database string) []string {
-	query := d.Query(db, fmt.Sprintf("SHOW TABLES IN %s", database))
+func (d *AwsAthenaConnector) getTables(database string) []string {
+	query := d.Query(fmt.Sprintf("SHOW TABLES IN %s", database))
 	var tables []string
 
 	for query.Next() {
@@ -62,8 +63,8 @@ func (d *AwsAthenaConnector) getTables(db *sql.DB, database string) []string {
 	return tables
 }
 
-func (d *AwsAthenaConnector) describeTables(db *sql.DB, database string, table string) []string {
-	query := d.Query(db, fmt.Sprintf("DESCRIBE %s.%s", database, table))
+func (d *AwsAthenaConnector) describeTables(database string, table string) []string {
+	query := d.Query(fmt.Sprintf("DESCRIBE %s.%s", database, table))
 	var tableAttributes []string
 
 	for query.Next() {
@@ -78,8 +79,8 @@ func (d *AwsAthenaConnector) describeTables(db *sql.DB, database string, table s
 	return tableAttributes
 }
 
-func (d *AwsAthenaConnector) getTableMeta(db *sql.DB, database string, table string) []string {
-	query := d.Query(db, fmt.Sprintf("SHOW TBLPROPERTIES %s.%s", database, table))
+func (d *AwsAthenaConnector) getTableMeta(database string, table string) []string {
+	query := d.Query(fmt.Sprintf("SHOW TBLPROPERTIES %s.%s", database, table))
 	var tableMeta []string
 
 	for query.Next() {
@@ -96,16 +97,16 @@ func (d *AwsAthenaConnector) getTableMeta(db *sql.DB, database string, table str
 }
 
 
-func (d *AwsAthenaConnector) Index(db *sql.DB) []*Node {
+func (d *AwsAthenaConnector) Index() []*Node {
 
 	var databases []*Node
-	for _, database := range d.getDatabases(db) {
+	for _, database := range d.getDatabases() {
 
 		var tables []*Node
-		for _, table := range d.getTables(db, database) {
+		for _, table := range d.getTables(database) {
 
 			var fields []*Node
-			for _, tableAttr := range d.describeTables(db, database, table) {
+			for _, tableAttr := range d.describeTables(database, table) {
 				fields = append(fields, &Node{Name: tableAttr,Context:  "field"})
 			}
 			tables = append(tables, &Node{Name: table, Context: "table", Children: fields})

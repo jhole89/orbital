@@ -7,7 +7,7 @@ import (
 )
 
 type Graph interface {
-	Connect()
+	Connect(endpoint string)
 	Query(queryString string) string
 	CreateEntity(e Entity) string
 	CreateRelationship(r Relationship) string
@@ -34,14 +34,15 @@ type Relationship struct {
 func GetGraph(graphName string, endpoint string) Graph {
 
 	var supportedGraph = map[string]Graph {
-		"awsneptune": &AwsNeptuneDB{Address: endpoint},
-		"gremlin": &AwsNeptuneDB{Address: endpoint},
-		"tinkerpop": &AwsNeptuneDB{Address: endpoint},
+		"awsneptune": &AwsNeptuneDB{},
+		"gremlin": &AwsNeptuneDB{},
+		"tinkerpop": &AwsNeptuneDB{},
 	}
 
 	g, ok := supportedGraph[strings.ToLower(graphName)]
 
 	if ok {
+		g.Connect(endpoint)
 		return g
 	} else {
 		keys := make([]string, len(supportedGraph))
