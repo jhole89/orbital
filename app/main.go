@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/jhole89/discovery-backend/connectors"
-	"github.com/jhole89/discovery-backend/database"
+	"github.com/jhole89/orbital/connectors"
+	"github.com/jhole89/orbital/database"
 	"log"
 	"net/http"
 )

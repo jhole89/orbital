@@ -20,7 +20,7 @@ type Node struct {
 
 func GetDriver(name string, address string) Driver {
 
-	var supportedConnectors = map[string]Driver {
+	var supportedConnectors = map[string]Driver{
 		"awsathena": &AwsAthenaConnector{},
 	}
 
@@ -34,7 +34,7 @@ func GetDriver(name string, address string) Driver {
 		for k := range supportedConnectors {
 			keys = append(keys, k)
 		}
-		log.Fatalf("Connecting to %s is not supported. Please specifiy a supported connector in your config.yaml.\nValid connectors's: %s", name, keys)
+		log.Printf("Connecting to %s is not supported. Please specifiy a supported connector in your config.yaml.\nValid connectors's: %s", name, keys)
 		return nil
 	}
 }

@@ -1,3 +1,5 @@
+bou.ke/monkey v1.0.2 h1:kWcnsrCNUatbxncxR/ThdYqbytgOIArtYWqcQLQzKLI=
+bou.ke/monkey v1.0.2/go.mod h1:OqickVX3tNx6t33n1xvtTtu85YN5s6cKwVug+oHMaIA=
 github.com/aws/aws-sdk-go v1.34.5 h1:FwubVVX9u+kW9qDCjVzyWOdsL+W5wPq683wMk2R2GXk=
 github.com/aws/aws-sdk-go v1.34.5/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=

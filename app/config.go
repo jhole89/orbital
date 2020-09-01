@@ -4,6 +4,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 type Config struct {
@@ -37,5 +38,13 @@ func (c *Config) getConf() *Config {
 	if err != nil {
 		log.Fatalf("Unable to expand config.yaml: %s\n", err.Error())
 	}
+
+	dbAddress, ok := os.LookupEnv("ORBITAL_DB_ADDRESS")
+	if ok {
+		if dbAddress != "" {
+			c.Database.Endpoint = dbAddress
+		}
+	}
+
 	return c
 }

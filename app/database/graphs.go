@@ -33,10 +33,10 @@ type Relationship struct {
 
 func GetGraph(graphName string, endpoint string) Graph {
 
-	var supportedGraph = map[string]Graph {
-		"awsneptune": &AwsNeptuneDB{},
-		"gremlin": &AwsNeptuneDB{},
-		"tinkerpop": &AwsNeptuneDB{},
+	var supportedGraph = map[string]Graph{
+		"awsneptune": &Gremlin{},
+		"gremlin": &Gremlin{},
+		"tinkerpop": &Gremlin{},
 	}
 
 	g, ok := supportedGraph[strings.ToLower(graphName)]
@@ -49,7 +49,7 @@ func GetGraph(graphName string, endpoint string) Graph {
 		for k := range supportedGraph {
 			keys = append(keys, k)
 		}
-		log.Fatalf("DB: %s is not supported. Please specifiy a supported DB in your config.yaml.\nValid DB's: %s", graphName, keys)
+		log.Printf("DB: %s is not supported. Please specifiy a supported DB in your config.yaml.\nValid DB's: %s", graphName, keys)
 		return nil
 	}
 }
