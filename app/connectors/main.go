@@ -13,9 +13,10 @@ type Driver interface {
 }
 
 type Node struct {
-	Name string
-	Context string
-	Children []*Node
+	Name       string
+	Context    string
+	Properties map[string]string
+	Children   []*Node
 }
 
 func GetDriver(name string, address string) Driver {

@@ -15,7 +15,7 @@ type Gremlin struct {
 	Connection gremtune.Client
 }
 
-func (n *Gremlin) Connect(address string)  {
+func (n *Gremlin) Connect(address string) {
 	errs := make(chan error)
 	go func(chan error) {
 		err := <-errs

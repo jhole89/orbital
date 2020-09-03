@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	bou.ke/monkey v1.0.2
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/aws/aws-sdk-go v1.34.5 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/schwartzmx/gremtune v0.0.3

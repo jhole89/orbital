@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/segmentio/go-athena"
+	"strings"
 )
 
 var err error
@@ -13,8 +14,13 @@ type AwsAthenaConnector struct {
 }
 
 type AwsAthenaTableDetails struct {
-	Attribute string
-	Value sql.NullString
+	Column string
+	Type   sql.NullString
+}
+
+type Column struct {
+	Name string
+	Type string
 }
 
 func (d *AwsAthenaConnector) Connect(address string) {
@@ -38,12 +44,12 @@ func (d *AwsAthenaConnector) getDatabases() []string {
 	var databases []string
 
 	for query.Next() {
-		var database string
-		err := query.Scan(&database)
+		var databaseName string
+		err := query.Scan(&databaseName)
 		if err != nil {
 			fmt.Printf("Unable to scan database: %s\n", err)
 		}
-		databases = append(databases, database)
+		databases = append(databases, strings.TrimSpace(databaseName))
 	}
 	return databases
 }
@@ -53,30 +59,35 @@ func (d *AwsAthenaConnector) getTables(database string) []string {
 	var tables []string
 
 	for query.Next() {
-		var table string
-		err := query.Scan(&table)
+		var tabName string
+		err := query.Scan(&tabName)
 		if err != nil {
 			fmt.Printf("Unable to scan table: %s\n", err)
 		}
-		tables = append(tables, table)
+		tables = append(tables, strings.TrimSpace(tabName))
 	}
 	return tables
 }
 
-func (d *AwsAthenaConnector) describeTables(database string, table string) []string {
+func (d *AwsAthenaConnector) describeTables(database string, table string) []Column {
 	query := d.Query(fmt.Sprintf("DESCRIBE %s.%s", database, table))
-	var tableAttributes []string
+	var columns []Column
 
 	for query.Next() {
 		var tableAttribute = AwsAthenaTableDetails{}
 
-		err := query.Scan(&tableAttribute.Attribute, &tableAttribute.Value)
+		err := query.Scan(&tableAttribute.Column, &tableAttribute.Type)
 		if err != nil {
 			fmt.Printf("Unable to scan TableAttributes: %s\n", err)
 		}
-		tableAttributes = append(tableAttributes, tableAttribute.Attribute)
+		c := strings.Split(tableAttribute.Column, "\t")
+
+		if len(c) == 2 {
+			col := Column{Name: strings.TrimSpace(c[0]), Type: strings.TrimSpace(c[1])}
+			columns = append(columns, col)
+		}
 	}
-	return tableAttributes
+	return columns
 }
 
 func (d *AwsAthenaConnector) getTableMeta(database string, table string) []string {
@@ -96,7 +107,6 @@ func (d *AwsAthenaConnector) getTableMeta(database string, table string) []strin
 	return tableMeta
 }
 
-
 func (d *AwsAthenaConnector) Index() []*Node {
 
 	var databases []*Node
@@ -106,8 +116,8 @@ func (d *AwsAthenaConnector) Index() []*Node {
 		for _, table := range d.getTables(database) {
 
 			var fields []*Node
-			for _, tableAttr := range d.describeTables(database, table) {
-				fields = append(fields, &Node{Name: tableAttr,Context:  "field"})
+			for _, field := range d.describeTables(database, table) {
+				fields = append(fields, &Node{Name: field.Name, Context: "field", Properties: map[string]string{"data-type": field.Type}})
 			}
 			tables = append(tables, &Node{Name: table, Context: "table", Children: fields})
 		}

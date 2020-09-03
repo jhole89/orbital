@@ -22,7 +22,7 @@ type Entity struct {
 
 type Property struct {
 	Attribute string
-	Value string
+	Value     string
 }
 
 type Relationship struct {
@@ -35,8 +35,8 @@ func GetGraph(graphName string, endpoint string) Graph {
 
 	var supportedGraph = map[string]Graph{
 		"awsneptune": &Gremlin{},
-		"gremlin": &Gremlin{},
-		"tinkerpop": &Gremlin{},
+		"gremlin":    &Gremlin{},
+		"tinkerpop":  &Gremlin{},
 	}
 
 	g, ok := supportedGraph[strings.ToLower(graphName)]

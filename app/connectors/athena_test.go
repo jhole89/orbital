@@ -3,8 +3,8 @@ package connectors
 import (
 	"bou.ke/monkey"
 	"database/sql"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
-	"reflect"
 	"testing"
 )
 
@@ -19,11 +19,7 @@ func TestAwsAthenaConnector_Connect(t *testing.T) {
 	monkey.Unpatch(sql.Open)
 }
 
-func TestAwsAthenaConnector_Index(t *testing.T) {
-
-}
-
-func TestAwsAthenaConnector_Query(t *testing.T) {
+func TestAwsAthenaConnector_getDatabases(t *testing.T) {
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -31,34 +27,73 @@ func TestAwsAthenaConnector_Query(t *testing.T) {
 	}
 	defer db.Close()
 
-	mock.ExpectBegin()
-	mock.ExpectExec("UPDATE products").WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectExec("INSERT INTO product_viewers").WithArgs(2, 3).WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectCommit()
+	columns := []string{"database_name"}
 
+	mock.ExpectQuery("SHOW SCHEMAS").WillReturnRows(sqlmock.NewRows(columns).AddRow("foo-db").AddRow("bar-db"))
 
-	var s *sql.DB
-	monkey.PatchInstanceMethod(reflect.TypeOf(s), "Query", func(query string, args ...interface{}) (*sql.Rows, error) {
-		return
+	var a AwsAthenaConnector
+	a.Connection = db
+	dbs := a.getDatabases()
+	assert.Equal(t, []string{"foo-db", "bar-db"}, dbs)
+}
+
+func TestAwsAthenaConnector_getTables(t *testing.T) {
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	defer db.Close()
 
-return (*sql.DB)(nil), nil
-	})
+	columns := []string{"tab_name"}
 
+	mock.ExpectQuery("SHOW TABLES IN foo").WillReturnRows(sqlmock.NewRows(columns).AddRow("foo-tab").AddRow("bar-tab"))
+
+	var a AwsAthenaConnector
+	a.Connection = db
+	tabs := a.getTables("foo")
+
+	assert.Equal(t, []string{"foo-tab", "bar-tab"}, tabs)
 }
 
 func TestAwsAthenaConnector_describeTables(t *testing.T) {
 
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	columns := []string{"column", "type"}
+
+	mock.ExpectQuery("DESCRIBE foo.bar").WillReturnRows(
+		sqlmock.NewRows(
+			columns,
+		).AddRow(
+			"some-string-field\tvarchar", "",
+		).AddRow(
+			"some-bool-field\tboolean", "",
+		).AddRow(
+			"some-int-field\tbigint", "",
+		).AddRow(
+			"some-double-field\tdouble", "",
+		),
+	)
+
+	var a AwsAthenaConnector
+	a.Connection = db
+	cols := a.describeTables("foo", "bar")
+
+	expected := []Column{
+		{Name: "some-string-field", Type: "varchar"},
+		{Name: "some-bool-field", Type: "boolean"},
+		{Name: "some-int-field", Type: "bigint"},
+		{Name: "some-double-field", Type: "double"},
+	}
+
+	assert.Equal(t, expected, cols)
 }
 
-func TestAwsAthenaConnector_getDatabases(t *testing.T) {
-
-}
-
-func TestAwsAthenaConnector_getTableMeta(t *testing.T) {
-
-}
-
-func TestAwsAthenaConnector_getTables(t *testing.T) {
+func TestAwsAthenaConnector_Index(t *testing.T) {
 
 }
