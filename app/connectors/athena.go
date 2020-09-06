@@ -7,10 +7,24 @@ import (
 	"strings"
 )
 
-var err error
-
-type AwsAthenaConnector struct {
+type AwsAthena struct {
 	Connection *sql.DB
+}
+
+func NewAwsAthena(dsn string) (Driver, error) {
+
+	db, err := sql.Open("athena", dsn)
+
+	if err != nil {
+		fmt.Printf("Unable to establish connection: %s\n", err)
+		return nil, err
+	}
+
+	return &AwsAthena{Connection: db}, nil
+}
+
+func (a *AwsAthena) Close() {
+	_ = a.Connection.Close()
 }
 
 type AwsAthenaTableDetails struct {
@@ -23,63 +37,82 @@ type Column struct {
 	Type string
 }
 
-func (d *AwsAthenaConnector) Connect(address string) {
-	d.Connection, err = sql.Open("athena", address)
-	if err != nil {
-		fmt.Printf("Unable to establish connection: %s\n", err)
-	}
-}
+func (a *AwsAthena) Query(queryString string) (*sql.Rows, error) {
 
-func (d *AwsAthenaConnector) Query(queryString string) *sql.Rows {
-	rows, err := d.Connection.Query(queryString)
+	rows, err := a.Connection.Query(queryString)
 
 	if err != nil {
-		fmt.Printf("Unable to perform query: %s\n", err)
+		fmt.Printf("Unable to execute query: %s\n", err)
+		return nil, err
 	}
-	return rows
+
+	return rows, nil
 }
 
-func (d *AwsAthenaConnector) getDatabases() []string {
-	query := d.Query("SHOW SCHEMAS")
-	var databases []string
+func (a *AwsAthena) getDatabases() ([]string, error) {
+	query, err := a.Query("SHOW SCHEMAS")
+
+	if err != nil {
+		return nil, err
+	}
+
+	var databases = make([]string, 0)
 
 	for query.Next() {
 		var databaseName string
 		err := query.Scan(&databaseName)
+
 		if err != nil {
 			fmt.Printf("Unable to scan database: %s\n", err)
+			return nil, err
 		}
 		databases = append(databases, strings.TrimSpace(databaseName))
 	}
-	return databases
+	return databases, nil
 }
 
-func (d *AwsAthenaConnector) getTables(database string) []string {
-	query := d.Query(fmt.Sprintf("SHOW TABLES IN %s", database))
-	var tables []string
+func (a *AwsAthena) getTables(database string) ([]string, error) {
+	query, err := a.Query(fmt.Sprintf("SHOW TABLES IN %s", database))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var tables = make([]string, 0)
 
 	for query.Next() {
+
 		var tabName string
 		err := query.Scan(&tabName)
+
 		if err != nil {
 			fmt.Printf("Unable to scan table: %s\n", err)
+			return nil, err
 		}
 		tables = append(tables, strings.TrimSpace(tabName))
 	}
-	return tables
+	return tables, nil
 }
 
-func (d *AwsAthenaConnector) describeTables(database string, table string) []Column {
-	query := d.Query(fmt.Sprintf("DESCRIBE %s.%s", database, table))
-	var columns []Column
+func (a *AwsAthena) describeTables(database, table string) ([]Column, error) {
+	query, err := a.Query(fmt.Sprintf("DESCRIBE %s.%s", database, table))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var columns = make([]Column, 0)
 
 	for query.Next() {
 		var tableAttribute = AwsAthenaTableDetails{}
 
 		err := query.Scan(&tableAttribute.Column, &tableAttribute.Type)
+
 		if err != nil {
 			fmt.Printf("Unable to scan TableAttributes: %s\n", err)
+			return nil, err
 		}
+
 		c := strings.Split(tableAttribute.Column, "\t")
 
 		if len(c) == 2 {
@@ -87,41 +120,43 @@ func (d *AwsAthenaConnector) describeTables(database string, table string) []Col
 			columns = append(columns, col)
 		}
 	}
-	return columns
+	return columns, nil
 }
 
-func (d *AwsAthenaConnector) getTableMeta(database string, table string) []string {
-	query := d.Query(fmt.Sprintf("SHOW TBLPROPERTIES %s.%s", database, table))
-	var tableMeta []string
+func (a *AwsAthena) Index() ([]*Node, error) {
+	return index(a.getDatabases, a.getTables, a.describeTables)
+}
 
-	for query.Next() {
-		var propAttr string
-		var propValue sql.NullString
-		err := query.Scan(&propAttr, &propValue)
+func index(getDatabases func() ([]string, error), getTables func(string) ([]string, error), getColumns func(string, string) ([]Column, error)) ([]*Node, error) {
+
+	dbs, err := getDatabases()
+	if err != nil {
+		return nil, err
+	}
+
+	var dbNodes = make([]*Node, 0)
+	for _, database := range dbs {
+
+		tables, err := getTables(database)
 		if err != nil {
-			fmt.Printf("Unable to scan tableProp: %s\n", err)
+			return nil, err
 		}
-		fmt.Printf("---- ---- --- TableProp: %s -- %s\n", propAttr, propValue.String)
-		tableMeta = append(tableMeta, propAttr)
-	}
-	return tableMeta
-}
 
-func (d *AwsAthenaConnector) Index() []*Node {
+		var tblNodes = make([]*Node, 0)
+		for _, table := range tables {
 
-	var databases []*Node
-	for _, database := range d.getDatabases() {
-
-		var tables []*Node
-		for _, table := range d.getTables(database) {
-
-			var fields []*Node
-			for _, field := range d.describeTables(database, table) {
-				fields = append(fields, &Node{Name: field.Name, Context: "field", Properties: map[string]string{"data-type": field.Type}})
+			fields, err := getColumns(database, table)
+			if err != nil {
+				return nil, err
 			}
-			tables = append(tables, &Node{Name: table, Context: "table", Children: fields})
+
+			var fieldNodes = make([]*Node, 0)
+			for _, field := range fields {
+				fieldNodes = append(fieldNodes, &Node{Name: field.Name, Context: "field", Properties: map[string]string{"data-type": field.Type}})
+			}
+			tblNodes = append(tblNodes, &Node{Name: table, Context: "table", Children: fieldNodes})
 		}
-		databases = append(databases, &Node{Name: database, Context: "database", Children: tables})
+		dbNodes = append(dbNodes, &Node{Name: database, Context: "database", Children: tblNodes})
 	}
-	return databases
+	return dbNodes, nil
 }

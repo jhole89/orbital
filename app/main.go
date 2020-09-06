@@ -22,7 +22,8 @@ func main() {
 	for _, lake := range conf.Lakes {
 		driver := connectors.GetDriver(fmt.Sprintf("%s%s", lake.Provider, lake.Store), lake.Address)
 
-		dbTopology := driver.Index()
+		dbTopology, _ := driver.Index()
+
 		for _, node := range dbTopology {
 			nodeToGraph(graph, node)
 		}

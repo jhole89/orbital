@@ -7,9 +7,14 @@ import (
 )
 
 type Driver interface {
-	Connect(address string)
-	Query(query string) *sql.Rows
-	Index() []*Node
+	Query(query string) (*sql.Rows, error)
+	Index() ([]*Node, error)
+}
+
+type Indexer interface {
+	getDatabases() ([]string, error)
+	getTables(database string) ([]string, error)
+	describeTables(database, table string) ([]Column, error)
 }
 
 type Node struct {
@@ -21,15 +26,15 @@ type Node struct {
 
 func GetDriver(name string, address string) Driver {
 
-	var supportedConnectors = map[string]Driver{
-		"awsathena": &AwsAthenaConnector{},
+	var supportedConnectors = map[string]func(dsn string) (Driver, error){
+		"awsathena": NewAwsAthena,
 	}
 
 	c, ok := supportedConnectors[strings.ToLower(name)]
 
 	if ok {
-		c.Connect(address)
-		return c
+		d, _ := c(address)
+		return d
 	} else {
 		keys := make([]string, len(supportedConnectors))
 		for k := range supportedConnectors {

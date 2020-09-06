@@ -1,88 +1,86 @@
 package connectors
 
 import (
-	"bou.ke/monkey"
 	"database/sql"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"log"
 	"testing"
 )
 
-func TestAwsAthenaConnector_Connect(t *testing.T) {
-	monkey.Patch(sql.Open, func(driverName string, dataSourceName string) (*sql.DB, error) {
-		return (*sql.DB)(nil), nil
-	})
-	var a AwsAthenaConnector
-	a.Connect("some-address")
-	assert.IsType(t, (*sql.DB)(nil), a.Connection, "Connect should establish an sql connection.")
+func NewMock() (*sql.DB, sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
 
-	monkey.Unpatch(sql.Open)
+	return db, mock
 }
 
 func TestAwsAthenaConnector_getDatabases(t *testing.T) {
 
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	defer db.Close()
+	asserter := assert.New(t)
 
-	columns := []string{"database_name"}
+	db, mock := NewMock()
+	a := &AwsAthena{db}
 
-	mock.ExpectQuery("SHOW SCHEMAS").WillReturnRows(sqlmock.NewRows(columns).AddRow("foo-db").AddRow("bar-db"))
+	defer func() {
+		a.Close()
+	}()
 
-	var a AwsAthenaConnector
-	a.Connection = db
-	dbs := a.getDatabases()
-	assert.Equal(t, []string{"foo-db", "bar-db"}, dbs)
+	rows := sqlmock.NewRows([]string{"database_name"}).AddRow("foo-db").AddRow("bar-db")
+	mock.ExpectQuery("SHOW SCHEMAS").WillReturnRows(rows)
+
+	dbs, err := a.getDatabases()
+
+	asserter.NoError(err)
+	asserter.NotEmpty(dbs)
+	asserter.Len(dbs, 2)
+	asserter.Equal([]string{"foo-db", "bar-db"}, dbs)
 }
 
 func TestAwsAthenaConnector_getTables(t *testing.T) {
 
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	defer db.Close()
+	asserter := assert.New(t)
 
-	columns := []string{"tab_name"}
+	db, mock := NewMock()
+	a := &AwsAthena{db}
 
-	mock.ExpectQuery("SHOW TABLES IN foo").WillReturnRows(sqlmock.NewRows(columns).AddRow("foo-tab").AddRow("bar-tab"))
+	defer func() {
+		a.Close()
+	}()
 
-	var a AwsAthenaConnector
-	a.Connection = db
-	tabs := a.getTables("foo")
+	rows := sqlmock.NewRows([]string{"tab_name"}).AddRow("foo-tab").AddRow("bar-tab")
+	mock.ExpectQuery("SHOW TABLES IN foo").WillReturnRows(rows)
 
-	assert.Equal(t, []string{"foo-tab", "bar-tab"}, tabs)
+	tabs, err := a.getTables("foo")
+
+	asserter.NoError(err)
+	asserter.NotEmpty(tabs)
+	asserter.Len(tabs, 2)
+	asserter.Equal([]string{"foo-tab", "bar-tab"}, tabs)
 }
 
 func TestAwsAthenaConnector_describeTables(t *testing.T) {
 
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-	defer db.Close()
+	asserter := assert.New(t)
 
-	columns := []string{"column", "type"}
+	db, mock := NewMock()
+	a := &AwsAthena{db}
 
-	mock.ExpectQuery("DESCRIBE foo.bar").WillReturnRows(
-		sqlmock.NewRows(
-			columns,
-		).AddRow(
-			"some-string-field\tvarchar", "",
-		).AddRow(
-			"some-bool-field\tboolean", "",
-		).AddRow(
-			"some-int-field\tbigint", "",
-		).AddRow(
-			"some-double-field\tdouble", "",
-		),
-	)
+	defer func() {
+		a.Close()
+	}()
 
-	var a AwsAthenaConnector
-	a.Connection = db
-	cols := a.describeTables("foo", "bar")
+	rows := sqlmock.NewRows([]string{"column", "type"}).
+		AddRow("some-string-field\tvarchar", "").
+		AddRow("some-bool-field\tboolean", "").
+		AddRow("some-int-field\tbigint", "").
+		AddRow("some-double-field\tdouble", "")
+	mock.ExpectQuery("DESCRIBE foo.bar").WillReturnRows(rows)
+
+	cols, err := a.describeTables("foo", "bar")
 
 	expected := []Column{
 		{Name: "some-string-field", Type: "varchar"},
@@ -91,9 +89,74 @@ func TestAwsAthenaConnector_describeTables(t *testing.T) {
 		{Name: "some-double-field", Type: "double"},
 	}
 
-	assert.Equal(t, expected, cols)
+	asserter.NoError(err)
+	asserter.NotEmpty(cols)
+	asserter.Len(cols, 4)
+	asserter.Equal(expected, cols)
+}
+
+type MockIndexer struct {
+	mock.Mock
+}
+
+func (a *MockIndexer) getDatabases() ([]string, error) {
+	args := a.Called()
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (a *MockIndexer) getTables(database string) ([]string, error) {
+	args := a.Called(database)
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (a *MockIndexer) describeTables(database, table string) ([]Column, error) {
+	args := a.Called(database, table)
+	return args.Get(0).([]Column), args.Error(1)
 }
 
 func TestAwsAthenaConnector_Index(t *testing.T) {
+	asserter := assert.New(t)
 
+	am := new(MockIndexer)
+	am.On("getDatabases").Return([]string{"foo-db", "bar-db"}, nil)
+	am.On("getTables", "foo-db").Return([]string{"foo1-tab", "bar1-tab"}, nil)
+	am.On("getTables", "bar-db").Return([]string{"foo2-tab", "bar2-tab"}, nil)
+	am.On("describeTables", "foo-db", "foo1-tab").
+		Return([]Column{{Name: "some-string-field", Type: "varchar"}, {Name: "some-bool-field", Type: "boolean"}}, nil)
+	am.On("describeTables", "foo-db", "bar1-tab").
+		Return([]Column{{Name: "some-string-field", Type: "varchar"}, {Name: "some-bool2-field", Type: "boolean"}}, nil)
+	am.On("describeTables", "bar-db", "foo2-tab").
+		Return([]Column{{Name: "some-string2-field", Type: "varchar"}, {Name: "some-int-field", Type: "bigint"}}, nil)
+	am.On("describeTables", "bar-db", "bar2-tab").
+		Return([]Column{{Name: "some-string3-field", Type: "varchar"}, {Name: "some-int-field", Type: "bigint"}}, nil)
+
+	nodes, err := index(am.getDatabases, am.getTables, am.describeTables)
+
+	expected := []*Node{
+		{Name: "foo-db", Context: "database", Children: []*Node{
+			{Name: "foo1-tab", Context: "table", Children: []*Node{
+				{Name: "some-string-field", Context: "field", Properties: map[string]string{"data-type": "varchar"}},
+				{Name: "some-bool-field", Context: "field", Properties: map[string]string{"data-type": "boolean"}},
+			}},
+			{Name: "bar1-tab", Context: "table", Children: []*Node{
+				{Name: "some-string-field", Context: "field", Properties: map[string]string{"data-type": "varchar"}},
+				{Name: "some-bool2-field", Context: "field", Properties: map[string]string{"data-type": "boolean"}},
+			}},
+		}},
+		{Name: "bar-db", Context: "database", Children: []*Node{
+			{Name: "foo2-tab", Context: "table", Children: []*Node{
+				{Name: "some-string2-field", Context: "field", Properties: map[string]string{"data-type": "varchar"}},
+				{Name: "some-int-field", Context: "field", Properties: map[string]string{"data-type": "bigint"}},
+			}},
+			{Name: "bar2-tab", Context: "table", Children: []*Node{
+				{Name: "some-string3-field", Context: "field", Properties: map[string]string{"data-type": "varchar"}},
+				{Name: "some-int-field", Context: "field", Properties: map[string]string{"data-type": "bigint"}},
+			}},
+		}},
+	}
+
+	asserter.NoError(err)
+	asserter.NotEmpty(nodes)
+	asserter.Len(nodes, 2)
+	asserter.Equal(expected, nodes)
 }
