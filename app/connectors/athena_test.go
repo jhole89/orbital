@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func NewMock() (*sql.DB, sqlmock.Sqlmock) {
+func sqlMock() (*sql.DB, sqlmock.Sqlmock) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -18,11 +18,11 @@ func NewMock() (*sql.DB, sqlmock.Sqlmock) {
 	return db, mock
 }
 
-func TestAwsAthenaConnector_getDatabases(t *testing.T) {
+func TestAwsAthena_getDatabases(t *testing.T) {
 
 	asserter := assert.New(t)
 
-	db, mock := NewMock()
+	db, mock := sqlMock()
 	a := &AwsAthena{db}
 
 	defer func() {
@@ -40,11 +40,11 @@ func TestAwsAthenaConnector_getDatabases(t *testing.T) {
 	asserter.Equal([]string{"foo-db", "bar-db"}, dbs)
 }
 
-func TestAwsAthenaConnector_getTables(t *testing.T) {
+func TestAwsAthena_getTables(t *testing.T) {
 
 	asserter := assert.New(t)
 
-	db, mock := NewMock()
+	db, mock := sqlMock()
 	a := &AwsAthena{db}
 
 	defer func() {
@@ -62,11 +62,11 @@ func TestAwsAthenaConnector_getTables(t *testing.T) {
 	asserter.Equal([]string{"foo-tab", "bar-tab"}, tabs)
 }
 
-func TestAwsAthenaConnector_describeTables(t *testing.T) {
+func TestAwsAthena_describeTables(t *testing.T) {
 
 	asserter := assert.New(t)
 
-	db, mock := NewMock()
+	db, mock := sqlMock()
 	a := &AwsAthena{db}
 
 	defer func() {
@@ -95,29 +95,29 @@ func TestAwsAthenaConnector_describeTables(t *testing.T) {
 	asserter.Equal(expected, cols)
 }
 
-type MockIndexer struct {
+type MockAthena struct {
 	mock.Mock
 }
 
-func (a *MockIndexer) getDatabases() ([]string, error) {
+func (a *MockAthena) getDatabases() ([]string, error) {
 	args := a.Called()
 	return args.Get(0).([]string), args.Error(1)
 }
 
-func (a *MockIndexer) getTables(database string) ([]string, error) {
+func (a *MockAthena) getTables(database string) ([]string, error) {
 	args := a.Called(database)
 	return args.Get(0).([]string), args.Error(1)
 }
 
-func (a *MockIndexer) describeTables(database, table string) ([]Column, error) {
+func (a *MockAthena) describeTables(database, table string) ([]Column, error) {
 	args := a.Called(database, table)
 	return args.Get(0).([]Column), args.Error(1)
 }
 
-func TestAwsAthenaConnector_Index(t *testing.T) {
+func TestAwsAthena_Index(t *testing.T) {
 	asserter := assert.New(t)
 
-	am := new(MockIndexer)
+	am := new(MockAthena)
 	am.On("getDatabases").Return([]string{"foo-db", "bar-db"}, nil)
 	am.On("getTables", "foo-db").Return([]string{"foo1-tab", "bar1-tab"}, nil)
 	am.On("getTables", "bar-db").Return([]string{"foo2-tab", "bar2-tab"}, nil)

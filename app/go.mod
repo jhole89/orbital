@@ -11,5 +11,7 @@ require (
 	github.com/schwartzmx/gremtune v0.0.3
 	github.com/segmentio/go-athena v0.0.0-20181208004937-dfa5f1818930
 	github.com/stretchr/testify v1.6.1
+	github.com/vektra/mockery v1.1.2 // indirect
+	github.com/vektra/mockery/v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )

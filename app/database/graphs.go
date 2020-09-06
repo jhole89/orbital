@@ -7,11 +7,11 @@ import (
 )
 
 type Graph interface {
-	Connect(endpoint string)
-	Query(queryString string) string
-	CreateEntity(e Entity) string
-	CreateRelationship(r Relationship) string
-	Read(w http.ResponseWriter) []byte
+	Clean() (string, error)
+	Query(queryString string) (string, error)
+	CreateEntity(e Entity) (string, error)
+	CreateRelationship(r Relationship) (string, error)
+	Read(w http.ResponseWriter) ([]byte, error)
 }
 
 type Entity struct {
@@ -33,17 +33,17 @@ type Relationship struct {
 
 func GetGraph(graphName string, endpoint string) Graph {
 
-	var supportedGraph = map[string]Graph{
-		"awsneptune": &Gremlin{},
-		"gremlin":    &Gremlin{},
-		"tinkerpop":  &Gremlin{},
+	var supportedGraph = map[string]func(string) (Graph, error){
+		"awsneptune": NewGremlin,
+		"gremlin":    NewGremlin,
+		"tinkerpop":  NewGremlin,
 	}
 
-	g, ok := supportedGraph[strings.ToLower(graphName)]
+	graphInitialiser, ok := supportedGraph[strings.ToLower(graphName)]
 
 	if ok {
-		g.Connect(endpoint)
-		return g
+		conn, _ := graphInitialiser(endpoint)
+		return conn
 	} else {
 		keys := make([]string, len(supportedGraph))
 		for k := range supportedGraph {

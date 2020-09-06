@@ -11,12 +11,6 @@ type Driver interface {
 	Index() ([]*Node, error)
 }
 
-type Indexer interface {
-	getDatabases() ([]string, error)
-	getTables(database string) ([]string, error)
-	describeTables(database, table string) ([]Column, error)
-}
-
 type Node struct {
 	Name       string
 	Context    string
@@ -26,15 +20,15 @@ type Node struct {
 
 func GetDriver(name string, address string) Driver {
 
-	var supportedConnectors = map[string]func(dsn string) (Driver, error){
+	var supportedConnectors = map[string]func(string) (Driver, error){
 		"awsathena": NewAwsAthena,
 	}
 
-	c, ok := supportedConnectors[strings.ToLower(name)]
+	connectionInitialiser, ok := supportedConnectors[strings.ToLower(name)]
 
 	if ok {
-		d, _ := c(address)
-		return d
+		conn, _ := connectionInitialiser(address)
+		return conn
 	} else {
 		keys := make([]string, len(supportedConnectors))
 		for k := range supportedConnectors {

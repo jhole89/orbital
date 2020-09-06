@@ -27,10 +27,10 @@ func main() {
 		for _, node := range dbTopology {
 			nodeToGraph(graph, node)
 		}
-		resp := graph.Query("g.V().elementMap()")
+		resp, _ := graph.Query("g.V().elementMap()")
 		fmt.Printf("Entities: %s\n", resp)
 
-		resp = graph.Query("g.E().elementMap()")
+		resp, _ = graph.Query("g.E().elementMap()")
 		fmt.Printf("Relationships: %s\n", resp)
 	}
 
