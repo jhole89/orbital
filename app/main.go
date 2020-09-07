@@ -18,6 +18,7 @@ func main() {
 	conf.getConf()
 
 	graph := database.GetGraph(conf.Database.Type, conf.Database.Endpoint)
+	_, err := graph.Clean()
 
 	for _, lake := range conf.Lakes {
 		driver := connectors.GetDriver(fmt.Sprintf("%s%s", lake.Provider, lake.Store), lake.Address)
@@ -36,7 +37,7 @@ func main() {
 
 	registerRoutes()
 	fmt.Printf("Server running at http://127.0.0.1:%d\n", conf.Service.Port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", conf.Service.Port), nil)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", conf.Service.Port), nil)
 	if err != nil {
 		log.Fatal("Unable to serve")
 	}

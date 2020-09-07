@@ -8,7 +8,12 @@ import (
 )
 
 type AwsAthena struct {
-	Connection *sql.DB
+	Connection athenaClient
+}
+
+type athenaClient interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	Close() error
 }
 
 func NewAwsAthena(dsn string) (Driver, error) {

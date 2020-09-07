@@ -10,7 +10,11 @@ import (
 )
 
 type Gremlin struct {
-	Client *gremtune.Client
+	Client gremlinClient
+}
+
+type gremlinClient interface {
+	Execute(query string) ([]gremtune.Response, error)
 }
 
 func NewGremlin(dsn string) (Graph, error) {
@@ -42,11 +46,11 @@ func NewGremlin(dsn string) (Graph, error) {
 	}
 }
 
-func (g *Gremlin) Clean() (string, error) {
+func (g *Gremlin) Clean() ([]byte, error) {
 	return g.Query("g.V().drop().iterate()")
 }
 
-func (g *Gremlin) CreateEntity(e Entity) (string, error) {
+func (g *Gremlin) CreateEntity(e Entity) ([]byte, error) {
 	queryString := fmt.Sprintf("g.addV('%s').property('name', '%s')", e.Context, e.Name)
 
 	for _, property := range e.Properties {
@@ -55,32 +59,18 @@ func (g *Gremlin) CreateEntity(e Entity) (string, error) {
 	return g.Query(queryString)
 }
 
-func (g *Gremlin) CreateRelationship(r Relationship) (string, error) {
+func (g *Gremlin) CreateRelationship(r Relationship) ([]byte, error) {
 	queryString := fmt.Sprintf("g.addE('%s').from(g.V().has('%s', 'name', '%s')).to(g.V().has('%s', 'name', '%s'))", r.Context, r.From.Context, r.From.Name, r.To.Context, r.To.Name)
-
 	return g.Query(queryString)
 }
 
-func (g *Gremlin) Query(queryString string) (string, error) {
-	resp, err := g.runQuery(queryString)
-	if err != nil {
-		return "", err
-	}
-
-	s, e := unmarshall(resp)
-	if e != nil {
-		return "", e
-	}
-	return fmt.Sprintf("%s", s), nil
-}
-
-func (g *Gremlin) runQuery(queryString string) ([]gremtune.Response, error) {
+func (g *Gremlin) Query(queryString string) ([]byte, error) {
 	resp, err := g.Client.Execute(queryString)
 	if err != nil {
 		log.Printf("Unable to execute query: %s. Err: %s\n", queryString, err.Error())
 		return nil, err
 	}
-	return resp, nil
+	return unmarshall(resp)
 }
 
 func unmarshall(resp []gremtune.Response) ([]byte, error) {
@@ -94,15 +84,9 @@ func unmarshall(resp []gremtune.Response) ([]byte, error) {
 }
 
 func (g *Gremlin) Read(w http.ResponseWriter) ([]byte, error) {
-	return g.httpQuery(w, "g.V().elementMap()")
-}
-
-func (g *Gremlin) httpQuery(w http.ResponseWriter, queryString string) ([]byte, error) {
-	resp, err := g.runQuery(queryString)
-
+	resp, err := g.Query("g.V().elementMap()")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return nil, err
 	}
-	return unmarshall(resp)
+	return resp, nil
 }

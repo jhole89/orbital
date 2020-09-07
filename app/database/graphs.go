@@ -7,10 +7,10 @@ import (
 )
 
 type Graph interface {
-	Clean() (string, error)
-	Query(queryString string) (string, error)
-	CreateEntity(e Entity) (string, error)
-	CreateRelationship(r Relationship) (string, error)
+	Clean() ([]byte, error)
+	Query(queryString string) ([]byte, error)
+	CreateEntity(e Entity) ([]byte, error)
+	CreateRelationship(r Relationship) ([]byte, error)
 	Read(w http.ResponseWriter) ([]byte, error)
 }
 
