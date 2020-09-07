@@ -2,6 +2,20 @@ name: Release Pipeline
 
 on:
   push:
-    branches:
-      - "main"
+    branches: "main"
 
+jobs:
+  docker-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and push Docker images
+        working-directory: app
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          repository: jhole89/orbital
+          registry: ghcr.io
+          tags: latest
