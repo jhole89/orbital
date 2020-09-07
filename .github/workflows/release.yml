@@ -1,0 +1,7 @@
+name: Release Pipeline
+
+on:
+  push:
+    branches:
+      - "main"
+
