@@ -1,0 +1,44 @@
+name: CI-Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  go-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ['1.14' , '1.15']
+    name: Go ${{ matrix.go }} pipeline
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: build
+        working-directory: app
+        id: go-build
+        run: go build -o orbital .
+
+      - name: format
+        working-directory: app
+        id: go-fmt
+        run: go fmt ./...
+
+      - name: vet
+        working-directory: app
+        id: go-fmt
+        run: go vet ./...
+
+      - name: lint
+        uses: golangci/golangci-lint-action@v1
+          with:
+            version: v1.29
+            working-directory: app
+            only-new-issues: true
+
+      - name: test
+        working-directory: app
+        id: go-test
+        run: go test ./...
