@@ -5,8 +5,18 @@ on:
     branches: "main"
 
 jobs:
+  metrics-publish:
+    runs-on: ubuntu-latest
+    name: Metrics Pipeline
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Publish GoCardReport
+        uses: creekorful/goreportcard-action@v1
+
   docker-publish:
     runs-on: ubuntu-latest
+    name: Docker Release Pipeline
     steps:
       - uses: actions/checkout@v2
 
