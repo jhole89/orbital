@@ -48,9 +48,9 @@ jobs:
         run: go test -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: report
-        working-directory: app
         id: go-reports
         uses: codecov/codecov-action@v1
           with:
+            directory: app/
             file: coverage.txt
             fail_ci_if_error: true
