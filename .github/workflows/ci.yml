@@ -62,8 +62,8 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build Image
-        working-directory: app
         uses: docker/build-push-action@v1
         with:
+          path: app
           repository: jhole89/orbital
           push: false
