@@ -53,3 +53,17 @@ jobs:
           directory: app/
           file: app/coverage.txt
           fail_ci_if_error: true
+
+  docker-check:
+    runs-on: ubuntu-latest
+    name: Docker Build Pipeline
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Image
+        working-directory: app
+        uses: docker/build-push-action@v1
+        with:
+          repository: jhole89/orbital
+          push: false
