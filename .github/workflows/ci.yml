@@ -49,7 +49,7 @@ jobs:
 
       - name: report
         uses: codecov/codecov-action@v1
-          with:
-            directory: app/
-            file: coverage.txt
-            fail_ci_if_error: true
+        with:
+          directory: app/
+          file: coverage.txt
+          fail_ci_if_error: true
