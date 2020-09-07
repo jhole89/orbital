@@ -10,7 +10,7 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusBadRequest)
 	}
 
-	res := graph.Read(w)
+	res, _ := graph.Read(w)
 
 	w.Header().Set("Content-Context", "application/json")
 	_, err := w.Write(res)

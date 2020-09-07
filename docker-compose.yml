@@ -1,0 +1,12 @@
+# For local development only - NOT PRODUCTION.
+version: '3'
+
+services:
+  db:
+    image: tinkerpop/gremlin-server
+  server:
+    build: app
+    environment:
+      ORBITAL_DB_ADDRESS: ws://db:8182
+    ports:
+    - 5000:5000
