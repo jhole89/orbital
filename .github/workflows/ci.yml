@@ -28,7 +28,7 @@ jobs:
 
       - name: vet
         working-directory: app
-        id: go-fmt
+        id: go-vet
         run: go vet ./...
 
       - name: lint
