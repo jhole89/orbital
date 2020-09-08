@@ -7,15 +7,24 @@ import (
 	"strings"
 )
 
-func nodeToGraph(graph database.Graph, node *connectors.Node) database.Entity {
+func nodeToGraph(graph database.Graph, node *connectors.Node) (database.Entity, error) {
 	entityA := database.Entity{Name: node.Name, Context: node.Context}
-	graph.CreateEntity(entityA)
+	_, err := graph.CreateEntity(entityA)
+	if err != nil {
+		return database.Entity{}, err
+	}
 	if node.Children != nil {
 		for _, childNode := range node.Children {
-			entityB := nodeToGraph(graph, childNode)
+			entityB, err := nodeToGraph(graph, childNode)
+			if err != nil {
+				return entityA, nil
+			}
 			relationship := database.Relationship{From: entityA, To: entityB, Context: fmt.Sprintf("has_%s", strings.ToLower(entityB.Context))}
-			graph.CreateRelationship(relationship)
+			_, err = graph.CreateRelationship(relationship)
+			if err != nil {
+				return entityB, err
+			}
 		}
 	}
-	return entityA
+	return entityA, nil
 }

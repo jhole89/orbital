@@ -19,6 +19,9 @@ func main() {
 
 	graph := database.GetGraph(conf.Database.Type, conf.Database.Endpoint)
 	_, err := graph.Clean()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	for _, lake := range conf.Lakes {
 		driver := connectors.GetDriver(fmt.Sprintf("%s%s", lake.Provider, lake.Store), lake.Address)
@@ -26,7 +29,10 @@ func main() {
 		dbTopology, _ := driver.Index()
 
 		for _, node := range dbTopology {
-			nodeToGraph(graph, node)
+			_, err := nodeToGraph(graph, node)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 		resp, _ := graph.Query("g.V().elementMap()")
 		fmt.Printf("Entities: %s\n", resp)

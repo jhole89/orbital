@@ -1,0 +1,69 @@
+name: CI-Pipeline
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  go-check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ['1.14' , '1.15']
+    name: Go ${{ matrix.go }} pipeline
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: build
+        working-directory: app
+        id: go-build
+        run: go build -o orbital .
+
+      - name: format
+        working-directory: app
+        id: go-fmt
+        run: go fmt ./...
+
+      - name: vet
+        working-directory: app
+        id: go-vet
+        run: go vet ./...
+
+      - name: lint
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.29
+          working-directory: app
+          only-new-issues: true
+
+      - name: test
+        working-directory: app
+        id: go-test
+        run: go test -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: report
+        uses: codecov/codecov-action@v1
+        with:
+          directory: app/
+          file: app/coverage.txt
+          fail_ci_if_error: true
+
+  docker-check:
+    runs-on: ubuntu-latest
+    name: Docker Build Pipeline
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Image
+        uses: docker/build-push-action@v1
+        with:
+          path: app
+          repository: jhole89/orbital
+          push: false
