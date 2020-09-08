@@ -1,4 +1,4 @@
-name: Publish Latest Pipeline
+name: Versioned Release Pipeline
 
 on:
   push:
