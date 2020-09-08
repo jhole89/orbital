@@ -1,31 +1,42 @@
-name: Release Pipeline
+name: Publish Latest Pipeline
 
 on:
   push:
-    branches: "main"
+    tags:
+      - 'v*'
 
 jobs:
-  metrics-publish:
+  gh-release:
+    if: github.event.base_ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    name: Metrics Pipeline
+    name: Release Pipeline
     steps:
       - uses: actions/checkout@v2
 
-      - name: Publish GoCardReport
-        uses: creekorful/goreportcard-action@v1
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        with:
+          tag_name: {{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: true
 
-  docker-publish:
+  docker-release:
+    if: github.event.base_ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     name: Docker Release Pipeline
     steps:
       - uses: actions/checkout@v2
 
       - name: Publish Docker image
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v1.1.0
         with:
           path: app
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }}
-          repository: jhole89/orbital
+          repository: ${{ github.repository_owner }}/orbital
           registry: ghcr.io
-          tags: latest
+          tags: ${{ github.ref }}

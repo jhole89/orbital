@@ -1,0 +1,31 @@
+name: Release Pipeline
+
+on:
+  push:
+    branches: "main"
+
+jobs:
+  publish-metrics:
+    runs-on: ubuntu-latest
+    name: Metrics Pipeline
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Publish GoCardReport
+        uses: creekorful/goreportcard-action@v1
+
+  publish-docker:
+    runs-on: ubuntu-latest
+    name: Publish Docker Latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Publish Docker image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          path: app
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          repository: ${{ github.repository_owner }}/orbital
+          registry: ghcr.io
+          tags: latest
