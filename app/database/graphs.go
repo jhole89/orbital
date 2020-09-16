@@ -13,7 +13,7 @@ type Graph interface {
 }
 
 type Entity struct {
-	Id         int        `json:"id"`
+	ID         int        `json:"id"`
 	Context    string     `json:"context"`
 	Name       string     `json:"name"`
 	Properties []Property `json:"properties"`
@@ -30,6 +30,7 @@ type Relationship struct {
 	Context string  `json:"context"`
 }
 
+// Establishes a new connection to a supported GraphDB passed by string name
 func GetGraph(graphName string, endpoint string) *Graph {
 
 	var supportedGraph = map[string]func(string) (Graph, error){

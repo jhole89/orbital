@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func loadGraph(lake *LakeConfig) error{
+func loadGraph(lake *LakeConfig) error {
 	driver := connectors.GetDriver(fmt.Sprintf("%s%s", lake.Provider, lake.Store), lake.Address)
 
 	dbTopology, _ := driver.Index()
