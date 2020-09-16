@@ -6,5 +6,5 @@ import (
 
 func registerRoutes() {
 
-	http.HandleFunc("/", readHandler)
+	http.HandleFunc("/query", dynamicQuery)
 }
