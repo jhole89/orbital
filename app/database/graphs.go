@@ -30,7 +30,7 @@ type Relationship struct {
 	Context string  `json:"context"`
 }
 
-// Establishes a new connection to a supported GraphDB passed by string name
+// GetGraph establishes a new connection to a supported GraphDB passed by string name
 func GetGraph(graphName string, endpoint string) *Graph {
 
 	var supportedGraph = map[string]func(string) (Graph, error){
