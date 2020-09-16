@@ -2,7 +2,6 @@ package database
 
 import (
 	"log"
-	"net/http"
 	"strings"
 )
 
@@ -11,27 +10,27 @@ type Graph interface {
 	Query(queryString string) ([]byte, error)
 	CreateEntity(e Entity) ([]byte, error)
 	CreateRelationship(r Relationship) ([]byte, error)
-	Read(w http.ResponseWriter) ([]byte, error)
 }
 
 type Entity struct {
-	Context    string
-	Name       string
-	Properties []Property
+	Id         int        `json:"id"`
+	Context    string     `json:"context"`
+	Name       string     `json:"name"`
+	Properties []Property `json:"properties"`
 }
 
 type Property struct {
-	Attribute string
-	Value     string
+	Attribute string `json:"attribute"`
+	Value     string `json:"value"`
 }
 
 type Relationship struct {
-	From    Entity
-	To      Entity
-	Context string
+	From    *Entity `json:"from"`
+	To      *Entity `json:"true"`
+	Context string  `json:"context"`
 }
 
-func GetGraph(graphName string, endpoint string) Graph {
+func GetGraph(graphName string, endpoint string) *Graph {
 
 	var supportedGraph = map[string]func(string) (Graph, error){
 		"awsneptune": NewGremlin,
@@ -43,7 +42,7 @@ func GetGraph(graphName string, endpoint string) Graph {
 
 	if ok {
 		conn, _ := graphInitialiser(endpoint)
-		return conn
+		return &conn
 	} else {
 		keys := make([]string, len(supportedGraph))
 		for k := range supportedGraph {

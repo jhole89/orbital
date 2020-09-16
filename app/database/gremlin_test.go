@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/schwartzmx/gremtune"
 	"github.com/stretchr/testify/assert"
-	"net/http"
 	"testing"
 )
 
@@ -75,8 +74,8 @@ func TestGremlin_CreateRelationship(t *testing.T) {
 		Properties: nil,
 	}
 	r := Relationship{
-		From:    e1,
-		To:      e2,
+		From:    &e1,
+		To:      &e2,
 		Context: "has_table",
 	}
 
@@ -92,30 +91,6 @@ func TestGremlin_Query(t *testing.T) {
 	m := mockGremlinClient{expectedResponse: []byte("{\"Query\":\"FakeQuery\"}")}
 	g := Gremlin{&m}
 	resp, err := g.Query("Not a real query")
-	asserter.NoError(err)
-	asserter.Equal([]byte("{\"Query\":\"FakeQuery\"}"), resp)
-}
-
-type mockWriter struct{}
-
-func (m *mockWriter) Header() http.Header {
-	return http.Header{"header": []string{"true"}}
-}
-func (m *mockWriter) Write(_ []byte) (int, error) {
-	return 200, nil
-}
-
-func (m *mockWriter) WriteHeader(_ int) {}
-
-func TestGremlin_Read(t *testing.T) {
-	asserter := assert.New(t)
-
-	w := mockWriter{}
-
-	m := mockGremlinClient{expectedResponse: []byte("{\"Query\":\"FakeQuery\"}")}
-	g := Gremlin{&m}
-	resp, err := g.Read(&w)
-
 	asserter.NoError(err)
 	asserter.Equal([]byte("{\"Query\":\"FakeQuery\"}"), resp)
 }

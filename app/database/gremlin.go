@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/schwartzmx/gremtune"
 	"log"
-	"net/http"
 	"time"
 )
 
@@ -81,12 +80,4 @@ func unmarshall(resp []gremtune.Response) ([]byte, error) {
 		return nil, err
 	}
 	return j, nil
-}
-
-func (g *Gremlin) Read(w http.ResponseWriter) ([]byte, error) {
-	resp, err := g.Query("g.V().elementMap()")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	return resp, nil
 }
