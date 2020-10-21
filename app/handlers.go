@@ -1,36 +1,81 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/graphql-go/graphql"
 )
 
-func dynamicQuery(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Expected POST not GET", http.StatusMethodNotAllowed)
-		return
-	}
+var dataType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "Data",
+		Fields: graphql.Fields{
+			"id": &graphql.Field{
+				Type: graphql.Int,
+			},
+			"name": &graphql.Field{
+				Type: graphql.String,
+			},
+			"context": &graphql.Field{
+				Type: graphql.String,
+			},
+			//"properties": &graphql.Field{
+			//	Type: graphql.NewList(propertyType),
+			//},
+		},
+	},
+)
 
-	if r.Body == nil {
-		http.Error(w, "Please send a request body", http.StatusBadRequest)
-		return
-	}
+//
+//var propertyType = graphql.NewObject(
+//	graphql.ObjectConfig{
+//		Name: "Property",
+//		Fields: graphql.Fields{
+//			"attribute": &graphql.Field{
+//				Type: graphql.String,
+//			},
+//			"value": &graphql.Field{
+//				Type: graphql.String,
+//			},
+//		},
+//	},
+//)
+//
+var dataQuery = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "DataQuery",
+		Fields: graphql.Fields{
+			"data": &graphql.Field{
+				Type:        dataType,
+				Description: "Get data-entity by id",
+				Args: graphql.FieldConfigArgument{
+					"id": &graphql.ArgumentConfig{
+						Type: graphql.Int,
+					},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					id, ok := p.Args["id"].(int)
+					if ok {
+						data, err := getDataEntity(p.Context, graph, id)
+						if err != nil {
+							return nil, err
+						}
+						return data, nil
+					}
+					return nil, nil
+				},
+			},
+			"list": &graphql.Field{
+				Type:        graphql.NewList(dataType),
+				Description: "Get data-entity list",
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					return listDataEntities(p.Context, graph)
+				},
+			},
+		},
+	},
+)
 
-	type query struct {
-		Query string `json:"query"`
-	}
-	var q query
-	err := json.NewDecoder(r.Body).Decode(&q)
-
-	res, err := (*graph).Query(q.Query)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	w.Header().Set("Content-Context", "application/json")
-	_, err = w.Write(res)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
+var dataSchema, _ = graphql.NewSchema(
+	graphql.SchemaConfig{
+		Query: dataQuery,
+	},
+)

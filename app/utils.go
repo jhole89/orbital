@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/jhole89/orbital/connectors"
-	"github.com/jhole89/orbital/database"
-	"strings"
+	"github.com/jhole89/orbital/ent"
+	"log"
 )
 
-func loadGraph(lake *LakeConfig) error {
+func loadGraph(graph *ent.Client, lake *LakeConfig) error {
 	driver := connectors.GetDriver(fmt.Sprintf("%s%s", lake.Provider, lake.Store), lake.Address)
 
 	dbTopology, _ := driver.Index()
@@ -21,29 +21,28 @@ func loadGraph(lake *LakeConfig) error {
 	return nil
 }
 
-func nodeToGraph(graph *database.Graph, node *connectors.Node) (*database.Entity, error) {
-	var propertyList []database.Property
+func nodeToGraph(graph *ent.Client, node *connectors.Node) (*ent.Data, error) {
+	var propertyList []Property
 	for k, v := range node.Properties {
-		propertyList = append(propertyList, database.Property{Attribute: k, Value: v})
+		propertyList = append(propertyList, Property{Attribute: k, Value: v})
 	}
-	entityA := database.Entity{Name: node.Name, Context: node.Context, Properties: propertyList}
 
-	_, err := (*graph).CreateEntity(entityA)
+	entityFrom, err := createDataVertex(ctx, graph, node.Name, node.Context)
 	if err != nil {
-		return &database.Entity{}, err
+		return nil, err
 	}
 	if node.Children != nil {
 		for _, childNode := range node.Children {
-			entityB, err := nodeToGraph(graph, childNode)
+			entityTo, err := nodeToGraph(graph, childNode)
 			if err != nil {
-				return &entityA, nil
+				return entityFrom, nil
 			}
-			relationship := database.Relationship{From: &entityA, To: entityB, Context: fmt.Sprintf("has_%s", strings.ToLower(entityB.Context))}
-			_, err = (*graph).CreateRelationship(relationship)
+			_, err = createRelationship(ctx, entityFrom, entityTo)
 			if err != nil {
-				return entityB, err
+				return entityTo, err
 			}
+			log.Printf("Created relationship between %s and %s\n", entityFrom.String(), entityTo.String())
 		}
 	}
-	return &entityA, nil
+	return entityFrom, nil
 }

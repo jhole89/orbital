@@ -38,7 +38,7 @@ jobs:
       - name: test
         working-directory: app
         id: go-test
-        run: go test -coverprofile=coverage.txt -covermode=atomic ./...
+        run: go test -coverprofile=coverage.txt -covermode=atomic . ./connectors/...
 
       - name: report
         uses: codecov/codecov-action@v1

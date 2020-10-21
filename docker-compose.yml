@@ -4,9 +4,10 @@ version: '3'
 services:
   db:
     image: tinkerpop/gremlin-server
+    command: conf/gremlin-server-rest-modern.yaml
   server:
     build: app
     environment:
-      ORBITAL_DB_ADDRESS: ws://db:8182
+      ORBITAL_DB_ADDRESS: http://db:8182
     ports:
     - 5000:5000
