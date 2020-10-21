@@ -8,9 +8,9 @@ import (
 )
 
 type Config struct {
-	Database DatabaseConfig `yaml:"database"`
-	Service  ServiceConfig  `yaml:"service"`
-	Lakes    []LakeConfig   `yaml:"lakes"`
+	Database *DatabaseConfig `yaml:"database"`
+	Service  *ServiceConfig  `yaml:"service"`
+	Lakes    []*LakeConfig   `yaml:"lakes"`
 }
 
 type DatabaseConfig struct {
