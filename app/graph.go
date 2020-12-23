@@ -1,85 +1,67 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	"github.com/jhole89/orbital/ent"
-	"log"
-	"strings"
-	"time"
+	"github.com/jhole89/orbital/connectors"
+	"github.com/jhole89/orbital/database"
 )
 
-// newGraph establishes a new connection to a supported GraphDB passed by string name
-func newGraph(graphName string, dsn string) (*ent.Client, error) {
-
-	retryCount := 10
-	for {
-		log.Println("Attempting to connect to server at: " + dsn)
-
-		client, err := ent.Open(strings.ToLower(graphName), dsn)
-
-		if err != nil {
-			if retryCount == 0 {
-				log.Println("Unable to connect to server: " + err.Error())
-				return nil, err
-			}
-
-			log.Printf("Could not connect to server. Waiting 2 seconds. %d retries left...\n", retryCount)
-			retryCount--
-			time.Sleep(2 * time.Second)
-		} else {
-			log.Println("Connected to server at: " + dsn)
-			defer client.Close()
-			return client, nil
-		}
-	}
-}
-
-func deleteAll(ctx context.Context, graph *ent.Client) error {
-	numData, err := graph.Data.Delete().Exec(ctx)
-	if err != nil {
+func reIndex(graph database.Graph, lakes []*LakeConfig) error {
+	if err := graph.Clean(); err != nil {
 		return err
 	}
-	log.Printf("#Data Vertices deleted: %d\n", numData)
-
+	if err := index(graph, lakes); err != nil {
+		return err
+	}
 	return nil
 }
 
-func createDataVertex(ctx context.Context, client *ent.Client, name, context string) (*ent.Data, error) {
-	d, err := client.Data.
-		Create().
-		SetName(name).
-		SetContext(context).
-		Save(ctx)
+func index(graph database.Graph, lakes []*LakeConfig) error {
+	for _, lake := range lakes {
+		if err := indexLake(graph, lake); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func indexLake(graph database.Graph, lake *LakeConfig) error {
+	driver := connectors.GetDriver(fmt.Sprintf("%s%s", lake.Provider, lake.Store), lake.Address)
+	dbTopology, err := driver.Index()
 	if err != nil {
-		return nil, fmt.Errorf("failed creating Data Vertex: %v", err)
+		return err
 	}
-	log.Printf("Data Vertex was created: %s\n", d.String())
-
-	return d, nil
-}
-
-func createRelationship(ctx context.Context, from, to *ent.Data) (*ent.Data, error) {
-	switch to.Context {
-	case "table":
-		return from.Update().AddHasTable(to).Save(ctx)
-	case "field":
-		return from.Update().AddHasField(to).Save(ctx)
-	default:
-		return nil, errors.New(fmt.Sprintf("%s is not a valid context", to.Context))
+	if err := loadGraph(graph, dbTopology); err != nil {
+		return err
 	}
+	return nil
 }
 
-func listDataEntities(ctx context.Context, graph *ent.Client) ([]*ent.Data, error) {
-	return graph.Data.Query().All(ctx)
+func loadGraph(graph database.Graph, nodes []*connectors.Node) error {
+	for _, n := range nodes {
+		if _, err := loadNode(graph, n); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func getDataEntity(ctx context.Context, graph *ent.Client, id int) (*ent.Data, error) {
-	return graph.Data.Get(ctx, id)
-}
-
-type Property struct {
-	Attribute string `json:"attribute"`
-	Value     string `json:"value"`
+func loadNode(graph database.Graph, node *connectors.Node) (*database.Entity, error) {
+	entityFrom, err := graph.CreateEntity(&database.Entity{Context: node.Context, Name: node.Name})
+	if err != nil {
+		return nil, err
+	}
+	if node.Children != nil {
+		for _, childNode := range node.Children {
+			entityTo, err := loadNode(graph, childNode)
+			if err != nil {
+				return nil, err
+			}
+			_, err = graph.CreateRelationship(&database.Relationship{Context: "owns", From: entityFrom, To: entityTo})
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return entityFrom, nil
 }
