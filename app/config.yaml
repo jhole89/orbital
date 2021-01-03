@@ -1,6 +1,6 @@
 database:
   type: gremlin
-  endpoint: http://127.0.0.1:8182
+  endpoint: ws://127.0.0.1:8182
 service:
   port: 5000
 lakes:

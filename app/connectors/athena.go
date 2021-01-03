@@ -133,7 +133,6 @@ func (a *AwsAthena) Index() ([]*Node, error) {
 }
 
 func index(getDatabases func() ([]string, error), getTables func(string) ([]string, error), getColumns func(string, string) ([]Column, error)) ([]*Node, error) {
-
 	dbs, err := getDatabases()
 	if err != nil {
 		return nil, err
