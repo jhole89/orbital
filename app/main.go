@@ -11,7 +11,7 @@ import (
 var (
 	conf  Config
 	graph database.Graph
-	err error
+	err   error
 )
 
 func main() {

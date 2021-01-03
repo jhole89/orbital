@@ -16,8 +16,8 @@ type Graph interface {
 
 type Entity struct {
 	ID         interface{} `json:"id"`
-	Context    string     `json:"context"`
-	Name       string     `json:"name"`
+	Context    string      `json:"context"`
+	Name       string      `json:"name"`
 	Properties []*Property `json:"properties"`
 }
 
@@ -27,10 +27,10 @@ type Property struct {
 }
 
 type Relationship struct {
-	ID interface{} `json:"id"`
-	From    *Entity `json:"from"`
-	To      *Entity `json:"true"`
-	Context string  `json:"context"`
+	ID      interface{} `json:"id"`
+	From    *Entity     `json:"from"`
+	To      *Entity     `json:"true"`
+	Context string      `json:"context"`
 }
 
 // GetGraph establishes a new connection to a supported GraphDB passed by string name

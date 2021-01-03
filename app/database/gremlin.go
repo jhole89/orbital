@@ -102,10 +102,10 @@ func (g *Gremlin) GetEntity(id interface{}) (*Entity, error) {
 	for _, p := range props {
 		v := p.GetValue().(string)
 		switch strings.ToLower(p.Value.Label) {
-			case "name":
-				e.Name = v
-			case "context":
-				e.Context = v
+		case "name":
+			e.Name = v
+		case "context":
+			e.Context = v
 		}
 	}
 	return &e, nil

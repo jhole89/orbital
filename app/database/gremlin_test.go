@@ -8,7 +8,7 @@ import (
 )
 
 type mockGremlinClient struct {
-	testVertexID interface{}
+	testVertexID  interface{}
 	testVertexIDs []interface{}
 	queryResponse [][]byte
 }
@@ -28,7 +28,7 @@ func (m *mockGremlinClient) AddVertex(label string, properties ...interface{}) (
 }
 func (m *mockGremlinClient) AllVertices() ([]model.Vertex, error) {
 	var vertices = make([]model.Vertex, len(m.testVertexIDs))
-	for _, id := range m.testVertexIDs{
+	for _, id := range m.testVertexIDs {
 		vertices = append(vertices, model.Vertex{
 			Type: "g:Vertex",
 			Value: model.VertexValue{
@@ -71,7 +71,7 @@ func TestGremlin_CreateEntity(t *testing.T) {
 	}
 	g := Gremlin{&m}
 	expected := Entity{
-		ID: 1234,
+		ID:         1234,
 		Context:    "database",
 		Name:       "mydb",
 		Properties: nil,
