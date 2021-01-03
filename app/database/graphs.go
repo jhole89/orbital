@@ -7,7 +7,6 @@ import (
 
 type Graph interface {
 	Clean() error
-	Query(queryString string) ([]byte, error)
 	CreateEntity(e *Entity) (*Entity, error)
 	GetEntity(id interface{}) (*Entity, error)
 	ListEntities() ([]*Entity, error)

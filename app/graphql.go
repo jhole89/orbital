@@ -59,7 +59,7 @@ var dataQuery = graphql.NewObject(
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					id, ok := p.Args["id"].(interface{})
+					id, ok := p.Args["id"]
 					if ok {
 						data, err := graph.GetEntity(id)
 						if err != nil {
@@ -70,26 +70,32 @@ var dataQuery = graphql.NewObject(
 					return nil, nil
 				},
 			},
-			//"connections": &graphql.Field{
-			//	Type:        graphql.NewList(dataType),
-			//	Description: "Get Entity connections by id",
-			//	Args: graphql.FieldConfigArgument{
-			//		"id": &graphql.ArgumentConfig{
-			//			Type: graphql.String,
-			//		},
-			//	},
-			//	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-			//		id, ok := p.Args["id"].(interface{})
-			//		if ok {
-			//			connections, err := graph.(id)
-			//			if err != nil {
-			//				return nil, err
-			//			}
-			//			return connections, nil
-			//		}
-			//		return nil, nil
-			//	},
-			//},
+			"connections": &graphql.Field{
+				Type:        graphql.NewList(dataType),
+				Description: "Get Entity connections by id",
+				Args: graphql.FieldConfigArgument{
+					"id": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+					"context": &graphql.ArgumentConfig{
+						Type: graphql.String,
+					},
+				},
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					id, ok := p.Args["id"]
+					if ok {
+						context, ok := p.Args["context"].(string)
+						if ok {
+							data, err := graph.GetRelationships(id, context)
+							if err != nil {
+								return nil, err
+							}
+							return data, err
+						}
+					}
+					return nil, nil
+				},
+			},
 		},
 	},
 )

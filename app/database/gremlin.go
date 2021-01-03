@@ -1,11 +1,11 @@
 package database
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/jhole89/orbital/database/gremlin-rest"
-	"github.com/schwartzmx/gremtune"
+	"github.com/northwesternmutual/grammes"
+	"github.com/northwesternmutual/grammes/model"
+	"github.com/northwesternmutual/grammes/query"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -14,7 +14,10 @@ type Gremlin struct {
 }
 
 type gremlinClient interface {
-	Execute(query string) ([]gremtune.Response, error)
+	AddVertex(label string, properties ...interface{}) (model.Vertex, error)
+	AllVertices() ([]model.Vertex, error)
+	DropAll() error
+	ExecuteQuery(queryObj query.Query) ([][]byte, error)
 }
 
 func newGremlin(dsn string) (Graph, error) {
@@ -25,16 +28,14 @@ func newGremlin(dsn string) (Graph, error) {
 		log.Printf("Lost connection to the database: %s\n", err.Error())
 	}(errs)
 
-	dialer := gremtune.NewDialer(dsn)
-
 	retryCount := 10
 	for {
 		log.Println("Connecting to Gremlin database at: " + dsn)
-		conn, err := gremtune.Dial(dialer, errs)
+		conn, err := grammes.DialWithWebSocket(dsn, grammes.WithErrorChannel(errs))
 		if err != nil {
 			if retryCount == 0 {
 				log.Println("Unable to connect to Gremlin database at: " + err.Error())
-				return nil, err
+				return &Gremlin{}, err
 			}
 
 			log.Printf("Could not connect to Gremlin server. Wait 2 seconds. %d retries left...\n", retryCount)
@@ -42,13 +43,13 @@ func newGremlin(dsn string) (Graph, error) {
 			time.Sleep(2 * time.Second)
 		} else {
 			log.Println("Connected to Gremlin database at: " + dsn)
-			return &Gremlin{Client: &conn}, nil
+			return &Gremlin{Client: conn}, nil
 		}
 	}
 }
 
 func (g *Gremlin) Clean() error {
-	_, err := g.Query("g.V().drop().iterate()")
+	err := g.Client.DropAll()
 	if err != nil {
 		return err
 	}
@@ -57,101 +58,92 @@ func (g *Gremlin) Clean() error {
 }
 
 func (g *Gremlin) CreateEntity(e *Entity) (*Entity, error) {
-	queryString := fmt.Sprintf("g.addV('%s').property('name', '%s').property('context', '%s')", e.Context, e.Name, e.Context)
-	for _, property := range e.Properties {
-		queryString += fmt.Sprintf(".property('%s', '%s')", property.Attribute, property.Value)
-	}
-	resp, err := g.Query(queryString)
+	vertex, err := g.Client.AddVertex(e.Context, "name", e.Name, "context", e.Context)
 	if err != nil {
-		return nil, err
+		return &Entity{}, err
 	}
-
-	var vlc gremlin_rest.VertexList
-	if err := json.Unmarshal(resp, &vlc); err != nil {
-		return nil, err
+	ent, err := g.GetEntity(vertex.ID())
+	if err != nil {
+		return &Entity{}, err
 	}
-	e.ID = vlc.Value[0].Value.ID.Value
-
-	log.Printf("Created Entity: {ID: %v, Name: %s, Context: %s}\n", e.ID, e.Name, e.Context)
-	return e, nil
+	log.Printf("Created Entity: {ID: %v, Name: %s, Context: %s}\n", ent.ID, ent.Name, ent.Context)
+	return ent, nil
 }
 
 func (g *Gremlin) CreateRelationship(r *Relationship) (*Relationship, error) {
-	resp, err := g.Query(fmt.Sprintf("g.addE('%s').from(g.V(%v)).to(g.V(%v))", r.Context, r.From.ID, r.To.ID))
+	t := grammes.Traversal()
+	resp, err := g.Client.ExecuteQuery(t.AddE(r.Context).From(t.V(r.From.ID)).To(t.V(r.To.ID)))
 	if err != nil {
-		return nil, err
+		return &Relationship{}, err
 	}
-
-	var elc gremlin_rest.EdgeList
-	if err := json.Unmarshal(resp, &elc); err != nil {
-		return nil, err
+	edges, err := grammes.UnmarshalEdgeList(resp)
+	if err != nil {
+		return &Relationship{}, err
 	}
-	r.ID = elc.Value[0].Value.ID.Value
+	r.ID = edges[0].ID()
 
 	log.Printf("Created Relationship: {ID: %v, Context: %s, From: %s (ID: %v), To: %s (ID: %v)}\n", r.ID, r.Context, r.From.Name, r.From.ID, r.To.Name, r.To.ID)
 	return r, nil
 }
 
 func (g *Gremlin) GetEntity(id interface{}) (*Entity, error) {
-	resp, err := g.Query(fmt.Sprintf("g.V(%v).properties()", id))
+	resp, err := g.Client.ExecuteQuery(grammes.Traversal().V(id).Properties())
 	if err != nil {
-		return nil, err
+		return &Entity{}, err
 	}
-	var r gremlin_rest.VertexPropertyList
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
+
 	var e = Entity{ID: id}
-	for _, prop := range r.Value {
-		switch prop.Value.Label {
+
+	props, err := grammes.UnmarshalPropertyList(resp)
+	if err != nil {
+		return &Entity{}, err
+	}
+
+	for _, p := range props {
+		v := p.GetValue().(string)
+		switch strings.ToLower(p.Value.Label) {
 			case "name":
-				e.Name = prop.Value.Value
+				e.Name = v
 			case "context":
-				e.Context = prop.Value.Value
+				e.Context = v
 		}
 	}
 	return &e, nil
 }
 
 func (g *Gremlin) GetRelationships(id interface{}, context string) ([]*Entity, error) {
-	//resp, err := g.Query(fmt.Sprintf("g.V(%v).out('%s')", id, context))
-	return nil, nil
-}
-
-func (g *Gremlin) ListEntities() ([]*Entity, error) {
-	resp, err := g.Query(fmt.Sprintf("g.V()"))
-	if err != nil {
-		return nil, err
-	}
-	var r gremlin_rest.VertexList
-	if err := json.Unmarshal(resp, &r); err != nil {
-		return nil, err
-	}
-
 	var entities []*Entity
-	for _, ent := range r.Value {
-		entity, err := g.GetEntity(ent.Value.ID.Value)
+	resp, err := g.Client.ExecuteQuery(grammes.Traversal().V(id).Out(context))
+	if err != nil {
+		return entities, err
+	}
+	vertices, err := grammes.UnmarshalVertexList(resp)
+	if err != nil {
+		return entities, err
+	}
+	for _, v := range vertices {
+		ent, err := g.GetEntity(v.ID())
 		if err != nil {
-			return nil, err
+			return entities, err
 		}
-		entities = append(entities, entity)
+		entities = append(entities, ent)
 	}
 	return entities, nil
 }
 
-func (g *Gremlin) Query(queryString string) ([]byte, error) {
-	resp, err := g.Client.Execute(queryString)
+func (g *Gremlin) ListEntities() ([]*Entity, error) {
+	vertices, err := g.Client.AllVertices()
+	var entities []*Entity
 	if err != nil {
-		log.Printf("Unable to execute query: %s. Err: %s\n", queryString, err.Error())
-		return nil, err
+		return entities, err
 	}
-	return marshallResponse(resp)
-}
 
-func marshallResponse(resp []gremtune.Response) ([]byte, error) {
-	j, err := json.Marshal(resp[0].Result.Data)
-	if err != nil {
-		return nil, err
+	for _, ent := range vertices {
+		entity, err := g.GetEntity(ent.ID())
+		if err != nil {
+			return entities, err
+		}
+		entities = append(entities, entity)
 	}
-	return j, nil
+	return entities, nil
 }
