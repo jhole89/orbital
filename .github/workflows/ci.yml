@@ -28,12 +28,17 @@ jobs:
       - name: format
         working-directory: app
         id: go-fmt
-        run: go fmt ./...
+        run: if [ $(gofmt -l -s . | wc -l) -ne 0 ]; then echo "fmt failed"; exit 1; fi
 
       - name: vet
         working-directory: app
         id: go-vet
         run: go vet ./...
+
+      - name: lint
+        working-directory: app
+        id: go-lint
+        run: if [ $(golint ./... | wc -l) -ne 0 ]; then echo "lint failed"; exit 1; fi
 
       - name: test
         working-directory: app
