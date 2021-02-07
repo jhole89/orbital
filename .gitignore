@@ -107,3 +107,5 @@ modules.xml
 
 # Sonarlint plugin
 .idea/sonarlint
+
+ui/node_modules/

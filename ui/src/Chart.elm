@@ -1,0 +1,24 @@
+--module Chart exposing (..)
+--
+--import Html exposing (node)
+--import Task
+--type Model
+--    = Empty
+--    | Initialised
+--
+--type Msg
+--    = Init
+--    | Created
+--
+--
+--update : Msg -> Model -> ( Model, Cmd Msg )
+--update msg _ =
+--    case msg of
+--        Init ->
+--            (Empty, initChart)
+--        Created ->
+--            (Initialised, Cmd.none)
+--
+--initChart : Cmd Msg
+--initChart =
+--    node "echart-element"[][]
