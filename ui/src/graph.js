@@ -5,27 +5,24 @@ import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/legend';
 import 'echarts/lib/chart/graph';
 import 'zrender/lib/canvas/canvas';
-import 'echarts/lib/chart/bar';
 
 customElements.define('echart-element',
   class EChartElement extends HTMLElement {
+
     constructor() {
       super();
       this.chart = null;
       this._option = null;
     }
+
     connectedCallback () {
+      const option = this.option
       this.chart = echarts.init(document.getElementById('graph'));
-      console.log("CONNECTED CALLBACK: this.chart is: ");
-      console.log(this.chart);
+      this.chart.setOption(option);
     }
 
     set option (newValue) {
-      console.log("SET OPTION: newValue is: ");
-      console.log(newValue);
       this._option = newValue;
-      console.log("SET OPTION: this.chart is: ")
-      console.log(this.chart)
       if (this.chart) {
         this.chart.setOption(newValue);
       }

@@ -6,6 +6,7 @@
   "dependencies": {
     "@webcomponents/custom-elements": "^1.4.3",
     "echarts": "^5.0.0",
+    "elm": "^0.19.1-5",
     "elm-format": "^0.8.4",
     "jquery": "^3.5.1"
   },
@@ -15,8 +16,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "elm make src/Main.elm --output=src/main.js && webpack --config webpack.config.js",
-    "build-dev": "elm make src/Main.elm --output=src/main.js --debug && webpack --config webpack.config.js"
+    "clean": "rm -rf dist && rm src/main.js",
+    "build": "npm run clean && elm make src/Main.elm --output=src/main.js && webpack --config webpack.config.js",
+    "build-dev": "elm make src/Main.elm --output=src/main.js --debug && webpack --config webpack.config.js",
+    "server": "elm reactor"
   },
   "author": "Joel Lutman",
   "license": "ISC"
