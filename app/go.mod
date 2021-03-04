@@ -8,12 +8,13 @@ require (
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/graphql-go/graphql v0.7.9
+	github.com/graphql-go/handler v0.2.3
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/northwesternmutual/grammes v1.2.0
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/segmentio/go-athena v0.0.0-20181208004937-dfa5f1818930
 	github.com/stretchr/objx v0.2.0 // indirect
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/zap v1.10.0 // indirect
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
