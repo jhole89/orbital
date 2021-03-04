@@ -4,19 +4,18 @@ version: '3'
 services:
   db:
     image: tinkerpop/gremlin-server
-    command: conf/gremlin-rest-server-rest-modern.yaml
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8182" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
   server:
     build: app
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     environment:
-      ORBITAL_DB_ADDRESS: http://db:8182
+      - ORBITAL_DB_ADDRESS=ws://db:8182
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
     ports:
       - 5000:5000
-    command: go test ./connectors/... .
+  ui:
+    build: ui
+    ports:
+      - 8000:8000
