@@ -88,7 +88,7 @@ func createDataHandler() (*handler.Handler, error) {
 	return handler.New(&handler.Config{Schema: &schema, Pretty: true, GraphiQL: true}), nil
 }
 
-func createAdminHandler()(*handler.Handler, error) {
+func createAdminHandler() (*handler.Handler, error) {
 	var fields = graphql.Fields{
 		"rebuild": &graphql.Field{
 			Type:        graphql.String,
