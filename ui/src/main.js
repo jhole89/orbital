@@ -4358,6 +4358,43 @@ function _Browser_load(url)
 
 
 
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
 // SEND REQUEST
 
 var _Http_toTask = F3(function(router, toTask, request)
@@ -4530,6 +4567,124 @@ function _Http_track(router, xhr, tracker)
 			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
 		}))));
 	});
+}
+
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return $elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
+
+
+function _Url_percentEncode(string)
+{
+	return encodeURIComponent(string);
+}
+
+function _Url_percentDecode(string)
+{
+	try
+	{
+		return $elm$core$Maybe$Just(decodeURIComponent(string));
+	}
+	catch (e)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
 }var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
@@ -5319,86 +5474,569 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$Loading = {$: 'Loading'};
-var $author$project$Main$GotData = function (a) {
-	return {$: 'GotData', a: a};
+var $krisajenkins$remotedata$RemoteData$Loading = {$: 'Loading'};
+var $author$project$Main$GotResponse = function (a) {
+	return {$: 'GotResponse', a: a};
 };
-var $author$project$Main$Data = F3(
-	function (nodes, links, categories) {
-		return {categories: categories, links: links, nodes: nodes};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
 	});
-var $author$project$Main$CategoryItemOption = function (name) {
-	return {name: name};
+var $dillonkearns$elm_graphql$Graphql$Http$GraphqlError = F2(
+	function (a, b) {
+		return {$: 'GraphqlError', a: a, b: b};
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$HttpError = function (a) {
+	return {$: 'HttpError', a: a};
 };
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$categoryItemOptionDecoder = $elm$json$Json$Decode$list(
-	A2(
-		$elm$json$Json$Decode$map,
-		$author$project$Main$CategoryItemOption,
-		A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string)));
-var $author$project$Main$GraphEdgeItemOption = F2(
-	function (source, target) {
-		return {source: source, target: target};
+var $dillonkearns$elm_graphql$Graphql$Http$GraphqlError$UnparsedData = function (a) {
+	return {$: 'UnparsedData', a: a};
+};
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $dillonkearns$elm_graphql$Graphql$Http$discardParsedErrorData = function (result) {
+	if (result.$ === 'Ok') {
+		var data = result.a;
+		return $elm$core$Result$Ok(data);
+	} else {
+		if (result.a.$ === 'HttpError') {
+			var httpError = result.a.a;
+			return $elm$core$Result$Err(
+				$dillonkearns$elm_graphql$Graphql$Http$HttpError(httpError));
+		} else {
+			if (result.a.a.$ === 'ParsedData') {
+				var _v1 = result.a;
+				var parsed = _v1.a.a;
+				var errorList = _v1.b;
+				return $elm$core$Result$Err(
+					A2(
+						$dillonkearns$elm_graphql$Graphql$Http$GraphqlError,
+						$dillonkearns$elm_graphql$Graphql$Http$GraphqlError$UnparsedData($elm$json$Json$Encode$null),
+						errorList));
+			} else {
+				var _v2 = result.a;
+				var value = _v2.a.a;
+				var errorList = _v2.b;
+				return $elm$core$Result$Err(
+					A2(
+						$dillonkearns$elm_graphql$Graphql$Http$GraphqlError,
+						$dillonkearns$elm_graphql$Graphql$Http$GraphqlError$UnparsedData(value),
+						errorList));
+			}
+		}
+	}
+};
+var $krisajenkins$remotedata$RemoteData$Failure = function (a) {
+	return {$: 'Failure', a: a};
+};
+var $krisajenkins$remotedata$RemoteData$Success = function (a) {
+	return {$: 'Success', a: a};
+};
+var $krisajenkins$remotedata$RemoteData$fromResult = function (result) {
+	if (result.$ === 'Err') {
+		var e = result.a;
+		return $krisajenkins$remotedata$RemoteData$Failure(e);
+	} else {
+		var x = result.a;
+		return $krisajenkins$remotedata$RemoteData$Success(x);
+	}
+};
+var $dillonkearns$elm_graphql$Graphql$OptionalArgument$Absent = {$: 'Absent'};
+var $author$project$Main$Entity = F4(
+	function (id, name, context, connections) {
+		return {connections: connections, context: context, id: id, name: name};
 	});
-var $author$project$Main$graphEdgeItemOptionDecoder = $elm$json$Json$Decode$list(
-	A3(
-		$elm$json$Json$Decode$map2,
-		$author$project$Main$GraphEdgeItemOption,
-		A2($elm$json$Json$Decode$field, 'source', $elm$json$Json$Decode$string),
-		A2($elm$json$Json$Decode$field, 'target', $elm$json$Json$Decode$string)));
-var $author$project$Main$GraphNodeItemOption = F8(
-	function (id, name, value, x, y, category, symbolSize, label) {
-		return {category: category, id: id, label: label, name: name, symbolSize: symbolSize, value: value, x: x, y: y};
-	});
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $author$project$Main$LabelOption = F3(
-	function (position, formatter, show) {
-		return {formatter: formatter, position: position, show: show};
-	});
+var $author$project$Entity$Scalar$Id = function (a) {
+	return {$: 'Id', a: a};
+};
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $elm$json$Json$Decode$map3 = _Json_map3;
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
-var $elm$json$Json$Decode$maybe = function (decoder) {
-	return $elm$json$Json$Decode$oneOf(
-		_List_fromArray(
-			[
-				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
-				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
-			]));
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$scalarDecoder = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			$elm$json$Json$Decode$string,
+			A2($elm$json$Json$Decode$map, $elm$core$String$fromFloat, $elm$json$Json$Decode$float),
+			A2($elm$json$Json$Decode$map, $elm$core$String$fromInt, $elm$json$Json$Decode$int),
+			A2(
+			$elm$json$Json$Decode$map,
+			function (bool) {
+				if (bool) {
+					return 'true';
+				} else {
+					return 'false';
+				}
+			},
+			$elm$json$Json$Decode$bool)
+		]));
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Entity$Scalar$defaultCodecs = {
+	codecId: {
+		decoder: A2($elm$json$Json$Decode$map, $author$project$Entity$Scalar$Id, $dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$scalarDecoder),
+		encoder: function (_v0) {
+			var raw = _v0.a;
+			return $elm$json$Json$Encode$string(raw);
+		}
+	}
 };
-var $author$project$Main$labelOptionDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Main$LabelOption,
-	$elm$json$Json$Decode$maybe(
-		A2($elm$json$Json$Decode$field, 'position', $elm$json$Json$Decode$string)),
-	$elm$json$Json$Decode$maybe(
-		A2($elm$json$Json$Decode$field, 'formatter', $elm$json$Json$Decode$string)),
-	$elm$json$Json$Decode$maybe(
-		A2($elm$json$Json$Decode$field, 'show', $elm$json$Json$Decode$bool)));
-var $elm$json$Json$Decode$map8 = _Json_map8;
-var $author$project$Main$graphNodeItemOptionDecoder = $elm$json$Json$Decode$list(
-	A9(
-		$elm$json$Json$Decode$map8,
-		$author$project$Main$GraphNodeItemOption,
-		A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string),
-		A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
-		A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$float),
-		A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$float),
-		A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$float),
-		A2($elm$json$Json$Decode$field, 'category', $elm$json$Json$Decode$int),
-		A2($elm$json$Json$Decode$field, 'symbolSize', $elm$json$Json$Decode$float),
-		$elm$json$Json$Decode$maybe(
-			A2($elm$json$Json$Decode$field, 'label', $author$project$Main$labelOptionDecoder))));
-var $author$project$Main$dataDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Main$Data,
-	A2($elm$json$Json$Decode$field, 'nodes', $author$project$Main$graphNodeItemOptionDecoder),
-	A2($elm$json$Json$Decode$field, 'links', $author$project$Main$graphEdgeItemOptionDecoder),
-	A2($elm$json$Json$Decode$field, 'categories', $author$project$Main$categoryItemOptionDecoder));
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $author$project$Entity$Scalar$Codecs = function (a) {
+	return {$: 'Codecs', a: a};
+};
+var $author$project$Entity$Scalar$defineCodecs = function (definitions) {
+	return $author$project$Entity$Scalar$Codecs(definitions);
+};
+var $author$project$Entity$ScalarCodecs$codecs = $author$project$Entity$Scalar$defineCodecs(
+	{codecId: $author$project$Entity$Scalar$defaultCodecs.codecId});
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $dillonkearns$elm_graphql$Graphql$Internal$Builder$Argument$Argument = F2(
+	function (a, b) {
+		return {$: 'Argument', a: a, b: b};
+	});
+var $dillonkearns$elm_graphql$Graphql$Internal$Encode$Json = function (a) {
+	return {$: 'Json', a: a};
+};
+var $dillonkearns$elm_graphql$Graphql$Internal$Encode$null = $dillonkearns$elm_graphql$Graphql$Internal$Encode$Json($elm$json$Json$Encode$null);
+var $dillonkearns$elm_graphql$Graphql$Internal$Builder$Argument$optional = F3(
+	function (fieldName, maybeValue, toValue) {
+		switch (maybeValue.$) {
+			case 'Present':
+				var value = maybeValue.a;
+				return $elm$core$Maybe$Just(
+					A2(
+						$dillonkearns$elm_graphql$Graphql$Internal$Builder$Argument$Argument,
+						fieldName,
+						toValue(value)));
+			case 'Absent':
+				return $elm$core$Maybe$Nothing;
+			default:
+				return $elm$core$Maybe$Just(
+					A2($dillonkearns$elm_graphql$Graphql$Internal$Builder$Argument$Argument, fieldName, $dillonkearns$elm_graphql$Graphql$Internal$Encode$null));
+		}
+	});
+var $dillonkearns$elm_graphql$Graphql$SelectionSet$SelectionSet = F2(
+	function (a, b) {
+		return {$: 'SelectionSet', a: a, b: b};
+	});
+var $dillonkearns$elm_graphql$Graphql$RawField$Composite = F3(
+	function (a, b, c) {
+		return {$: 'Composite', a: a, b: b, c: c};
+	});
+var $dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$composite = F3(
+	function (fieldName, args, fields) {
+		return A3($dillonkearns$elm_graphql$Graphql$RawField$Composite, fieldName, args, fields);
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$HashData = F4(
+	function (shift, seed, hash, charsProcessed) {
+		return {charsProcessed: charsProcessed, hash: hash, seed: seed, shift: shift};
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$c1 = 3432918353;
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$c2 = 461845907;
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$multiplyBy = F2(
+	function (b, a) {
+		return ((a & 65535) * b) + ((((a >>> 16) * b) & 65535) << 16);
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $elm$core$Bitwise$or = _Bitwise_or;
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$rotlBy = F2(
+	function (b, a) {
+		return (a << b) | (a >>> (32 - b));
+	});
+var $elm$core$Bitwise$xor = _Bitwise_xor;
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$finalize = function (data) {
+	var acc = (!(!data.hash)) ? (data.seed ^ A2(
+		$dillonkearns$elm_graphql$Graphql$Document$Hash$multiplyBy,
+		$dillonkearns$elm_graphql$Graphql$Document$Hash$c2,
+		A2(
+			$dillonkearns$elm_graphql$Graphql$Document$Hash$rotlBy,
+			15,
+			A2($dillonkearns$elm_graphql$Graphql$Document$Hash$multiplyBy, $dillonkearns$elm_graphql$Graphql$Document$Hash$c1, data.hash)))) : data.seed;
+	var h0 = acc ^ data.charsProcessed;
+	var h1 = A2($dillonkearns$elm_graphql$Graphql$Document$Hash$multiplyBy, 2246822507, h0 ^ (h0 >>> 16));
+	var h2 = A2($dillonkearns$elm_graphql$Graphql$Document$Hash$multiplyBy, 3266489909, h1 ^ (h1 >>> 13));
+	return (h2 ^ (h2 >>> 16)) >>> 0;
+};
+var $elm$core$String$foldl = _String_foldl;
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$mix = F2(
+	function (h1, k1) {
+		return A2(
+			$dillonkearns$elm_graphql$Graphql$Document$Hash$multiplyBy,
+			5,
+			A2(
+				$dillonkearns$elm_graphql$Graphql$Document$Hash$rotlBy,
+				13,
+				h1 ^ A2(
+					$dillonkearns$elm_graphql$Graphql$Document$Hash$multiplyBy,
+					$dillonkearns$elm_graphql$Graphql$Document$Hash$c2,
+					A2(
+						$dillonkearns$elm_graphql$Graphql$Document$Hash$rotlBy,
+						15,
+						A2($dillonkearns$elm_graphql$Graphql$Document$Hash$multiplyBy, $dillonkearns$elm_graphql$Graphql$Document$Hash$c1, k1))))) + 3864292196;
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$hashFold = F2(
+	function (c, data) {
+		var res = data.hash | ((255 & $elm$core$Char$toCode(c)) << data.shift);
+		var _v0 = data.shift;
+		if (_v0 === 24) {
+			return {
+				charsProcessed: data.charsProcessed + 1,
+				hash: 0,
+				seed: A2($dillonkearns$elm_graphql$Graphql$Document$Hash$mix, data.seed, res),
+				shift: 0
+			};
+		} else {
+			return {charsProcessed: data.charsProcessed + 1, hash: res, seed: data.seed, shift: data.shift + 8};
+		}
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$Hash$hashString = F2(
+	function (seed, str) {
+		return $dillonkearns$elm_graphql$Graphql$Document$Hash$finalize(
+			A3(
+				$elm$core$String$foldl,
+				$dillonkearns$elm_graphql$Graphql$Document$Hash$hashFold,
+				A4($dillonkearns$elm_graphql$Graphql$Document$Hash$HashData, 0, seed, 0, 0),
+				str));
+	});
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $dillonkearns$elm_graphql$Graphql$Internal$Encode$serialize = function (value) {
+	switch (value.$) {
+		case 'EnumValue':
+			var enumValue = value.a;
+			return enumValue;
+		case 'Json':
+			var json = value.a;
+			return A2($elm$json$Json$Encode$encode, 0, json);
+		case 'List':
+			var values = value.a;
+			return '[' + (A2(
+				$elm$core$String$join,
+				', ',
+				A2($elm$core$List$map, $dillonkearns$elm_graphql$Graphql$Internal$Encode$serialize, values)) + ']');
+		default:
+			var keyValuePairs = value.a;
+			return '{' + (A2(
+				$elm$core$String$join,
+				', ',
+				A2(
+					$elm$core$List$map,
+					function (_v1) {
+						var key = _v1.a;
+						var objectValue = _v1.b;
+						return key + (': ' + $dillonkearns$elm_graphql$Graphql$Internal$Encode$serialize(objectValue));
+					},
+					keyValuePairs)) + '}');
+	}
+};
+var $dillonkearns$elm_graphql$Graphql$Document$Argument$argToString = function (_v0) {
+	var name = _v0.a;
+	var value = _v0.b;
+	return name + (': ' + $dillonkearns$elm_graphql$Graphql$Internal$Encode$serialize(value));
+};
+var $dillonkearns$elm_graphql$Graphql$Document$Argument$serialize = function (args) {
+	if (!args.b) {
+		return '';
+	} else {
+		var nonemptyArgs = args;
+		return '(' + (A2(
+			$elm$core$String$join,
+			', ',
+			A2($elm$core$List$map, $dillonkearns$elm_graphql$Graphql$Document$Argument$argToString, nonemptyArgs)) + ')');
+	}
+};
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
+var $dillonkearns$elm_graphql$Graphql$Document$Field$maybeAliasHash = function (field) {
+	return A2(
+		$elm$core$Maybe$map,
+		$dillonkearns$elm_graphql$Graphql$Document$Hash$hashString(0),
+		function () {
+			if (field.$ === 'Composite') {
+				var name = field.a;
+				var _arguments = field.b;
+				var children = field.c;
+				return $elm$core$List$isEmpty(_arguments) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
+					$dillonkearns$elm_graphql$Graphql$Document$Argument$serialize(_arguments));
+			} else {
+				var typeString = field.a.typeString;
+				var fieldName = field.a.fieldName;
+				var _arguments = field.b;
+				return (fieldName === '__typename') ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
+					$elm$core$String$concat(
+						A2(
+							$elm$core$List$append,
+							_List_fromArray(
+								[typeString]),
+							$elm$core$List$singleton(
+								$dillonkearns$elm_graphql$Graphql$Document$Argument$serialize(_arguments)))));
+			}
+		}());
+};
+var $dillonkearns$elm_graphql$Graphql$RawField$name = function (field) {
+	if (field.$ === 'Composite') {
+		var fieldName = field.a;
+		var argumentList = field.b;
+		var fieldList = field.c;
+		return fieldName;
+	} else {
+		var typeString = field.a.typeString;
+		var fieldName = field.a.fieldName;
+		var argumentList = field.b;
+		return fieldName;
+	}
+};
+var $dillonkearns$elm_graphql$Graphql$Document$Field$alias = function (field) {
+	return A2(
+		$elm$core$Maybe$map,
+		function (aliasHash) {
+			return _Utils_ap(
+				$dillonkearns$elm_graphql$Graphql$RawField$name(field),
+				$elm$core$String$fromInt(aliasHash));
+		},
+		$dillonkearns$elm_graphql$Graphql$Document$Field$maybeAliasHash(field));
+};
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$Field$hashedAliasName = function (field) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		$dillonkearns$elm_graphql$Graphql$RawField$name(field),
+		$dillonkearns$elm_graphql$Graphql$Document$Field$alias(field));
+};
+var $dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForCompositeField = F4(
+	function (fieldName, args, _v0, decoderTransform) {
+		var fields = _v0.a;
+		var decoder = _v0.b;
+		return A2(
+			$dillonkearns$elm_graphql$Graphql$SelectionSet$SelectionSet,
+			_List_fromArray(
+				[
+					A3($dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$composite, fieldName, args, fields)
+				]),
+			A2(
+				$elm$json$Json$Decode$field,
+				$dillonkearns$elm_graphql$Graphql$Document$Field$hashedAliasName(
+					A3($dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$composite, fieldName, args, fields)),
+				decoderTransform(decoder)));
+	});
+var $dillonkearns$elm_graphql$Graphql$Internal$Encode$string = function (value) {
+	return $dillonkearns$elm_graphql$Graphql$Internal$Encode$Json(
+		$elm$json$Json$Encode$string(value));
+};
+var $dillonkearns$elm_graphql$Graphql$Internal$Encode$fromJson = function (jsonValue) {
+	return $dillonkearns$elm_graphql$Graphql$Internal$Encode$Json(jsonValue);
+};
+var $author$project$Entity$Scalar$unwrapEncoder = F2(
+	function (getter, _v0) {
+		var unwrappedCodecs = _v0.a;
+		return A2(
+			$elm$core$Basics$composeR,
+			getter(unwrappedCodecs).encoder,
+			$dillonkearns$elm_graphql$Graphql$Internal$Encode$fromJson);
+	});
+var $author$project$Entity$Object$Entity$connections = F2(
+	function (fillInOptionals____, object____) {
+		var filledInOptionals____ = fillInOptionals____(
+			{context: $dillonkearns$elm_graphql$Graphql$OptionalArgument$Absent, id: $dillonkearns$elm_graphql$Graphql$OptionalArgument$Absent});
+		var optionalArgs____ = A2(
+			$elm$core$List$filterMap,
+			$elm$core$Basics$identity,
+			_List_fromArray(
+				[
+					A3(
+					$dillonkearns$elm_graphql$Graphql$Internal$Builder$Argument$optional,
+					'id',
+					filledInOptionals____.id,
+					A2(
+						$author$project$Entity$Scalar$unwrapEncoder,
+						function ($) {
+							return $.codecId;
+						},
+						$author$project$Entity$ScalarCodecs$codecs)),
+					A3($dillonkearns$elm_graphql$Graphql$Internal$Builder$Argument$optional, 'context', filledInOptionals____.context, $dillonkearns$elm_graphql$Graphql$Internal$Encode$string)
+				]));
+		return A4(
+			$dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForCompositeField,
+			'connections',
+			optionalArgs____,
+			object____,
+			A2($elm$core$Basics$composeR, $elm$core$Basics$identity, $elm$json$Json$Decode$list));
+	});
+var $dillonkearns$elm_graphql$Graphql$RawField$Leaf = F2(
+	function (a, b) {
+		return {$: 'Leaf', a: a, b: b};
+	});
+var $dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$leaf = F2(
+	function (details, args) {
+		return A2($dillonkearns$elm_graphql$Graphql$RawField$Leaf, details, args);
+	});
+var $dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForField = F4(
+	function (typeString, fieldName, args, decoder) {
+		var newLeaf = A2(
+			$dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$leaf,
+			{fieldName: fieldName, typeString: typeString},
+			args);
+		return A2(
+			$dillonkearns$elm_graphql$Graphql$SelectionSet$SelectionSet,
+			_List_fromArray(
+				[newLeaf]),
+			A2(
+				$elm$json$Json$Decode$field,
+				$dillonkearns$elm_graphql$Graphql$Document$Field$hashedAliasName(newLeaf),
+				decoder));
+	});
+var $author$project$Entity$Object$Entity$context = A4($dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForField, 'String', 'context', _List_Nil, $elm$json$Json$Decode$string);
+var $author$project$Entity$Scalar$unwrapCodecs = function (_v0) {
+	var unwrappedCodecs = _v0.a;
+	return unwrappedCodecs;
+};
+var $author$project$Entity$Object$Entity$id = A4(
+	$dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForField,
+	'ScalarCodecs.Id',
+	'id',
+	_List_Nil,
+	$author$project$Entity$Scalar$unwrapCodecs($author$project$Entity$ScalarCodecs$codecs).codecId.decoder);
+var $author$project$Entity$Object$Entity$name = A4($dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForField, 'String', 'name', _List_Nil, $elm$json$Json$Decode$string);
+var $dillonkearns$elm_graphql$Graphql$SelectionSet$succeed = function (constructor) {
+	return A2(
+		$dillonkearns$elm_graphql$Graphql$SelectionSet$SelectionSet,
+		_List_Nil,
+		$elm$json$Json$Decode$succeed(constructor));
+};
+var $dillonkearns$elm_graphql$Graphql$SelectionSet$with = F2(
+	function (_v0, _v1) {
+		var selectionFields1 = _v0.a;
+		var selectionDecoder1 = _v0.b;
+		var selectionFields2 = _v1.a;
+		var selectionDecoder2 = _v1.b;
+		return A2(
+			$dillonkearns$elm_graphql$Graphql$SelectionSet$SelectionSet,
+			_Utils_ap(selectionFields1, selectionFields2),
+			A3($elm$json$Json$Decode$map2, $elm$core$Basics$apR, selectionDecoder1, selectionDecoder2));
+	});
+var $author$project$Main$entitySelection = A2(
+	$dillonkearns$elm_graphql$Graphql$SelectionSet$with,
+	A2(
+		$author$project$Entity$Object$Entity$connections,
+		function (_v0) {
+			return {context: $dillonkearns$elm_graphql$Graphql$OptionalArgument$Absent, id: $dillonkearns$elm_graphql$Graphql$OptionalArgument$Absent};
+		},
+		$author$project$Entity$Object$Entity$name),
+	A2(
+		$dillonkearns$elm_graphql$Graphql$SelectionSet$with,
+		$author$project$Entity$Object$Entity$context,
+		A2(
+			$dillonkearns$elm_graphql$Graphql$SelectionSet$with,
+			$author$project$Entity$Object$Entity$name,
+			A2(
+				$dillonkearns$elm_graphql$Graphql$SelectionSet$with,
+				$author$project$Entity$Object$Entity$id,
+				$dillonkearns$elm_graphql$Graphql$SelectionSet$succeed($author$project$Main$Entity)))));
+var $author$project$Entity$Query$list = function (object____) {
+	return A4(
+		$dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForCompositeField,
+		'list',
+		_List_Nil,
+		object____,
+		A2($elm$core$Basics$composeR, $elm$core$Basics$identity, $elm$json$Json$Decode$list));
+};
+var $author$project$Main$listEntitiesQuery = $author$project$Entity$Query$list($author$project$Main$entitySelection);
+var $dillonkearns$elm_graphql$Graphql$Http$Query = F2(
+	function (a, b) {
+		return {$: 'Query', a: a, b: b};
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$Request = function (a) {
+	return {$: 'Request', a: a};
+};
+var $dillonkearns$elm_graphql$Graphql$Document$decoder = function (_v0) {
+	var fields = _v0.a;
+	var decoder_ = _v0.b;
+	return A2($elm$json$Json$Decode$field, 'data', decoder_);
+};
+var $dillonkearns$elm_graphql$Graphql$Http$queryRequest = F2(
+	function (baseUrl, query) {
+		return $dillonkearns$elm_graphql$Graphql$Http$Request(
+			{
+				baseUrl: baseUrl,
+				details: A2($dillonkearns$elm_graphql$Graphql$Http$Query, $elm$core$Maybe$Nothing, query),
+				expect: $dillonkearns$elm_graphql$Graphql$Document$decoder(query),
+				headers: _List_Nil,
+				operationName: $elm$core$Maybe$Nothing,
+				queryParams: _List_Nil,
+				timeout: $elm$core$Maybe$Nothing,
+				withCredentials: false
+			});
+	});
+var $elm$http$Http$Request = function (a) {
+	return {$: 'Request', a: a};
+};
+var $elm$http$Http$State = F2(
+	function (reqs, subs) {
+		return {reqs: reqs, subs: subs};
+	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$http$Http$init = $elm$core$Task$succeed(
+	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -5418,8 +6056,6 @@ var $elm$http$Http$Sending = function (a) {
 	return {$: 'Sending', a: a};
 };
 var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Maybe$isJust = function (maybe) {
 	if (maybe.$ === 'Just') {
 		return true;
@@ -5941,87 +6577,6 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $elm$http$Http$expectStringResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
-	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
-var $elm$http$Http$BadStatus = function (a) {
-	return {$: 'BadStatus', a: a};
-};
-var $elm$http$Http$BadUrl = function (a) {
-	return {$: 'BadUrl', a: a};
-};
-var $elm$http$Http$NetworkError = {$: 'NetworkError'};
-var $elm$http$Http$Timeout = {$: 'Timeout'};
-var $elm$http$Http$resolve = F2(
-	function (toResult, response) {
-		switch (response.$) {
-			case 'BadUrl_':
-				var url = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadUrl(url));
-			case 'Timeout_':
-				return $elm$core$Result$Err($elm$http$Http$Timeout);
-			case 'NetworkError_':
-				return $elm$core$Result$Err($elm$http$Http$NetworkError);
-			case 'BadStatus_':
-				var metadata = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.statusCode));
-			default:
-				var body = response.b;
-				return A2(
-					$elm$core$Result$mapError,
-					$elm$http$Http$BadBody,
-					toResult(body));
-		}
-	});
-var $elm$http$Http$expectJson = F2(
-	function (toMsg, decoder) {
-		return A2(
-			$elm$http$Http$expectStringResponse,
-			toMsg,
-			$elm$http$Http$resolve(
-				function (string) {
-					return A2(
-						$elm$core$Result$mapError,
-						$elm$json$Json$Decode$errorToString,
-						A2($elm$json$Json$Decode$decodeString, decoder, string));
-				}));
-	});
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$http$Http$Request = function (a) {
-	return {$: 'Request', a: a};
-};
-var $elm$http$Http$State = F2(
-	function (reqs, subs) {
-		return {reqs: reqs, subs: subs};
-	});
-var $elm$http$Http$init = $elm$core$Task$succeed(
-	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
 var $elm$core$Process$kill = _Scheduler_kill;
 var $elm$core$Process$spawn = _Scheduler_spawn;
 var $elm$http$Http$updateReqs = F3(
@@ -6094,24 +6649,6 @@ var $elm$http$Http$onEffects = F4(
 			},
 			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
 	});
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (_v0.$ === 'Just') {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
-	});
 var $elm$http$Http$maybeSend = F4(
 	function (router, desiredTracker, progress, _v0) {
 		var actualTracker = _v0.a;
@@ -6181,131 +6718,97 @@ var $elm$http$Http$request = function (r) {
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
-var $elm$http$Http$get = function (r) {
-	return $elm$http$Http$request(
-		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
+var $elm$http$Http$riskyRequest = function (r) {
+	return $elm$http$Http$command(
+		$elm$http$Http$Request(
+			{allowCookiesFromOtherDomains: true, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
-var $author$project$Main$getData = $elm$http$Http$get(
-	{
-		expect: A2($elm$http$Http$expectJson, $author$project$Main$GotData, $author$project$Main$dataDecoder),
-		url: 'https://cors-anywhere.herokuapp.com/https://echarts.apache.org/next/examples/data/asset/data/les-miserables.json'
-	});
-var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$getData);
-};
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$Failure = {$: 'Failure'};
-var $author$project$Main$Success = function (a) {
-	return {$: 'Success', a: a};
-};
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$update = F2(
-	function (msg, _v0) {
-		if (msg.$ === 'Fetch') {
-			return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$getData);
+var $dillonkearns$elm_graphql$Graphql$Http$convertResult = function (httpResult) {
+	if (httpResult.$ === 'Ok') {
+		var successOrError = httpResult.a;
+		if (successOrError.$ === 'Ok') {
+			var value = successOrError.a;
+			return $elm$core$Result$Ok(value);
 		} else {
-			var result = msg.a;
-			if (result.$ === 'Ok') {
-				var data = result.a;
-				return _Utils_Tuple2(
-					$author$project$Main$Success(data),
-					$elm$core$Platform$Cmd$none);
-			} else {
-				return _Utils_Tuple2($author$project$Main$Failure, $elm$core$Platform$Cmd$none);
-			}
+			var _v2 = successOrError.a;
+			var possiblyParsedData = _v2.a;
+			var error = _v2.b;
+			return $elm$core$Result$Err(
+				A2($dillonkearns$elm_graphql$Graphql$Http$GraphqlError, possiblyParsedData, error));
 		}
+	} else {
+		var httpError = httpResult.a;
+		return $elm$core$Result$Err(
+			$dillonkearns$elm_graphql$Graphql$Http$HttpError(httpError));
+	}
+};
+var $dillonkearns$elm_graphql$Graphql$Http$BadPayload = function (a) {
+	return {$: 'BadPayload', a: a};
+};
+var $dillonkearns$elm_graphql$Graphql$Http$BadStatus = F2(
+	function (a, b) {
+		return {$: 'BadStatus', a: a, b: b};
 	});
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
+var $dillonkearns$elm_graphql$Graphql$Http$BadUrl = function (a) {
+	return {$: 'BadUrl', a: a};
+};
+var $dillonkearns$elm_graphql$Graphql$Http$NetworkError = {$: 'NetworkError'};
+var $dillonkearns$elm_graphql$Graphql$Http$Timeout = {$: 'Timeout'};
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$expectJson = F2(
+	function (toMsg, decoder) {
 		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $author$project$Main$Fetch = {$: 'Fetch'};
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$core$Debug$log = _Debug_log;
-var $author$project$Main$setLabel = function (graphNodeItemOption) {
-	return _Utils_update(
-		graphNodeItemOption,
-		{
-			label: $elm$core$Maybe$Just(
-				{
-					formatter: $elm$core$Maybe$Nothing,
-					position: $elm$core$Maybe$Nothing,
-					show: $elm$core$Maybe$Just(graphNodeItemOption.symbolSize > 30)
-				})
-		});
-};
-var $author$project$Main$dataToChartOpts = function (data) {
-	return A2(
-		$elm$core$Debug$log,
-		'ToChartOps: ',
-		{
-			animationDuration: 1500,
-			animationEasingUpdate: 'quinticInOut',
-			legend: _List_fromArray(
-				[
-					{
-					data: A2(
-						$elm$core$List$map,
-						function (d) {
-							return d.name;
-						},
-						data.categories)
-				}
-				]),
-			series: _List_fromArray(
-				[
-					{
-					categories: data.categories,
-					data: A2($elm$core$List$map, $author$project$Main$setLabel, data.nodes),
-					emphasis: {
-						focus: 'adjacency',
-						lineStyle: {
-							color: $elm$core$Maybe$Nothing,
-							curveness: $elm$core$Maybe$Nothing,
-							width: $elm$core$Maybe$Just(10)
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			function (response) {
+				switch (response.$) {
+					case 'BadUrl_':
+						var url = response.a;
+						return $elm$core$Result$Err(
+							$dillonkearns$elm_graphql$Graphql$Http$BadUrl(url));
+					case 'Timeout_':
+						return $elm$core$Result$Err($dillonkearns$elm_graphql$Graphql$Http$Timeout);
+					case 'NetworkError_':
+						return $elm$core$Result$Err($dillonkearns$elm_graphql$Graphql$Http$NetworkError);
+					case 'BadStatus_':
+						var metadata = response.a;
+						var body = response.b;
+						return $elm$core$Result$Err(
+							A2($dillonkearns$elm_graphql$Graphql$Http$BadStatus, metadata, body));
+					default:
+						var metadata = response.a;
+						var body = response.b;
+						var _v1 = A2($elm$json$Json$Decode$decodeString, decoder, body);
+						if (_v1.$ === 'Ok') {
+							var value = _v1.a;
+							return $elm$core$Result$Ok(value);
+						} else {
+							var err = _v1.a;
+							return $elm$core$Result$Err(
+								$dillonkearns$elm_graphql$Graphql$Http$BadPayload(err));
 						}
-					},
-					label: {
-						formatter: $elm$core$Maybe$Just('{b}'),
-						position: $elm$core$Maybe$Just('right'),
-						show: $elm$core$Maybe$Nothing
-					},
-					layout: 'none',
-					lineStyle: {
-						color: $elm$core$Maybe$Just('source'),
-						curveness: $elm$core$Maybe$Just(0.3),
-						width: $elm$core$Maybe$Nothing
-					},
-					links: data.links,
-					name: 'Les Miserables',
-					roam: true,
-					type_: 'graph'
 				}
-				]),
-			title: {left: 'right', subtext: 'Default layout', text: 'Les Miserables', top: 'bottom'},
-			tooltip: {}
-		});
-};
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
+			});
 	});
+var $dillonkearns$elm_graphql$Graphql$Http$QueryHelper$Get = {$: 'Get'};
+var $dillonkearns$elm_graphql$Graphql$Http$QueryHelper$Post = {$: 'Post'};
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $dillonkearns$elm_graphql$Graphql$Http$QueryHelper$maxLength = 2000;
 var $elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
 		A3(
@@ -6319,6 +6822,919 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			_Json_emptyObject(_Utils_Tuple0),
 			pairs));
 };
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$String$dropRight = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3($elm$core$String$slice, 0, -n, string);
+	});
+var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
+var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var $elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (index >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var subTree = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _v0.a;
+				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var $elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var $elm$core$Array$get = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
+			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
+			A3($elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var $lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation = F2(
+	function (replacements, _v0) {
+		var match = _v0.match;
+		var ordinalString = A2(
+			$elm$core$Basics$composeL,
+			$elm$core$String$dropLeft(1),
+			$elm$core$String$dropRight(1))(match);
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$andThen,
+				function (value) {
+					return A2($elm$core$Array$get, value, replacements);
+				},
+				$elm$core$String$toInt(ordinalString)));
+	});
+var $elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
+			var jsArray = _v0.a;
+			var remainingItems = _v0.b;
+			if (_Utils_cmp(
+				$elm$core$Elm$JsArray$length(jsArray),
+				$elm$core$Array$branchFactor) < 0) {
+				return A2(
+					$elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					$elm$core$List$cons,
+					$elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var $elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return $elm$core$Array$empty;
+	} else {
+		return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
+};
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
+var $elm$regex$Regex$never = _Regex_never;
+var $lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex = A2(
+	$elm$core$Maybe$withDefault,
+	$elm$regex$Regex$never,
+	$elm$regex$Regex$fromString('\\{\\d+\\}'));
+var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+var $lukewestby$elm_string_interpolate$String$Interpolate$interpolate = F2(
+	function (string, args) {
+		var asArray = $elm$core$Array$fromList(args);
+		return A3(
+			$elm$regex$Regex$replace,
+			$lukewestby$elm_string_interpolate$String$Interpolate$interpolationRegex,
+			$lukewestby$elm_string_interpolate$String$Interpolate$applyInterpolation(asArray),
+			string);
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$Indent$spaces = function (n) {
+	return (n > 0) ? (' ' + $dillonkearns$elm_graphql$Graphql$Document$Indent$spaces(n - 1)) : '';
+};
+var $dillonkearns$elm_graphql$Graphql$Document$Indent$generate = function (indentationLevel) {
+	return $dillonkearns$elm_graphql$Graphql$Document$Indent$spaces(indentationLevel * 2);
+};
+var $dillonkearns$elm_graphql$Graphql$RawField$typename = A2(
+	$dillonkearns$elm_graphql$Graphql$RawField$Leaf,
+	{fieldName: '__typename', typeString: ''},
+	_List_Nil);
+var $dillonkearns$elm_graphql$Graphql$Document$Field$nonemptyChildren = function (children) {
+	return $elm$core$List$isEmpty(children) ? A2($elm$core$List$cons, $dillonkearns$elm_graphql$Graphql$RawField$typename, children) : children;
+};
+var $dillonkearns$elm_graphql$Graphql$Document$Field$serialize = F3(
+	function (aliasName, mIndentationLevel, field) {
+		var prefix = function () {
+			if (aliasName.$ === 'Just') {
+				var aliasName_ = aliasName.a;
+				return _Utils_ap(
+					aliasName_,
+					function () {
+						if (mIndentationLevel.$ === 'Just') {
+							return ': ';
+						} else {
+							return ':';
+						}
+					}());
+			} else {
+				return '';
+			}
+		}();
+		return A2(
+			$elm$core$Maybe$map,
+			function (string) {
+				return _Utils_ap(
+					$dillonkearns$elm_graphql$Graphql$Document$Indent$generate(
+						A2($elm$core$Maybe$withDefault, 0, mIndentationLevel)),
+					_Utils_ap(prefix, string));
+			},
+			function () {
+				if (field.$ === 'Composite') {
+					var fieldName = field.a;
+					var args = field.b;
+					var children = field.c;
+					if (mIndentationLevel.$ === 'Nothing') {
+						return $elm$core$Maybe$Just(
+							(fieldName + ($dillonkearns$elm_graphql$Graphql$Document$Argument$serialize(args) + ('{' + A2($dillonkearns$elm_graphql$Graphql$Document$Field$serializeChildren, $elm$core$Maybe$Nothing, children)))) + '}');
+					} else {
+						var indentationLevel = mIndentationLevel.a;
+						return $elm$core$Maybe$Just(
+							(fieldName + ($dillonkearns$elm_graphql$Graphql$Document$Argument$serialize(args) + (' {\n' + A2(
+								$dillonkearns$elm_graphql$Graphql$Document$Field$serializeChildren,
+								$elm$core$Maybe$Just(indentationLevel),
+								children)))) + ('\n' + ($dillonkearns$elm_graphql$Graphql$Document$Indent$generate(indentationLevel) + '}')));
+					}
+				} else {
+					var fieldName = field.a.fieldName;
+					var args = field.b;
+					return $elm$core$Maybe$Just(
+						_Utils_ap(
+							fieldName,
+							$dillonkearns$elm_graphql$Graphql$Document$Argument$serialize(args)));
+				}
+			}());
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$Field$serializeChildren = F2(
+	function (indentationLevel, children) {
+		return A2(
+			$elm$core$String$join,
+			function () {
+				if (indentationLevel.$ === 'Just') {
+					return '\n';
+				} else {
+					return ' ';
+				}
+			}(),
+			A2(
+				$elm$core$List$filterMap,
+				$elm$core$Basics$identity,
+				A2(
+					$elm$core$List$map,
+					function (field) {
+						return A3(
+							$dillonkearns$elm_graphql$Graphql$Document$Field$serialize,
+							$dillonkearns$elm_graphql$Graphql$Document$Field$alias(field),
+							A2(
+								$elm$core$Maybe$map,
+								$elm$core$Basics$add(1),
+								indentationLevel),
+							field);
+					},
+					$dillonkearns$elm_graphql$Graphql$Document$Field$nonemptyChildren(children))));
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$serialize = F2(
+	function (operationType, queries) {
+		return A2(
+			$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+			'{0} {\n{1}\n}',
+			_List_fromArray(
+				[
+					operationType,
+					A2(
+					$dillonkearns$elm_graphql$Graphql$Document$Field$serializeChildren,
+					$elm$core$Maybe$Just(0),
+					queries)
+				]));
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$serializeQuery = function (_v0) {
+	var fields = _v0.a;
+	var decoder_ = _v0.b;
+	return A2($dillonkearns$elm_graphql$Graphql$Document$serialize, 'query', fields);
+};
+var $dillonkearns$elm_graphql$Graphql$Document$serializeQueryForUrl = function (_v0) {
+	var fields = _v0.a;
+	var decoder_ = _v0.b;
+	return '{' + (A2($dillonkearns$elm_graphql$Graphql$Document$Field$serializeChildren, $elm$core$Maybe$Nothing, fields) + '}');
+};
+var $dillonkearns$elm_graphql$Graphql$Document$serializeQueryForUrlWithOperationName = F2(
+	function (operationName, _v0) {
+		var fields = _v0.a;
+		var decoder_ = _v0.b;
+		return 'query ' + (operationName + (' {' + (A2($dillonkearns$elm_graphql$Graphql$Document$Field$serializeChildren, $elm$core$Maybe$Nothing, fields) + '}')));
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$serializeWithOperationName = F3(
+	function (operationType, operationName, queries) {
+		return A2(
+			$lukewestby$elm_string_interpolate$String$Interpolate$interpolate,
+			'{0} {1} {\n{2}\n}',
+			_List_fromArray(
+				[
+					operationType,
+					operationName,
+					A2(
+					$dillonkearns$elm_graphql$Graphql$Document$Field$serializeChildren,
+					$elm$core$Maybe$Just(0),
+					queries)
+				]));
+	});
+var $dillonkearns$elm_graphql$Graphql$Document$serializeQueryWithOperationName = F2(
+	function (operationName, _v0) {
+		var fields = _v0.a;
+		var decoder_ = _v0.b;
+		return A3($dillonkearns$elm_graphql$Graphql$Document$serializeWithOperationName, 'query', operationName, fields);
+	});
+var $elm$url$Url$percentEncode = _Url_percentEncode;
+var $dillonkearns$elm_graphql$Graphql$Http$QueryParams$replace = F2(
+	function (old, _new) {
+		return A2(
+			$elm$core$Basics$composeR,
+			$elm$core$String$split(old),
+			$elm$core$String$join(_new));
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$QueryParams$queryEscape = A2(
+	$elm$core$Basics$composeR,
+	$elm$url$Url$percentEncode,
+	A2($dillonkearns$elm_graphql$Graphql$Http$QueryParams$replace, '%20', '+'));
+var $dillonkearns$elm_graphql$Graphql$Http$QueryParams$queryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return $dillonkearns$elm_graphql$Graphql$Http$QueryParams$queryEscape(key) + ('=' + $dillonkearns$elm_graphql$Graphql$Http$QueryParams$queryEscape(value));
+};
+var $dillonkearns$elm_graphql$Graphql$Http$QueryParams$joinUrlEncoded = function (args) {
+	return A2(
+		$elm$core$String$join,
+		'&',
+		A2($elm$core$List$map, $dillonkearns$elm_graphql$Graphql$Http$QueryParams$queryPair, args));
+};
+var $dillonkearns$elm_graphql$Graphql$Http$QueryParams$urlWithQueryParams = F2(
+	function (queryParams, url) {
+		return $elm$core$List$isEmpty(queryParams) ? url : (url + ('?' + $dillonkearns$elm_graphql$Graphql$Http$QueryParams$joinUrlEncoded(queryParams)));
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$QueryHelper$build = F5(
+	function (forceMethod, url, queryParams, maybeOperationName, queryDocument) {
+		var _v0 = function () {
+			if (maybeOperationName.$ === 'Just') {
+				var operationName = maybeOperationName.a;
+				return _Utils_Tuple2(
+					A2($dillonkearns$elm_graphql$Graphql$Document$serializeQueryForUrlWithOperationName, operationName, queryDocument),
+					_List_fromArray(
+						[
+							_Utils_Tuple2('operationName', operationName)
+						]));
+			} else {
+				return _Utils_Tuple2(
+					$dillonkearns$elm_graphql$Graphql$Document$serializeQueryForUrl(queryDocument),
+					_List_Nil);
+			}
+		}();
+		var serializedQueryForGetRequest = _v0.a;
+		var operationNameParamForGetRequest = _v0.b;
+		var urlForGetRequest = A2(
+			$dillonkearns$elm_graphql$Graphql$Http$QueryParams$urlWithQueryParams,
+			_Utils_ap(
+				queryParams,
+				_Utils_ap(
+					_List_fromArray(
+						[
+							_Utils_Tuple2('query', serializedQueryForGetRequest)
+						]),
+					operationNameParamForGetRequest)),
+			url);
+		if (_Utils_eq(
+			forceMethod,
+			$elm$core$Maybe$Just($dillonkearns$elm_graphql$Graphql$Http$QueryHelper$Post)) || ((_Utils_cmp(
+			$elm$core$String$length(urlForGetRequest),
+			$dillonkearns$elm_graphql$Graphql$Http$QueryHelper$maxLength) > -1) && (!_Utils_eq(
+			forceMethod,
+			$elm$core$Maybe$Just($dillonkearns$elm_graphql$Graphql$Http$QueryHelper$Get))))) {
+			var _v2 = function () {
+				if (maybeOperationName.$ === 'Just') {
+					var operationName = maybeOperationName.a;
+					return _Utils_Tuple2(
+						A2($dillonkearns$elm_graphql$Graphql$Document$serializeQueryWithOperationName, operationName, queryDocument),
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'operationName',
+								$elm$json$Json$Encode$string(operationName))
+							]));
+				} else {
+					return _Utils_Tuple2(
+						$dillonkearns$elm_graphql$Graphql$Document$serializeQuery(queryDocument),
+						_List_Nil);
+				}
+			}();
+			var serializedQuery = _v2.a;
+			var operationNameParamForPostRequest = _v2.b;
+			return {
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_Utils_ap(
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'query',
+									$elm$json$Json$Encode$string(serializedQuery))
+								]),
+							operationNameParamForPostRequest))),
+				method: $dillonkearns$elm_graphql$Graphql$Http$QueryHelper$Post,
+				url: A2($dillonkearns$elm_graphql$Graphql$Http$QueryParams$urlWithQueryParams, _List_Nil, url)
+			};
+		} else {
+			return {body: $elm$http$Http$emptyBody, method: $dillonkearns$elm_graphql$Graphql$Http$QueryHelper$Get, url: urlForGetRequest};
+		}
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$GraphqlError$ParsedData = function (a) {
+	return {$: 'ParsedData', a: a};
+};
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $dillonkearns$elm_graphql$Graphql$Http$GraphqlError$GraphqlError = F3(
+	function (message, locations, details) {
+		return {details: details, locations: locations, message: message};
+	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
+var $elm$json$Json$Decode$dict = function (decoder) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Dict$fromList,
+		$elm$json$Json$Decode$keyValuePairs(decoder));
+};
+var $dillonkearns$elm_graphql$Graphql$Http$GraphqlError$Location = F2(
+	function (line, column) {
+		return {column: column, line: line};
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$GraphqlError$locationDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$dillonkearns$elm_graphql$Graphql$Http$GraphqlError$Location,
+	A2($elm$json$Json$Decode$field, 'line', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'column', $elm$json$Json$Decode$int));
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $elm$json$Json$Decode$maybe = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+			]));
+};
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $dillonkearns$elm_graphql$Graphql$Http$GraphqlError$decoder = A2(
+	$elm$json$Json$Decode$field,
+	'errors',
+	$elm$json$Json$Decode$list(
+		A4(
+			$elm$json$Json$Decode$map3,
+			$dillonkearns$elm_graphql$Graphql$Http$GraphqlError$GraphqlError,
+			A2($elm$json$Json$Decode$field, 'message', $elm$json$Json$Decode$string),
+			$elm$json$Json$Decode$maybe(
+				A2(
+					$elm$json$Json$Decode$field,
+					'locations',
+					$elm$json$Json$Decode$list($dillonkearns$elm_graphql$Graphql$Http$GraphqlError$locationDecoder))),
+			A2(
+				$elm$json$Json$Decode$map,
+				$elm$core$Dict$remove('locations'),
+				A2(
+					$elm$json$Json$Decode$map,
+					$elm$core$Dict$remove('message'),
+					$elm$json$Json$Decode$dict($elm$json$Json$Decode$value))))));
+var $elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$decodeErrorWithData = function (data) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Result$Err,
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Tuple$pair(data),
+			$dillonkearns$elm_graphql$Graphql$Http$GraphqlError$decoder));
+};
+var $dillonkearns$elm_graphql$Graphql$Http$nullJsonValue = function (a) {
+	nullJsonValue:
+	while (true) {
+		var _v0 = A2($elm$json$Json$Decode$decodeString, $elm$json$Json$Decode$value, 'null');
+		if (_v0.$ === 'Ok') {
+			var value = _v0.a;
+			return value;
+		} else {
+			var $temp$a = _Utils_Tuple0;
+			a = $temp$a;
+			continue nullJsonValue;
+		}
+	}
+};
+var $dillonkearns$elm_graphql$Graphql$Http$errorDecoder = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2(
+				$elm$json$Json$Decode$andThen,
+				$dillonkearns$elm_graphql$Graphql$Http$decodeErrorWithData,
+				A2($elm$json$Json$Decode$map, $dillonkearns$elm_graphql$Graphql$Http$GraphqlError$ParsedData, decoder)),
+				A2(
+				$elm$json$Json$Decode$andThen,
+				$dillonkearns$elm_graphql$Graphql$Http$decodeErrorWithData,
+				A2(
+					$elm$json$Json$Decode$map,
+					$dillonkearns$elm_graphql$Graphql$Http$GraphqlError$UnparsedData,
+					A2($elm$json$Json$Decode$field, 'data', $elm$json$Json$Decode$value))),
+				A2(
+				$elm$json$Json$Decode$andThen,
+				$dillonkearns$elm_graphql$Graphql$Http$decodeErrorWithData,
+				$elm$json$Json$Decode$succeed(
+					$dillonkearns$elm_graphql$Graphql$Http$GraphqlError$UnparsedData(
+						$dillonkearns$elm_graphql$Graphql$Http$nullJsonValue(_Utils_Tuple0))))
+			]));
+};
+var $dillonkearns$elm_graphql$Graphql$Http$decoderOrError = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				$dillonkearns$elm_graphql$Graphql$Http$errorDecoder(decoder),
+				A2($elm$json$Json$Decode$map, $elm$core$Result$Ok, decoder)
+			]));
+};
+var $dillonkearns$elm_graphql$Graphql$Document$serializeMutation = function (_v0) {
+	var fields = _v0.a;
+	var decoder_ = _v0.b;
+	return A2($dillonkearns$elm_graphql$Graphql$Document$serialize, 'mutation', fields);
+};
+var $dillonkearns$elm_graphql$Graphql$Document$serializeMutationWithOperationName = F2(
+	function (operationName, _v0) {
+		var fields = _v0.a;
+		var decoder_ = _v0.b;
+		return A3($dillonkearns$elm_graphql$Graphql$Document$serializeWithOperationName, 'mutation', operationName, fields);
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$toReadyRequest = function (_v0) {
+	var request = _v0.a;
+	var _v1 = request.details;
+	if (_v1.$ === 'Query') {
+		var forcedRequestMethod = _v1.a;
+		var querySelectionSet = _v1.b;
+		var queryRequestDetails = A5(
+			$dillonkearns$elm_graphql$Graphql$Http$QueryHelper$build,
+			function () {
+				if (forcedRequestMethod.$ === 'Just') {
+					if (forcedRequestMethod.a.$ === 'AlwaysGet') {
+						var _v4 = forcedRequestMethod.a;
+						return $elm$core$Maybe$Just($dillonkearns$elm_graphql$Graphql$Http$QueryHelper$Get);
+					} else {
+						var _v5 = forcedRequestMethod.a;
+						return $elm$core$Maybe$Nothing;
+					}
+				} else {
+					return $elm$core$Maybe$Just($dillonkearns$elm_graphql$Graphql$Http$QueryHelper$Post);
+				}
+			}(),
+			request.baseUrl,
+			request.queryParams,
+			request.operationName,
+			querySelectionSet);
+		return {
+			body: queryRequestDetails.body,
+			decoder: $dillonkearns$elm_graphql$Graphql$Http$decoderOrError(request.expect),
+			headers: request.headers,
+			method: function () {
+				var _v2 = queryRequestDetails.method;
+				if (_v2.$ === 'Get') {
+					return 'GET';
+				} else {
+					return 'Post';
+				}
+			}(),
+			timeout: request.timeout,
+			url: queryRequestDetails.url
+		};
+	} else {
+		var mutationSelectionSet = _v1.a;
+		var serializedMutation = function () {
+			var _v6 = request.operationName;
+			if (_v6.$ === 'Just') {
+				var operationName = _v6.a;
+				return A2($dillonkearns$elm_graphql$Graphql$Document$serializeMutationWithOperationName, operationName, mutationSelectionSet);
+			} else {
+				return $dillonkearns$elm_graphql$Graphql$Document$serializeMutation(mutationSelectionSet);
+			}
+		}();
+		return {
+			body: $elm$http$Http$jsonBody(
+				$elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'query',
+							$elm$json$Json$Encode$string(serializedMutation))
+						]))),
+			decoder: $dillonkearns$elm_graphql$Graphql$Http$decoderOrError(request.expect),
+			headers: request.headers,
+			method: 'POST',
+			timeout: request.timeout,
+			url: A2($dillonkearns$elm_graphql$Graphql$Http$QueryParams$urlWithQueryParams, request.queryParams, request.baseUrl)
+		};
+	}
+};
+var $dillonkearns$elm_graphql$Graphql$Http$toHttpRequestRecord = F2(
+	function (resultToMessage, fullRequest) {
+		var request = fullRequest.a;
+		return function (readyRequest) {
+			return {
+				body: readyRequest.body,
+				expect: A2(
+					$dillonkearns$elm_graphql$Graphql$Http$expectJson,
+					A2($elm$core$Basics$composeR, $dillonkearns$elm_graphql$Graphql$Http$convertResult, resultToMessage),
+					readyRequest.decoder),
+				headers: readyRequest.headers,
+				method: readyRequest.method,
+				timeout: readyRequest.timeout,
+				tracker: $elm$core$Maybe$Nothing,
+				url: readyRequest.url
+			};
+		}(
+			$dillonkearns$elm_graphql$Graphql$Http$toReadyRequest(fullRequest));
+	});
+var $dillonkearns$elm_graphql$Graphql$Http$send = F2(
+	function (resultToMessage, fullRequest) {
+		var request = fullRequest.a;
+		return (request.withCredentials ? $elm$http$Http$riskyRequest : $elm$http$Http$request)(
+			A2($dillonkearns$elm_graphql$Graphql$Http$toHttpRequestRecord, resultToMessage, fullRequest));
+	});
+var $author$project$Main$makeListEntitiesQuery = A2(
+	$dillonkearns$elm_graphql$Graphql$Http$send,
+	A2(
+		$elm$core$Basics$composeR,
+		$dillonkearns$elm_graphql$Graphql$Http$discardParsedErrorData,
+		A2($elm$core$Basics$composeR, $krisajenkins$remotedata$RemoteData$fromResult, $author$project$Main$GotResponse)),
+	A2($dillonkearns$elm_graphql$Graphql$Http$queryRequest, 'http://127.0.0.1:5000/entity', $author$project$Main$listEntitiesQuery));
+var $author$project$Main$init = function (_v0) {
+	return _Utils_Tuple2($krisajenkins$remotedata$RemoteData$Loading, $author$project$Main$makeListEntitiesQuery);
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$update = F2(
+	function (msg, _v0) {
+		if (msg.$ === 'GotResponse') {
+			var response = msg.a;
+			return _Utils_Tuple2(response, $elm$core$Platform$Cmd$none);
+		} else {
+			return _Utils_Tuple2($krisajenkins$remotedata$RemoteData$Loading, $author$project$Main$makeListEntitiesQuery);
+		}
+	});
+var $author$project$Main$Rebuild = {$: 'Rebuild'};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$Main$buildErrorMsg = function (msg) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('alert')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('closeBtn')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('x')
+					])),
+				$elm$html$Html$text('Error: ' + msg)
+			]));
+};
+var $elm$core$Debug$toString = _Debug_toString;
+var $author$project$Main$buildHttpErrorMessage = function (httpError) {
+	switch (httpError.$) {
+		case 'BadUrl':
+			var message = httpError.a;
+			return message;
+		case 'Timeout':
+			return 'Server is taking too long to respond. Please try again later.';
+		case 'NetworkError':
+			return 'Unable to reach server.';
+		case 'BadStatus':
+			var metadata = httpError.a;
+			var body = httpError.b;
+			return 'Request failed with status code: ' + ($elm$core$String$fromInt(metadata.statusCode) + ('. Error: ' + body));
+		default:
+			var error = httpError.a;
+			return 'Bad payload received: ' + $elm$core$Debug$toString(error);
+	}
+};
+var $author$project$Main$buildFailureMsg = function (parsedData) {
+	if (parsedData.$ === 'GraphqlError') {
+		var graphqlErrors = parsedData.b;
+		return A2(
+			$elm$core$List$map,
+			function (err) {
+				return $author$project$Main$buildErrorMsg(err.message);
+			},
+			graphqlErrors);
+	} else {
+		var httpError = parsedData.a;
+		return _List_fromArray(
+			[
+				$author$project$Main$buildErrorMsg(
+				$author$project$Main$buildHttpErrorMessage(httpError))
+			]);
+	}
+};
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$List$concatMap = F2(
+	function (f, list) {
+		return $elm$core$List$concat(
+			A2($elm$core$List$map, f, list));
+	});
+var $author$project$Main$entityToGraphEdgeItemOption = function (e) {
+	return A2(
+		$elm$core$List$map,
+		function (c) {
+			return {source: e.name, target: c};
+		},
+		e.connections);
+};
+var $elm_community$list_extra$List$Extra$findIndexHelp = F3(
+	function (index, predicate, list) {
+		findIndexHelp:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (predicate(x)) {
+					return $elm$core$Maybe$Just(index);
+				} else {
+					var $temp$index = index + 1,
+						$temp$predicate = predicate,
+						$temp$list = xs;
+					index = $temp$index;
+					predicate = $temp$predicate;
+					list = $temp$list;
+					continue findIndexHelp;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$findIndex = $elm_community$list_extra$List$Extra$findIndexHelp(0);
+var $elm_community$list_extra$List$Extra$elemIndex = function (x) {
+	return $elm_community$list_extra$List$Extra$findIndex(
+		$elm$core$Basics$eq(x));
+};
+var $author$project$Main$entityToGraphNodeItemOption = F2(
+	function (l, e) {
+		return {
+			category: A2($elm_community$list_extra$List$Extra$elemIndex, e.context, l),
+			label: $elm$core$Maybe$Nothing,
+			name: $elm$core$Maybe$Just(e.name),
+			symbolSize: $elm$core$Maybe$Just(20),
+			value: 1,
+			x: $elm$core$Maybe$Nothing,
+			y: $elm$core$Maybe$Nothing
+		};
+	});
+var $elm$core$List$sortBy = _List_sortBy;
+var $elm$core$List$sort = function (xs) {
+	return A2($elm$core$List$sortBy, $elm$core$Basics$identity, xs);
+};
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $elm$core$Set$insert = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
+	});
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm$core$Set$member = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return A2($elm$core$Dict$member, key, dict);
+	});
+var $elm_community$list_extra$List$Extra$uniqueHelp = F4(
+	function (f, existing, remaining, accumulator) {
+		uniqueHelp:
+		while (true) {
+			if (!remaining.b) {
+				return $elm$core$List$reverse(accumulator);
+			} else {
+				var first = remaining.a;
+				var rest = remaining.b;
+				var computedFirst = f(first);
+				if (A2($elm$core$Set$member, computedFirst, existing)) {
+					var $temp$f = f,
+						$temp$existing = existing,
+						$temp$remaining = rest,
+						$temp$accumulator = accumulator;
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				} else {
+					var $temp$f = f,
+						$temp$existing = A2($elm$core$Set$insert, computedFirst, existing),
+						$temp$remaining = rest,
+						$temp$accumulator = A2($elm$core$List$cons, first, accumulator);
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$unique = function (list) {
+	return A4($elm_community$list_extra$List$Extra$uniqueHelp, $elm$core$Basics$identity, $elm$core$Set$empty, list, _List_Nil);
+};
+var $author$project$Main$entityListToChartOpts = function (entityList) {
+	var categories = $elm$core$List$sort(
+		$elm_community$list_extra$List$Extra$unique(
+			A2(
+				$elm$core$List$map,
+				function (e) {
+					return e.context;
+				},
+				entityList)));
+	return {
+		legend: _List_fromArray(
+			[
+				{data: categories}
+			]),
+		series: _List_fromArray(
+			[
+				{
+				animation: $elm$core$Maybe$Just(true),
+				categories: A2(
+					$elm$core$List$map,
+					function (c) {
+						return {name: c};
+					},
+					categories),
+				data: A2(
+					$elm$core$List$map,
+					$author$project$Main$entityToGraphNodeItemOption(categories),
+					entityList),
+				draggable: $elm$core$Maybe$Just(true),
+				emphasis: $elm$core$Maybe$Nothing,
+				force: $elm$core$Maybe$Just(
+					{
+						edgeLength: $elm$core$Maybe$Just(100),
+						friction: $elm$core$Maybe$Just(0.2),
+						gravity: $elm$core$Maybe$Just(0.2),
+						layoutAnimation: $elm$core$Maybe$Just(true),
+						repulsion: $elm$core$Maybe$Just(50)
+					}),
+				label: $elm$core$Maybe$Just(
+					{
+						formatter: $elm$core$Maybe$Just('{b}'),
+						position: $elm$core$Maybe$Just('right'),
+						show: $elm$core$Maybe$Nothing
+					}),
+				layout: 'force',
+				lineStyle: $elm$core$Maybe$Nothing,
+				links: A2($elm$core$List$concatMap, $author$project$Main$entityToGraphEdgeItemOption, entityList),
+				name: $elm$core$Maybe$Nothing,
+				roam: $elm$core$Maybe$Just(true),
+				type_: 'graph'
+			}
+			]),
+		title: $elm$core$Maybe$Nothing,
+		tooltip: $elm$core$Maybe$Just(
+			{show: false})
+	};
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
 var $author$project$Main$legendOptionEncoder = function (legendOption) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -6338,21 +7754,8 @@ var $author$project$Main$categoryItemOptionEncoder = function (categoryItemOptio
 				$elm$json$Json$Encode$string(categoryItemOption.name))
 			]));
 };
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var $elm$json$Json$Encode$float = _Json_wrap;
+var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$Main$lineStyleOptionEncoder = function (lineStyleOption) {
 	return A2(
 		$elm$core$Basics$composeL,
@@ -6401,6 +7804,60 @@ var $author$project$Main$emphasisOptionEncoder = function (emphasisOption) {
 				$author$project$Main$lineStyleOptionEncoder(emphasisOption.lineStyle))
 			]));
 };
+var $author$project$Main$forceOptionEncoder = function (forceOption) {
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (el) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'edgeLength',
+							$elm$json$Json$Encode$int(el)));
+				},
+				forceOption.edgeLength),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (f) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'friction',
+							$elm$json$Json$Encode$float(f)));
+				},
+				forceOption.friction),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (g) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'gravity',
+							$elm$json$Json$Encode$float(g)));
+				},
+				forceOption.gravity),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (la) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'layoutAnimation',
+							$elm$json$Json$Encode$bool(la)));
+				},
+				forceOption.layoutAnimation),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (r) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'repulsion',
+							$elm$json$Json$Encode$int(r)));
+				},
+				forceOption.repulsion)
+			]));
+};
 var $author$project$Main$graphEdgeItemOptionEncoder = function (graphEdgeItemOption) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -6422,113 +7879,199 @@ var $author$project$Main$labelOptionEncoder = function (labelOption) {
 			[
 				A2(
 				$elm$core$Maybe$andThen,
-				function (position) {
+				function (p) {
 					return $elm$core$Maybe$Just(
 						_Utils_Tuple2(
 							'position',
-							$elm$json$Json$Encode$string(position)));
+							$elm$json$Json$Encode$string(p)));
 				},
 				labelOption.position),
 				A2(
 				$elm$core$Maybe$andThen,
-				function (formatter) {
+				function (f) {
 					return $elm$core$Maybe$Just(
 						_Utils_Tuple2(
 							'formatter',
-							$elm$json$Json$Encode$string(formatter)));
+							$elm$json$Json$Encode$string(f)));
 				},
 				labelOption.formatter),
 				A2(
 				$elm$core$Maybe$andThen,
-				function (show) {
+				function (s) {
 					return $elm$core$Maybe$Just(
 						_Utils_Tuple2(
 							'show',
-							$elm$json$Json$Encode$bool(show)));
+							$elm$json$Json$Encode$bool(s)));
 				},
 				labelOption.show)
 			]));
 };
-var $author$project$Main$graphNodeItemOptionEncoder = function (graphNodeItemOption) {
+var $author$project$Main$graphNodeItemOptionEncoder = function (gnio) {
 	return A2(
 		$elm$core$Basics$composeL,
 		$elm$json$Json$Encode$object,
 		$elm$core$List$filterMap($elm$core$Basics$identity))(
 		_List_fromArray(
 			[
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'id',
-					$elm$json$Json$Encode$string(graphNodeItemOption.id))),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'name',
-					$elm$json$Json$Encode$string(graphNodeItemOption.name))),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (n) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'name',
+							$elm$json$Json$Encode$string(n)));
+				},
+				gnio.name),
 				$elm$core$Maybe$Just(
 				_Utils_Tuple2(
 					'value',
-					$elm$json$Json$Encode$float(graphNodeItemOption.value))),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'x',
-					$elm$json$Json$Encode$float(graphNodeItemOption.x))),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'y',
-					$elm$json$Json$Encode$float(graphNodeItemOption.y))),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'category',
-					$elm$json$Json$Encode$int(graphNodeItemOption.category))),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'symbolSize',
-					$elm$json$Json$Encode$float(graphNodeItemOption.symbolSize))),
+					$elm$json$Json$Encode$float(gnio.value))),
 				A2(
 				$elm$core$Maybe$andThen,
-				function (label) {
+				function (x) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'x',
+							$elm$json$Json$Encode$float(x)));
+				},
+				gnio.x),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (y) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'y',
+							$elm$json$Json$Encode$float(y)));
+				},
+				gnio.y),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (c) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'category',
+							$elm$json$Json$Encode$int(c)));
+				},
+				gnio.category),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (s) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'symbolSize',
+							$elm$json$Json$Encode$float(s)));
+				},
+				gnio.symbolSize),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (l) {
 					return $elm$core$Maybe$Just(
 						_Utils_Tuple2(
 							'label',
-							$author$project$Main$labelOptionEncoder(label)));
+							$author$project$Main$labelOptionEncoder(l)));
 				},
-				graphNodeItemOption.label)
+				gnio.label)
 			]));
 };
 var $author$project$Main$seriesOptionEncoder = function (seriesOption) {
-	return $elm$json$Json$Encode$object(
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
 		_List_fromArray(
 			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (a) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'animation',
+							$elm$json$Json$Encode$bool(a)));
+				},
+				seriesOption.animation),
+				$elm$core$Maybe$Just(
 				_Utils_Tuple2(
-				'name',
-				$elm$json$Json$Encode$string(seriesOption.name)),
+					'categories',
+					A2($elm$json$Json$Encode$list, $author$project$Main$categoryItemOptionEncoder, seriesOption.categories))),
+				$elm$core$Maybe$Just(
 				_Utils_Tuple2(
-				'type',
-				$elm$json$Json$Encode$string(seriesOption.type_)),
+					'data',
+					A2($elm$json$Json$Encode$list, $author$project$Main$graphNodeItemOptionEncoder, seriesOption.data))),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (d) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'draggable',
+							$elm$json$Json$Encode$bool(d)));
+				},
+				seriesOption.draggable),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (e) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'emphasis',
+							$author$project$Main$emphasisOptionEncoder(e)));
+				},
+				seriesOption.emphasis),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (f) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'force',
+							$author$project$Main$forceOptionEncoder(f)));
+				},
+				seriesOption.force),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (l) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'label',
+							$author$project$Main$labelOptionEncoder(l)));
+				},
+				seriesOption.label),
+				$elm$core$Maybe$Just(
 				_Utils_Tuple2(
-				'layout',
-				$elm$json$Json$Encode$string(seriesOption.layout)),
+					'layout',
+					$elm$json$Json$Encode$string(seriesOption.layout))),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (ls) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'lineStyle',
+							$author$project$Main$lineStyleOptionEncoder(ls)));
+				},
+				seriesOption.lineStyle),
+				$elm$core$Maybe$Just(
 				_Utils_Tuple2(
-				'roam',
-				$elm$json$Json$Encode$bool(seriesOption.roam)),
+					'links',
+					A2($elm$json$Json$Encode$list, $author$project$Main$graphEdgeItemOptionEncoder, seriesOption.links))),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (n) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'name',
+							$elm$json$Json$Encode$string(n)));
+				},
+				seriesOption.name),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (r) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'roam',
+							$elm$json$Json$Encode$bool(r)));
+				},
+				seriesOption.roam),
+				$elm$core$Maybe$Just(
 				_Utils_Tuple2(
-				'label',
-				$author$project$Main$labelOptionEncoder(seriesOption.label)),
-				_Utils_Tuple2(
-				'lineStyle',
-				$author$project$Main$lineStyleOptionEncoder(seriesOption.lineStyle)),
-				_Utils_Tuple2(
-				'emphasis',
-				$author$project$Main$emphasisOptionEncoder(seriesOption.emphasis)),
-				_Utils_Tuple2(
-				'data',
-				A2($elm$json$Json$Encode$list, $author$project$Main$graphNodeItemOptionEncoder, seriesOption.data)),
-				_Utils_Tuple2(
-				'links',
-				A2($elm$json$Json$Encode$list, $author$project$Main$graphEdgeItemOptionEncoder, seriesOption.links)),
-				_Utils_Tuple2(
-				'categories',
-				A2($elm$json$Json$Encode$list, $author$project$Main$categoryItemOptionEncoder, seriesOption.categories))
+					'type',
+					$elm$json$Json$Encode$string(seriesOption.type_)))
 			]));
 };
 var $author$project$Main$titleOptionEncoder = function (titleOption) {
@@ -6549,27 +8092,48 @@ var $author$project$Main$titleOptionEncoder = function (titleOption) {
 				$elm$json$Json$Encode$string(titleOption.left))
 			]));
 };
-var $author$project$Main$tooltipOptionEncoder = $elm$json$Json$Encode$object(_List_Nil);
-var $author$project$Main$encodeChartOptions = function (chartOptions) {
+var $author$project$Main$tooltipOptionEncoder = function (tooltipOption) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
 			[
 				_Utils_Tuple2(
-				'title',
-				$author$project$Main$titleOptionEncoder(chartOptions.title)),
-				_Utils_Tuple2('tooltip', $author$project$Main$tooltipOptionEncoder),
+				'show',
+				$elm$json$Json$Encode$bool(tooltipOption.show))
+			]));
+};
+var $author$project$Main$encodeChartOptions = function (chartOptions) {
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (title) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'title',
+							$author$project$Main$titleOptionEncoder(title)));
+				},
+				chartOptions.title),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (t) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'tooltip',
+							$author$project$Main$tooltipOptionEncoder(t)));
+				},
+				chartOptions.tooltip),
+				$elm$core$Maybe$Just(
 				_Utils_Tuple2(
-				'legend',
-				A2($elm$json$Json$Encode$list, $author$project$Main$legendOptionEncoder, chartOptions.legend)),
+					'legend',
+					A2($elm$json$Json$Encode$list, $author$project$Main$legendOptionEncoder, chartOptions.legend))),
+				$elm$core$Maybe$Just(
 				_Utils_Tuple2(
-				'animationDuration',
-				$elm$json$Json$Encode$int(chartOptions.animationDuration)),
-				_Utils_Tuple2(
-				'animationEasingUpdate',
-				$elm$json$Json$Encode$string(chartOptions.animationEasingUpdate)),
-				_Utils_Tuple2(
-				'series',
-				A2($elm$json$Json$Encode$list, $author$project$Main$seriesOptionEncoder, chartOptions.series))
+					'series',
+					A2($elm$json$Json$Encode$list, $author$project$Main$seriesOptionEncoder, chartOptions.series)))
 			]));
 };
 var $elm$virtual_dom$VirtualDom$node = function (tag) {
@@ -6597,52 +8161,23 @@ var $author$project$Main$graph = function (chartOptions) {
 				$author$project$Main$encodeChartOptions(chartOptions))
 			]));
 };
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$viewGraph = function (model) {
+var $author$project$Main$viewModelResult = function (model) {
 	switch (model.$) {
+		case 'NotAsked':
+			return $elm$html$Html$text('I didn\'t ask');
+		case 'Loading':
+			return $elm$html$Html$text('Loading...');
 		case 'Failure':
+			var e = model.a;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('I could not load for some reason. '),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$Fetch)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Try Again!')
-							]))
-					]));
-		case 'Loading':
-			return $elm$html$Html$text('Loading...');
+				$author$project$Main$buildFailureMsg(e));
 		default:
-			var data = model.a;
+			var entityList = model.a;
 			return A2(
 				$author$project$Main$graph,
-				$author$project$Main$dataToChartOpts(data),
+				$author$project$Main$entityListToChartOpts(entityList),
 				_List_Nil);
 	}
 };
@@ -6665,7 +8200,26 @@ var $author$project$Main$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						$author$project$Main$viewGraph(model)
+						$author$project$Main$viewModelResult(model)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$id('rebuildBtn')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$Rebuild)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('rebuild')
+							]))
 					]))
 			]));
 };
