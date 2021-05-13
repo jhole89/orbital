@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	http.Handle("/admin", ah)
+	http.Handle("/admin", disableCors(ah))
 
 	if err = reIndex(graph, conf.Lakes); err != nil {
 		log.Println(err)

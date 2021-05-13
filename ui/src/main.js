@@ -5475,8 +5475,9 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$element = _Browser_element;
 var $krisajenkins$remotedata$RemoteData$Loading = {$: 'Loading'};
-var $author$project$Main$GotResponse = function (a) {
-	return {$: 'GotResponse', a: a};
+var $krisajenkins$remotedata$RemoteData$NotAsked = {$: 'NotAsked'};
+var $author$project$Main$GotEntityListResponse = function (a) {
+	return {$: 'GotEntityListResponse', a: a};
 };
 var $elm$core$Basics$composeR = F3(
 	function (f, g, x) {
@@ -7437,26 +7438,68 @@ var $author$project$Main$makeListEntitiesQuery = A2(
 	A2(
 		$elm$core$Basics$composeR,
 		$dillonkearns$elm_graphql$Graphql$Http$discardParsedErrorData,
-		A2($elm$core$Basics$composeR, $krisajenkins$remotedata$RemoteData$fromResult, $author$project$Main$GotResponse)),
+		A2($elm$core$Basics$composeR, $krisajenkins$remotedata$RemoteData$fromResult, $author$project$Main$GotEntityListResponse)),
 	A2($dillonkearns$elm_graphql$Graphql$Http$queryRequest, 'http://127.0.0.1:5000/entity', $author$project$Main$listEntitiesQuery));
 var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2($krisajenkins$remotedata$RemoteData$Loading, $author$project$Main$makeListEntitiesQuery);
+	return _Utils_Tuple2(
+		{entities: $krisajenkins$remotedata$RemoteData$Loading, indexing: $krisajenkins$remotedata$RemoteData$NotAsked},
+		$author$project$Main$makeListEntitiesQuery);
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$GotAdminResponse = function (a) {
+	return {$: 'GotAdminResponse', a: a};
+};
+var $elm$json$Json$Decode$null = _Json_decodeNull;
+var $elm$json$Json$Decode$nullable = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				$elm$json$Json$Decode$null($elm$core$Maybe$Nothing),
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder)
+			]));
+};
+var $author$project$Admin$Query$rebuild = A4(
+	$dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForField,
+	'(Maybe String)',
+	'rebuild',
+	_List_Nil,
+	$elm$json$Json$Decode$nullable($elm$json$Json$Decode$string));
+var $author$project$Main$rebuildQuery = $author$project$Admin$Query$rebuild;
+var $author$project$Main$sendRebuildQuery = A2(
+	$dillonkearns$elm_graphql$Graphql$Http$send,
+	A2(
+		$elm$core$Basics$composeR,
+		$dillonkearns$elm_graphql$Graphql$Http$discardParsedErrorData,
+		A2($elm$core$Basics$composeR, $krisajenkins$remotedata$RemoteData$fromResult, $author$project$Main$GotAdminResponse)),
+	A2($dillonkearns$elm_graphql$Graphql$Http$queryRequest, 'http://127.0.0.1:5000/admin', $author$project$Main$rebuildQuery));
 var $author$project$Main$update = F2(
-	function (msg, _v0) {
-		if (msg.$ === 'GotResponse') {
-			var response = msg.a;
-			return _Utils_Tuple2(response, $elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2($krisajenkins$remotedata$RemoteData$Loading, $author$project$Main$makeListEntitiesQuery);
+	function (msg, model) {
+		switch (msg.$) {
+			case 'GotEntityListResponse':
+				var entityListModel = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{entities: entityListModel}),
+					$elm$core$Platform$Cmd$none);
+			case 'GotAdminResponse':
+				var adminModel = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{indexing: adminModel}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{indexing: $krisajenkins$remotedata$RemoteData$Loading}),
+					$author$project$Main$sendRebuildQuery);
 		}
 	});
-var $author$project$Main$Rebuild = {$: 'Rebuild'};
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -7466,6 +7509,11 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$Main$FetchAdminResponse = {$: 'FetchAdminResponse'};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -7483,11 +7531,39 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $author$project$Main$fetchButton = F2(
+	function (_class, displayText) {
+		return A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class(_class),
+					$elm$html$Html$Events$onClick($author$project$Main$FetchAdminResponse)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(displayText)
+				]));
+	});
+var $elm$core$Debug$toString = _Debug_toString;
+var $author$project$Main$viewAdminModelResult = function (model) {
+	switch (model.$) {
+		case 'NotAsked':
+			return A2($author$project$Main$fetchButton, 'neutralBtn', 'ReBuild Network');
+		case 'Loading':
+			return A2($author$project$Main$fetchButton, 'loadingBtn', 'Building...');
+		case 'Failure':
+			var e = model.a;
+			return A2(
+				$author$project$Main$fetchButton,
+				'failureBtn',
+				$elm$core$Debug$toString(e));
+		default:
+			return A2($author$project$Main$fetchButton, 'successBtn', 'Rebuild Network');
+	}
+};
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Main$buildErrorMsg = function (msg) {
 	return A2(
@@ -7511,7 +7587,6 @@ var $author$project$Main$buildErrorMsg = function (msg) {
 				$elm$html$Html$text('Error: ' + msg)
 			]));
 };
-var $elm$core$Debug$toString = _Debug_toString;
 var $author$project$Main$buildHttpErrorMessage = function (httpError) {
 	switch (httpError.$) {
 		case 'BadUrl':
@@ -8161,7 +8236,7 @@ var $author$project$Main$graph = function (chartOptions) {
 				$author$project$Main$encodeChartOptions(chartOptions))
 			]));
 };
-var $author$project$Main$viewModelResult = function (model) {
+var $author$project$Main$viewEntityListModelResult = function (model) {
 	switch (model.$) {
 		case 'NotAsked':
 			return $elm$html$Html$text('I didn\'t ask');
@@ -8200,7 +8275,7 @@ var $author$project$Main$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						$author$project$Main$viewModelResult(model)
+						$author$project$Main$viewEntityListModelResult(model.entities)
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -8210,16 +8285,7 @@ var $author$project$Main$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$Rebuild)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('rebuild')
-							]))
+						$author$project$Main$viewAdminModelResult(model.indexing)
 					]))
 			]));
 };

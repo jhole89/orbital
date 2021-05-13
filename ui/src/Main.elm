@@ -12,7 +12,7 @@ import Graphql.Operation exposing (RootQuery)
 import Graphql.OptionalArgument as OptionalArgument
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 import Html exposing (..)
-import Html.Attributes as Attr
+import Html.Attributes as Attr exposing (style)
 import Html.Events exposing (onClick)
 import Http
 import Json.Encode as Encode
@@ -325,18 +325,18 @@ makeListEntitiesQuery =
         |> Graphql.Http.send
             (Graphql.Http.discardParsedErrorData
                 >> RemoteData.fromResult
-                >> GotResponse
+                >> GotEntityListResponse
             )
 
---sendRebuildQuery : Cmd Msg
---sendRebuildQuery =
---    rebuildQuery
---        |> Graphql.Http.queryRequest "http://127.0.0.1:5000/admin"
---        |> Graphql.Http.send
---            (Graphql.Http.discardParsedErrorData
---                >> RemoteData.fromResult
---                >>
---            )
+sendRebuildQuery : Cmd Msg
+sendRebuildQuery =
+    rebuildQuery
+        |> Graphql.Http.queryRequest "http://127.0.0.1:5000/admin"
+        |> Graphql.Http.send
+            (Graphql.Http.discardParsedErrorData
+                >> RemoteData.fromResult
+                >> GotAdminResponse
+            )
 
 
 -- ELM ARCHITECTURE
@@ -354,30 +354,51 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( RemoteData.Loading, makeListEntitiesQuery
+    ( { entities = RemoteData.Loading
+      , indexing = RemoteData.NotAsked
+      }
+    , makeListEntitiesQuery
     )
 
 -- MODEL
 
+type alias EntityListModel = RemoteData (Graphql.Http.Error ()) EntityListResponse
+type alias AdminModel = RemoteData (Graphql.Http.Error ()) AdminResponse
 
 type alias Model =
-    ( RemoteData (Graphql.Http.Error ()) EntityListResponse
-    )
+    { entities: EntityListModel
+    , indexing: AdminModel
+    }
 
 -- UPDATE
 
 
 type Msg
-    = GotResponse Model
-    | Rebuild
+    = GotEntityListResponse EntityListModel
+    | FetchEntityList
+    | GotAdminResponse AdminModel
+    | FetchAdminResponse
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg _ =
+update msg model =
     case msg of
-        GotResponse response ->
-            ( response, Cmd.none )
-        Rebuild ->
-            ( RemoteData.Loading, makeListEntitiesQuery )
+        GotEntityListResponse entityListModel ->
+            ( { model | entities = entityListModel }
+            , Cmd.none
+            )
+        FetchEntityList ->
+            ( { model | entities = RemoteData.Loading }
+            , makeListEntitiesQuery
+            )
+        GotAdminResponse adminModel ->
+            ( { model | indexing = adminModel }
+            , Cmd.none
+            )
+        FetchAdminResponse ->
+            ( { model | indexing = RemoteData.Loading }
+            , sendRebuildQuery
+            )
 
 
 -- VIEW
@@ -393,16 +414,15 @@ view model =
             , Attr.style "width" "1200px"
             , Attr.style "height" "800px"
             ]
-            [ viewModelResult model
+            [ viewEntityListModelResult model.entities
             ]
         , div
             [ Attr.id "rebuildBtn" ]
-            [ button [ onClick Rebuild ] [ text "rebuild" ] ]
+            [ viewAdminModelResult model.indexing ]
         ]
 
-
-viewModelResult : Model -> Html Msg
-viewModelResult model =
+viewEntityListModelResult : EntityListModel -> Html Msg
+viewEntityListModelResult model =
     case model of
         NotAsked ->
             text "I didn't ask"
@@ -456,3 +476,22 @@ buildHttpErrorMessage httpError =
 graph : ChartOptions -> List (Html msg) -> Html msg
 graph chartOptions =
     node "echart-element"[ Attr.property "option" <| encodeChartOptions chartOptions ]
+
+viewAdminModelResult : AdminModel -> Html Msg
+viewAdminModelResult model =
+    case model of
+        NotAsked ->
+            fetchButton "neutralBtn" "ReBuild Network"
+
+        Loading ->
+            fetchButton "loadingBtn" "Building..."
+
+        Failure e ->
+            fetchButton "failureBtn" (Debug.toString e)
+
+        Success _ ->
+            fetchButton "successBtn" "Rebuild Network"
+
+fetchButton : String -> String -> Html Msg
+fetchButton class displayText =
+    button [ Attr.class class, onClick FetchAdminResponse ] [ text displayText ]
