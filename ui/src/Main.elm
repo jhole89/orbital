@@ -2,6 +2,8 @@ module Main exposing (main)
 
 import Admin.Query as AdminQuery
 import Browser
+import Css
+import Debug
 import Entity.Object
 import Entity.Object.Entity as Entity
 import Entity.Query as EntityQuery
@@ -11,15 +13,21 @@ import Graphql.Http.GraphqlError exposing (GraphqlError, PossiblyParsedData(..))
 import Graphql.Operation exposing (RootQuery)
 import Graphql.OptionalArgument as OptionalArgument
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
-import Html exposing (..)
-import Html.Attributes as Attr exposing (style)
-import Html.Events exposing (onClick)
+import Html.Styled.Events exposing (onClick)
 import Http
 import Json.Encode as Encode
 import List
 import List.Extra
+import Material.Icons as Icons
+import Material.Icons.Types exposing (Coloring(..), Icon)
 import RemoteData exposing (RemoteData(..))
 import Entity.Object.Entity as Entity
+import Svg.Styled as Svg
+import Svg.Styled.Attributes exposing (css, d, r, viewBox)
+import Tailwind.Utilities as Tw
+import Css.Global
+import Html.Styled as Html
+import Html.Styled.Attributes as Attr
 
 -- INBOUND TYPES
 
@@ -338,6 +346,10 @@ sendRebuildQuery =
                 >> GotAdminResponse
             )
 
+--drawGraph : Cmd Msg
+--drawGraph =
+
+
 
 -- ELM ARCHITECTURE
 
@@ -345,7 +357,7 @@ main : Program () Model Msg
 main =
   Browser.element
     { init = init
-    , view = view
+    , view = view >> Html.toUnstyled
     , update = update
     , subscriptions = \_ -> Sub.none
     }
@@ -378,6 +390,7 @@ type Msg
     | FetchEntityList
     | GotAdminResponse AdminModel
     | FetchAdminResponse
+    --| Draw ChartOptions
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -399,61 +412,110 @@ update msg model =
             ( { model | indexing = RemoteData.Loading }
             , sendRebuildQuery
             )
+        --Draw chartOptions ->
+        --    ( model, drawGraph chartOptions)
 
 
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model -> Html.Html Msg
 view model =
-    div
-        [ Attr.style "display" "flex"
+    Html.div
+        [ Attr.css
+            [ Tw.bg_gray_50 ]
+        , Attr.style "display" "flex"
         ]
-        [ div
+        [ Css.Global.global Tw.globalStyles
+        , Html.div
             [ Attr.id "graph"
             , Attr.style "width" "1200px"
             , Attr.style "height" "800px"
             ]
             [ viewEntityListModelResult model.entities
             ]
-        , div
+        , Html.div
             [ Attr.id "rebuildBtn" ]
             [ viewAdminModelResult model.indexing ]
         ]
 
-viewEntityListModelResult : EntityListModel -> Html Msg
+viewEntityListModelResult : EntityListModel -> Html.Html Msg
 viewEntityListModelResult model =
     case model of
         NotAsked ->
-            text "I didn't ask"
+            Html.text "I didn't ask"
 
         Loading ->
-            text "Loading..."
+            Html.text "Loading..."
 
         Failure e ->
-            div [] (buildFailureMsg e)
+            Html.div [] (buildFailureMsg e)
 
         Success entityList ->
             graph (entityListToChartOpts entityList) []
 
-buildFailureMsg: Error parsedData -> List (Html Msg)
+buildFailureMsg: Error parsedData -> List (Html.Html Msg)
 buildFailureMsg parsedData =
     case parsedData of
         Graphql.Http.GraphqlError _ graphqlErrors ->
-            List.map (\err -> buildErrorMsg err.message) graphqlErrors
+            List.map (\err -> buildErrorMsg "Graphql Error" err.message) graphqlErrors
 
         Graphql.Http.HttpError httpError ->
-            [ buildErrorMsg (buildHttpErrorMessage httpError) ]
+            [ buildErrorMsg "Http Error" (buildHttpErrorMessage httpError) ]
 
-buildErrorMsg: String -> Html Msg
-buildErrorMsg msg =
-    div
-        [ Attr.class "alert" ]
-        [ span
-            [ Attr.class "closeBtn" ]
-            [ text "x" ]
-        , text ("Error: " ++ msg)
+buildErrorMsg: String -> String -> Html.Html Msg
+buildErrorMsg eType eMsg =
+    Html.div
+        [ Attr.css
+            [ Tw.flex
+            , Tw.bg_red_200
+            , Tw.p_4
+            ]
         ]
+        [ Html.div
+            [ Attr.css [ Tw.mr_4 ] ]
+            [ Html.div
+                [ Attr.css
+                    [ Tw.h_10
+                    , Tw.w_10
+                    , Tw.text_white
+                    , Tw.bg_red_600
+                    , Tw.rounded_full
+                    , Tw.flex
+                    , Tw.justify_center
+                    , Tw.items_center
+                    ]
+                ]
+                [ Html.fromUnstyled (Icons.warning 24 Inherit) ]
+            ]
+        , Html.div
+            [ Attr.css
+                [ Tw.flex
+                , Tw.justify_between
+                , Tw.w_full
+                ]
+            ]
+            [ Html.div
+                [ Attr.css [ Tw.text_red_600 ] ]
+                [ Html.p
+                    [ Attr.css
+                        [ Tw.mb_2
+                        , Tw.font_bold
+                        ]
+                    ]
+                    [ Html.text eType ]
+                , Html.p [ Attr.css [ Tw.text_xs ] ] [ Html.text eMsg ]
+                ]
+            , Html.div
+                [ Attr.css
+                    [ Tw.text_sm
+                    , Tw.text_gray_500
+                    ]
+                ]
+                [ Html.button [] [ Html.text "x" ] ]
+            ]
+        ]
+
 
 buildHttpErrorMessage : HttpError -> String
 buildHttpErrorMessage httpError =
@@ -473,25 +535,64 @@ buildHttpErrorMessage httpError =
         BadPayload error ->
             "Bad payload received: " ++ Debug.toString error
 
-graph : ChartOptions -> List (Html msg) -> Html msg
+graph : ChartOptions -> List (Html.Html msg) -> Html.Html msg
 graph chartOptions =
-    node "echart-element"[ Attr.property "option" <| encodeChartOptions chartOptions ]
+    Html.node "echart-element" [ Attr.property "option" <| encodeChartOptions chartOptions ]
 
-viewAdminModelResult : AdminModel -> Html Msg
+viewAdminModelResult : AdminModel -> Html.Html Msg
 viewAdminModelResult model =
     case model of
-        NotAsked ->
-            fetchButton "neutralBtn" "ReBuild Network"
+        RemoteData.NotAsked ->
+            rebuildBtn
+                Tw.bg_blue_500
+                (rebuildBtnSvg rebuildBtnLogoSpec Icons.build "Rebuild")
 
-        Loading ->
-            fetchButton "loadingBtn" "Building..."
 
-        Failure e ->
-            fetchButton "failureBtn" (Debug.toString e)
+        RemoteData.Loading ->
+            rebuildBtn
+                Tw.bg_yellow_500
+                (rebuildBtnSvg (Tw.animate_spin :: rebuildBtnLogoSpec) Icons.refresh "Building")
 
-        Success _ ->
-            fetchButton "successBtn" "Rebuild Network"
+        RemoteData.Failure e ->
+            rebuildBtn
+                Tw.bg_red_600
+                (rebuildBtnSvg rebuildBtnLogoSpec Icons.error_outline ("Error: " ++ Debug.toString e) )
 
-fetchButton : String -> String -> Html Msg
-fetchButton class displayText =
-    button [ Attr.class class, onClick FetchAdminResponse ] [ text displayText ]
+        RemoteData.Success _ ->
+            rebuildBtn
+                Tw.bg_green_400
+                (rebuildBtnSvg rebuildBtnLogoSpec Icons.check_circle_outline "Rebuilt")
+
+rebuildBtnLogoSpec : List (Css.Style)
+rebuildBtnLogoSpec =
+    [ Tw.h_5
+    , Tw.w_5
+    , Tw.mr_3
+    ]
+
+rebuildBtnSvg : List (Css.Style) -> Icon msg -> String -> List (Html.Html msg)
+rebuildBtnSvg cssStyle icon displayText =
+    [ Svg.svg
+        [ css cssStyle
+        , viewBox "0 0 24 24"
+        ]
+        [ Html.fromUnstyled (icon 24 Inherit) ]
+    , Html.text displayText
+    ]
+
+rebuildBtn : Css.Style -> List (Html.Html Msg) -> Html.Html Msg
+rebuildBtn colour inner =
+    Html.button
+        [ Attr.css
+            [ Tw.flex
+              , Tw.items_center
+              , Tw.shadow
+              , Tw.px_4
+              , Tw.py_2
+              , Tw.text_white
+              , Tw.rounded_md
+              , colour
+              ]
+            , onClick FetchAdminResponse
+        ]
+        inner
