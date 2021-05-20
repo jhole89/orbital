@@ -20,13 +20,13 @@ import List
 import List.Extra
 import Material.Icons as Icons
 import Material.Icons.Types exposing (Coloring(..), Icon)
-import RemoteData exposing (RemoteData(..))
+import RemoteData exposing (RemoteData)
 import Entity.Object.Entity as Entity
 import Svg.Styled as Svg
 import Svg.Styled.Attributes exposing (css, d, r, viewBox)
 import Tailwind.Utilities as Tw
 import Css.Global
-import Html.Styled as Html
+import Html.Styled as Html exposing (Attribute)
 import Html.Styled.Attributes as Attr
 
 -- INBOUND TYPES
@@ -346,9 +346,6 @@ sendRebuildQuery =
                 >> GotAdminResponse
             )
 
---drawGraph : Cmd Msg
---drawGraph =
-
 
 
 -- ELM ARCHITECTURE
@@ -386,34 +383,33 @@ type alias Model =
 
 
 type Msg
-    = GotEntityListResponse EntityListModel
-    | FetchEntityList
-    | GotAdminResponse AdminModel
+    = FetchEntityList
+    | GotEntityListResponse EntityListModel
     | FetchAdminResponse
-    --| Draw ChartOptions
+    | GotAdminResponse AdminModel
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GotEntityListResponse entityListModel ->
-            ( { model | entities = entityListModel }
-            , Cmd.none
-            )
         FetchEntityList ->
-            ( { model | entities = RemoteData.Loading }
+            ( { entities = RemoteData.Loading
+              , indexing = RemoteData.NotAsked
+              }
             , makeListEntitiesQuery
             )
-        GotAdminResponse adminModel ->
-            ( { model | indexing = adminModel }
+        GotEntityListResponse entityModel ->
+            ( { model | entities = entityModel }
             , Cmd.none
             )
         FetchAdminResponse ->
             ( { model | indexing = RemoteData.Loading }
             , sendRebuildQuery
             )
-        --Draw chartOptions ->
-        --    ( model, drawGraph chartOptions)
+        GotAdminResponse adminModel ->
+            ( { model | indexing = adminModel }
+            , Cmd.none
+            )
 
 
 -- VIEW
@@ -434,25 +430,28 @@ view model =
             ]
             [ viewEntityListModelResult model.entities
             ]
-        , Html.div
-            [ Attr.id "rebuildBtn" ]
-            [ viewAdminModelResult model.indexing ]
+        , Html.div [] [ viewAdminModelResult model.indexing ]
         ]
 
 viewEntityListModelResult : EntityListModel -> Html.Html Msg
 viewEntityListModelResult model =
     case model of
-        NotAsked ->
+        RemoteData.NotAsked ->
             Html.text "I didn't ask"
 
-        Loading ->
+        RemoteData.Loading ->
             Html.text "Loading..."
 
-        Failure e ->
+        RemoteData.Failure e ->
             Html.div [] (buildFailureMsg e)
 
-        Success entityList ->
-            graph (entityListToChartOpts entityList) []
+        RemoteData.Success entityList ->
+            setGraphOptions (entityListToChartOpts entityList) []
+
+setGraphOptions : ChartOptions -> List (Html.Html msg) -> Html.Html msg
+setGraphOptions chartOptions =
+    Html.node "echart-element" [ Attr.property "option" <| encodeChartOptions chartOptions ]
+
 
 buildFailureMsg: Error parsedData -> List (Html.Html Msg)
 buildFailureMsg parsedData =
@@ -520,55 +519,88 @@ buildErrorMsg eType eMsg =
 buildHttpErrorMessage : HttpError -> String
 buildHttpErrorMessage httpError =
     case httpError of
-        BadUrl message ->
+        Graphql.Http.BadUrl message ->
             message
 
-        Timeout ->
+        Graphql.Http.Timeout ->
             "Server is taking too long to respond. Please try again later."
 
-        NetworkError ->
+        Graphql.Http.NetworkError ->
             "Unable to reach server."
 
-        BadStatus metadata body ->
+        Graphql.Http.BadStatus metadata body ->
             "Request failed with status code: " ++ String.fromInt metadata.statusCode ++ ". Error: " ++ body
 
-        BadPayload error ->
+        Graphql.Http.BadPayload error ->
             "Bad payload received: " ++ Debug.toString error
-
-graph : ChartOptions -> List (Html.Html msg) -> Html.Html msg
-graph chartOptions =
-    Html.node "echart-element" [ Attr.property "option" <| encodeChartOptions chartOptions ]
 
 viewAdminModelResult : AdminModel -> Html.Html Msg
 viewAdminModelResult model =
     case model of
         RemoteData.NotAsked ->
-            rebuildBtn
-                Tw.bg_blue_500
-                (rebuildBtnSvg rebuildBtnLogoSpec Icons.build "Rebuild")
-
+            Html.button
+                [ rebuildBtnStyle 
+                    [ Tw.bg_blue_500 ]
+                    ( Css.hover [ Tw.bg_blue_700 ] )
+                    ( rebuildBtnFocusStyle [ Tw.ring_blue_500, Tw.ring_offset_blue_200 ] )
+                , onClick FetchAdminResponse
+                ]
+                ( rebuildBtnSvg rebuildBtnLogoStyle Icons.build "Rebuild" )
 
         RemoteData.Loading ->
-            rebuildBtn
-                Tw.bg_yellow_500
-                (rebuildBtnSvg (Tw.animate_spin :: rebuildBtnLogoSpec) Icons.refresh "Building")
+            Html.button
+                [ rebuildBtnStyle
+                    [ Tw.bg_yellow_500, Tw.cursor_not_allowed ]
+                    ( Css.hover [ Tw.bg_yellow_700 ] )
+                    ( rebuildBtnFocusStyle [ Tw.ring_yellow_500, Tw.ring_offset_yellow_200 ] )
+                ]
+                ( rebuildBtnSvg ( Tw.animate_spin :: rebuildBtnLogoStyle ) Icons.refresh "Building" )
 
         RemoteData.Failure e ->
-            rebuildBtn
-                Tw.bg_red_600
-                (rebuildBtnSvg rebuildBtnLogoSpec Icons.error_outline ("Error: " ++ Debug.toString e) )
+            Html.button
+                [ rebuildBtnStyle
+                    [ Tw.bg_red_500 ]
+                    ( Css.hover [ Tw.bg_red_700 ] )
+                    ( rebuildBtnFocusStyle [ Tw.ring_red_500, Tw.ring_offset_red_200 ] )
+                , onClick FetchAdminResponse
+                ]
+                ( rebuildBtnSvg rebuildBtnLogoStyle Icons.error_outline ("Error: " ++ Debug.toString e) )
 
         RemoteData.Success _ ->
-            rebuildBtn
-                Tw.bg_green_400
-                (rebuildBtnSvg rebuildBtnLogoSpec Icons.check_circle_outline "Rebuilt")
+            Html.button
+                [ rebuildBtnStyle
+                    [ Tw.bg_green_500 ]
+                    ( Css.hover [ Tw.bg_green_700 ] )
+                    ( rebuildBtnFocusStyle [ Tw.ring_green_500, Tw.ring_offset_green_200 ] )
+                , onClick FetchEntityList
+                ]
+                (rebuildBtnSvg rebuildBtnLogoStyle Icons.check_circle_outline "Rebuilt")
 
-rebuildBtnLogoSpec : List (Css.Style)
-rebuildBtnLogoSpec =
-    [ Tw.h_5
-    , Tw.w_5
-    , Tw.mr_3
-    ]
+rebuildBtnStyle : List (Css.Style) -> Css.Style -> Css.Style -> Attribute msg
+rebuildBtnStyle cssStyles hoverStyle focusStyle =
+    Attr.css
+        ( cssStyles ++ 
+            [ Tw.flex
+            , Tw.items_center
+            , Tw.shadow
+            , Tw.px_4
+            , Tw.py_2
+            , Tw.text_white
+            , Tw.rounded_md
+            , hoverStyle
+            , focusStyle
+            ]
+        )
+
+rebuildBtnFocusStyle: List (Css.Style) -> Css.Style
+rebuildBtnFocusStyle focusStyles =
+    Css.focus 
+        ( focusStyles ++
+            [ Tw.outline_none
+            , Tw.ring_2
+            , Tw.ring_offset_2
+            ] 
+        )
 
 rebuildBtnSvg : List (Css.Style) -> Icon msg -> String -> List (Html.Html msg)
 rebuildBtnSvg cssStyle icon displayText =
@@ -580,19 +612,9 @@ rebuildBtnSvg cssStyle icon displayText =
     , Html.text displayText
     ]
 
-rebuildBtn : Css.Style -> List (Html.Html Msg) -> Html.Html Msg
-rebuildBtn colour inner =
-    Html.button
-        [ Attr.css
-            [ Tw.flex
-              , Tw.items_center
-              , Tw.shadow
-              , Tw.px_4
-              , Tw.py_2
-              , Tw.text_white
-              , Tw.rounded_md
-              , colour
-              ]
-            , onClick FetchAdminResponse
-        ]
-        inner
+rebuildBtnLogoStyle : List (Css.Style)
+rebuildBtnLogoStyle =
+    [ Tw.h_5
+    , Tw.w_5
+    , Tw.mr_3
+    ]

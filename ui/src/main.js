@@ -9638,32 +9638,30 @@ var $author$project$Main$sendRebuildQuery = A2(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'GotEntityListResponse':
-				var entityListModel = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{entities: entityListModel}),
-					$elm$core$Platform$Cmd$none);
 			case 'FetchEntityList':
 				return _Utils_Tuple2(
+					{entities: $krisajenkins$remotedata$RemoteData$Loading, indexing: $krisajenkins$remotedata$RemoteData$NotAsked},
+					$author$project$Main$makeListEntitiesQuery);
+			case 'GotEntityListResponse':
+				var entityModel = msg.a;
+				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{entities: $krisajenkins$remotedata$RemoteData$Loading}),
-					$author$project$Main$makeListEntitiesQuery);
-			case 'GotAdminResponse':
+						{entities: entityModel}),
+					$elm$core$Platform$Cmd$none);
+			case 'FetchAdminResponse':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{indexing: $krisajenkins$remotedata$RemoteData$Loading}),
+					$author$project$Main$sendRebuildQuery);
+			default:
 				var adminModel = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{indexing: adminModel}),
 					$elm$core$Platform$Cmd$none);
-			default:
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{indexing: $krisajenkins$remotedata$RemoteData$Loading}),
-					$author$project$Main$sendRebuildQuery);
 		}
 	});
 var $rtfeldman$elm_css$Css$Preprocess$ApplyStyles = function (a) {
@@ -10177,6 +10175,8 @@ var $rtfeldman$elm_css$VirtualDom$Styled$style = F2(
 			'');
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$style = $rtfeldman$elm_css$VirtualDom$Styled$style;
+var $author$project$Main$FetchAdminResponse = {$: 'FetchAdminResponse'};
+var $author$project$Main$FetchEntityList = {$: 'FetchEntityList'};
 var $rtfeldman$elm_css$Css$Preprocess$WithKeyframes = function (a) {
 	return {$: 'WithKeyframes', a: a};
 };
@@ -10258,23 +10258,47 @@ var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_500 = $rt
 			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
 			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(59, 130, 246, var(--tw-bg-opacity))')
 		]));
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_green_400 = $rtfeldman$elm_css$Css$batch(
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_700 = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
 			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
-			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(52, 211, 153, var(--tw-bg-opacity))')
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(29, 78, 216, var(--tw-bg-opacity))')
 		]));
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_600 = $rtfeldman$elm_css$Css$batch(
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_green_500 = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
 			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
-			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(220, 38, 38, var(--tw-bg-opacity))')
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(16, 185, 129, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_green_700 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(4, 120, 87, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_500 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(239, 68, 68, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_700 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(185, 28, 28, var(--tw-bg-opacity))')
 		]));
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_yellow_500 = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
 			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
 			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(245, 158, 11, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_yellow_700 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(180, 83, 9, var(--tw-bg-opacity))')
 		]));
 var $elm$svg$Svg$Attributes$clipRule = _VirtualDom_attribute('clip-rule');
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
@@ -10375,6 +10399,7 @@ var $icidasset$elm_material_icons$Material$Icons$build = A2(
 				]),
 			_List_Nil)
 		]));
+var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
 var $icidasset$elm_material_icons$Material$Icons$check_circle_outline = A2(
 	$icidasset$elm_material_icons$Material$Icons$Internal$icon,
 	_List_fromArray(
@@ -10399,6 +10424,7 @@ var $icidasset$elm_material_icons$Material$Icons$check_circle_outline = A2(
 				]),
 			_List_Nil)
 		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$cursor_not_allowed = A2($rtfeldman$elm_css$Css$property, 'cursor', 'not-allowed');
 var $icidasset$elm_material_icons$Material$Icons$error_outline = A2(
 	$icidasset$elm_material_icons$Material$Icons$Internal$icon,
 	_List_fromArray(
@@ -10423,10 +10449,18 @@ var $icidasset$elm_material_icons$Material$Icons$error_outline = A2(
 				]),
 			_List_Nil)
 		]));
-var $author$project$Main$FetchAdminResponse = {$: 'FetchAdminResponse'};
-var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex = A2($rtfeldman$elm_css$Css$property, 'display', 'flex');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center = A2($rtfeldman$elm_css$Css$property, 'align-items', 'center');
+var $rtfeldman$elm_css$Css$Preprocess$ExtendSelector = F2(
+	function (a, b) {
+		return {$: 'ExtendSelector', a: a, b: b};
+	});
+var $rtfeldman$elm_css$Css$Structure$PseudoClassSelector = function (a) {
+	return {$: 'PseudoClassSelector', a: a};
+};
+var $rtfeldman$elm_css$Css$pseudoClass = function (_class) {
+	return $rtfeldman$elm_css$Css$Preprocess$ExtendSelector(
+		$rtfeldman$elm_css$Css$Structure$PseudoClassSelector(_class));
+};
+var $rtfeldman$elm_css$Css$hover = $rtfeldman$elm_css$Css$pseudoClass('hover');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -10452,6 +10486,35 @@ var $rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $rtfeldman$elm_css$Css$focus = $rtfeldman$elm_css$Css$pseudoClass('focus');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$outline_none = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'outline', '2px solid transparent'),
+			A2($rtfeldman$elm_css$Css$property, 'outline-offset', '2px')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_2 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-offset-shadow', 'var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color)'),
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-shadow', 'var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color)'),
+			A2($rtfeldman$elm_css$Css$property, 'box-shadow', 'var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_2 = A2($rtfeldman$elm_css$Css$property, '--tw-ring-offset-width', '2px');
+var $author$project$Main$rebuildBtnFocusStyle = function (focusStyles) {
+	return $rtfeldman$elm_css$Css$focus(
+		_Utils_ap(
+			focusStyles,
+			_List_fromArray(
+				[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$outline_none, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_2, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_2])));
+};
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_5 = A2($rtfeldman$elm_css$Css$property, 'height', '1.25rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mr_3 = A2($rtfeldman$elm_css$Css$property, 'margin-right', '0.75rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_5 = A2($rtfeldman$elm_css$Css$property, 'width', '1.25rem');
+var $author$project$Main$rebuildBtnLogoStyle = _List_fromArray(
+	[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_5, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_5, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mr_3]);
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex = A2($rtfeldman$elm_css$Css$property, 'display', 'flex');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center = A2($rtfeldman$elm_css$Css$property, 'align-items', 'center');
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_4 = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
@@ -10477,24 +10540,14 @@ var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_white = $rtf
 			A2($rtfeldman$elm_css$Css$property, '--tw-text-opacity', '1'),
 			A2($rtfeldman$elm_css$Css$property, 'color', 'rgba(255, 255, 255, var(--tw-text-opacity))')
 		]));
-var $author$project$Main$rebuildBtn = F2(
-	function (colour, inner) {
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$button,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$css(
-					_List_fromArray(
-						[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$shadow, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_4, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_2, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_white, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_md, colour])),
-					$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$FetchAdminResponse)
-				]),
-			inner);
+var $author$project$Main$rebuildBtnStyle = F3(
+	function (cssStyles, hoverStyle, focusStyle) {
+		return $rtfeldman$elm_css$Html$Styled$Attributes$css(
+			_Utils_ap(
+				cssStyles,
+				_List_fromArray(
+					[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$shadow, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_4, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_2, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_white, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_md, hoverStyle, focusStyle])));
 	});
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_5 = A2($rtfeldman$elm_css$Css$property, 'height', '1.25rem');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mr_3 = A2($rtfeldman$elm_css$Css$property, 'margin-right', '0.75rem');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_5 = A2($rtfeldman$elm_css$Css$property, 'width', '1.25rem');
-var $author$project$Main$rebuildBtnLogoSpec = _List_fromArray(
-	[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_5, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_5, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mr_3]);
 var $icidasset$elm_material_icons$Material$Icons$Types$Inherit = {$: 'Inherit'};
 var $elm$virtual_dom$VirtualDom$attribute = F2(
 	function (key, value) {
@@ -10574,38 +10627,117 @@ var $icidasset$elm_material_icons$Material$Icons$refresh = A2(
 				]),
 			_List_Nil)
 		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_blue_500 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-color', 'rgba(59, 130, 246, var(--tw-ring-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_green_500 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-color', 'rgba(16, 185, 129, var(--tw-ring-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_blue_200 = A2($rtfeldman$elm_css$Css$property, '--tw-ring-offset-color', '#bfdbfe');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_green_200 = A2($rtfeldman$elm_css$Css$property, '--tw-ring-offset-color', '#a7f3d0');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_red_200 = A2($rtfeldman$elm_css$Css$property, '--tw-ring-offset-color', '#fecaca');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_yellow_200 = A2($rtfeldman$elm_css$Css$property, '--tw-ring-offset-color', '#fde68a');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_red_500 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-color', 'rgba(239, 68, 68, var(--tw-ring-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_yellow_500 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-color', 'rgba(245, 158, 11, var(--tw-ring-opacity))')
+		]));
 var $elm$core$Debug$toString = _Debug_toString;
 var $author$project$Main$viewAdminModelResult = function (model) {
 	switch (model.$) {
 		case 'NotAsked':
 			return A2(
-				$author$project$Main$rebuildBtn,
-				$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_500,
-				A3($author$project$Main$rebuildBtnSvg, $author$project$Main$rebuildBtnLogoSpec, $icidasset$elm_material_icons$Material$Icons$build, 'Rebuild'));
+				$rtfeldman$elm_css$Html$Styled$button,
+				_List_fromArray(
+					[
+						A3(
+						$author$project$Main$rebuildBtnStyle,
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_500]),
+						$rtfeldman$elm_css$Css$hover(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_700])),
+						$author$project$Main$rebuildBtnFocusStyle(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_blue_500, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_blue_200]))),
+						$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$FetchAdminResponse)
+					]),
+				A3($author$project$Main$rebuildBtnSvg, $author$project$Main$rebuildBtnLogoStyle, $icidasset$elm_material_icons$Material$Icons$build, 'Rebuild'));
 		case 'Loading':
 			return A2(
-				$author$project$Main$rebuildBtn,
-				$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_yellow_500,
+				$rtfeldman$elm_css$Html$Styled$button,
+				_List_fromArray(
+					[
+						A3(
+						$author$project$Main$rebuildBtnStyle,
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_yellow_500, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$cursor_not_allowed]),
+						$rtfeldman$elm_css$Css$hover(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_yellow_700])),
+						$author$project$Main$rebuildBtnFocusStyle(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_yellow_500, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_yellow_200])))
+					]),
 				A3(
 					$author$project$Main$rebuildBtnSvg,
-					A2($elm$core$List$cons, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$animate_spin, $author$project$Main$rebuildBtnLogoSpec),
+					A2($elm$core$List$cons, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$animate_spin, $author$project$Main$rebuildBtnLogoStyle),
 					$icidasset$elm_material_icons$Material$Icons$refresh,
 					'Building'));
 		case 'Failure':
 			var e = model.a;
 			return A2(
-				$author$project$Main$rebuildBtn,
-				$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_600,
+				$rtfeldman$elm_css$Html$Styled$button,
+				_List_fromArray(
+					[
+						A3(
+						$author$project$Main$rebuildBtnStyle,
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_500]),
+						$rtfeldman$elm_css$Css$hover(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_700])),
+						$author$project$Main$rebuildBtnFocusStyle(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_red_500, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_red_200]))),
+						$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$FetchAdminResponse)
+					]),
 				A3(
 					$author$project$Main$rebuildBtnSvg,
-					$author$project$Main$rebuildBtnLogoSpec,
+					$author$project$Main$rebuildBtnLogoStyle,
 					$icidasset$elm_material_icons$Material$Icons$error_outline,
 					'Error: ' + $elm$core$Debug$toString(e)));
 		default:
 			return A2(
-				$author$project$Main$rebuildBtn,
-				$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_green_400,
-				A3($author$project$Main$rebuildBtnSvg, $author$project$Main$rebuildBtnLogoSpec, $icidasset$elm_material_icons$Material$Icons$check_circle_outline, 'Rebuilt'));
+				$rtfeldman$elm_css$Html$Styled$button,
+				_List_fromArray(
+					[
+						A3(
+						$author$project$Main$rebuildBtnStyle,
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_green_500]),
+						$rtfeldman$elm_css$Css$hover(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_green_700])),
+						$author$project$Main$rebuildBtnFocusStyle(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_green_500, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_green_200]))),
+						$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$FetchEntityList)
+					]),
+				A3($author$project$Main$rebuildBtnSvg, $author$project$Main$rebuildBtnLogoStyle, $icidasset$elm_material_icons$Material$Icons$check_circle_outline, 'Rebuilt'));
 	}
 };
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_200 = $rtfeldman$elm_css$Css$batch(
@@ -10613,6 +10745,12 @@ var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_200 = $rtf
 		[
 			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
 			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(254, 202, 202, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_600 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(220, 38, 38, var(--tw-bg-opacity))')
 		]));
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold = A2($rtfeldman$elm_css$Css$property, 'font-weight', '700');
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_10 = A2($rtfeldman$elm_css$Css$property, 'height', '2.5rem');
@@ -11394,7 +11532,7 @@ var $author$project$Main$encodeChartOptions = function (chartOptions) {
 			]));
 };
 var $rtfeldman$elm_css$Html$Styled$Attributes$property = $rtfeldman$elm_css$VirtualDom$Styled$property;
-var $author$project$Main$graph = function (chartOptions) {
+var $author$project$Main$setGraphOptions = function (chartOptions) {
 	return A2(
 		$rtfeldman$elm_css$Html$Styled$node,
 		'echart-element',
@@ -11421,7 +11559,7 @@ var $author$project$Main$viewEntityListModelResult = function (model) {
 		default:
 			var entityList = model.a;
 			return A2(
-				$author$project$Main$graph,
+				$author$project$Main$setGraphOptions,
 				$author$project$Main$entityListToChartOpts(entityList),
 				_List_Nil);
 	}
@@ -11453,10 +11591,7 @@ var $author$project$Main$view = function (model) {
 					])),
 				A2(
 				$rtfeldman$elm_css$Html$Styled$div,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$id('rebuildBtn')
-					]),
+				_List_Nil,
 				_List_fromArray(
 					[
 						$author$project$Main$viewAdminModelResult(model.indexing)

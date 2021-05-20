@@ -7,31 +7,45 @@ import 'echarts/lib/chart/graph';
 import 'zrender/lib/canvas/canvas';
 
 customElements.define('echart-element',
-  class EChartElement extends HTMLElement {
+    class EChartElement extends HTMLElement {
 
-    constructor() {
-      super();
-      this.chart = null;
-      this._option = null;
+        constructor() {
+            super();
+            this._option = null;
+            console.log("contructor called")
+        }
+
+        render(option) {
+          const dom = document.getElementById('graph');
+          const instance = echarts.getInstanceByDom(dom);
+
+          console.log("fetched instance: " + instance)
+          if (instance) {
+            instance.showLoading();
+            console.log("disposing...instance " + instance)
+            echarts.dispose(instance);
+          }
+          if (!instance) {
+
+          }
+          const chart = echarts.init(dom);
+          console.log("chart init'd..." + chart)
+          chart.setOption(option);
+        }
+
+        connectedCallback () {
+          this.render(this.option);
+        }
+
+        set option (newValue) {
+          this._option = newValue;
+        }
+
+        get option () {
+            console.log("get option")
+            return this._option
+        }
+
+        disconnectedCallback () {}
     }
-
-    connectedCallback () {
-      const option = this.option
-      this.chart = echarts.init(document.getElementById('graph'));
-      this.chart.setOption(option);
-    }
-
-    set option (newValue) {
-      this._option = newValue;
-      if (this.chart) {
-        this.chart.setOption(newValue);
-      }
-    }
-
-    get option () {
-      return this._option
-    }
-
-    disconnectedCallback () {}
-  }
 );
