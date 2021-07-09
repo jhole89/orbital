@@ -5480,7 +5480,10 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$element = _Browser_element;
 var $krisajenkins$remotedata$RemoteData$Loading = {$: 'Loading'};
+var $author$project$Main$NoEnt = {$: 'NoEnt'};
+var $author$project$Main$NoOpt = {$: 'NoOpt'};
 var $krisajenkins$remotedata$RemoteData$NotAsked = {$: 'NotAsked'};
+var $author$project$Main$initModelState = {chartConfig: $author$project$Main$NoOpt, displaySidebar: true, displayWarningModal: false, entities: $krisajenkins$remotedata$RemoteData$Loading, idReferences: _List_Nil, indexing: $krisajenkins$remotedata$RemoteData$NotAsked, selectedEntity: $author$project$Main$NoEnt};
 var $author$project$Main$GotEntityListResponse = function (a) {
 	return {$: 'GotEntityListResponse', a: a};
 };
@@ -5543,7 +5546,7 @@ var $krisajenkins$remotedata$RemoteData$fromResult = function (result) {
 	}
 };
 var $dillonkearns$elm_graphql$Graphql$OptionalArgument$Absent = {$: 'Absent'};
-var $author$project$Main$Entity = F4(
+var $author$project$EntityHelpers$Entity = F4(
 	function (id, name, context, connections) {
 		return {connections: connections, context: context, id: id, name: name};
 	});
@@ -5974,7 +5977,7 @@ var $dillonkearns$elm_graphql$Graphql$SelectionSet$with = F2(
 			_Utils_ap(selectionFields1, selectionFields2),
 			A3($elm$json$Json$Decode$map2, $elm$core$Basics$apR, selectionDecoder1, selectionDecoder2));
 	});
-var $author$project$Main$entitySelection = A2(
+var $author$project$EntityHelpers$entitySelection = A2(
 	$dillonkearns$elm_graphql$Graphql$SelectionSet$with,
 	A2(
 		$author$project$Entity$Object$Entity$connections,
@@ -5991,7 +5994,7 @@ var $author$project$Main$entitySelection = A2(
 			A2(
 				$dillonkearns$elm_graphql$Graphql$SelectionSet$with,
 				$author$project$Entity$Object$Entity$id,
-				$dillonkearns$elm_graphql$Graphql$SelectionSet$succeed($author$project$Main$Entity)))));
+				$dillonkearns$elm_graphql$Graphql$SelectionSet$succeed($author$project$EntityHelpers$Entity)))));
 var $author$project$Entity$Query$list = function (object____) {
 	return A4(
 		$dillonkearns$elm_graphql$Graphql$Internal$Builder$Object$selectionForCompositeField,
@@ -6000,7 +6003,7 @@ var $author$project$Entity$Query$list = function (object____) {
 		object____,
 		A2($elm$core$Basics$composeR, $elm$core$Basics$identity, $elm$json$Json$Decode$list));
 };
-var $author$project$Main$listEntitiesQuery = $author$project$Entity$Query$list($author$project$Main$entitySelection);
+var $author$project$EntityHelpers$listEntitiesQuery = $author$project$Entity$Query$list($author$project$EntityHelpers$entitySelection);
 var $dillonkearns$elm_graphql$Graphql$Http$Query = F2(
 	function (a, b) {
 		return {$: 'Query', a: a, b: b};
@@ -7439,11 +7442,9 @@ var $author$project$Main$makeListEntitiesQuery = A2(
 		$elm$core$Basics$composeR,
 		$dillonkearns$elm_graphql$Graphql$Http$discardParsedErrorData,
 		A2($elm$core$Basics$composeR, $krisajenkins$remotedata$RemoteData$fromResult, $author$project$Main$GotEntityListResponse)),
-	A2($dillonkearns$elm_graphql$Graphql$Http$queryRequest, 'http://127.0.0.1:5000/entity', $author$project$Main$listEntitiesQuery));
+	A2($dillonkearns$elm_graphql$Graphql$Http$queryRequest, 'http://127.0.0.1:5000/entity', $author$project$EntityHelpers$listEntitiesQuery));
 var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2(
-		{entities: $krisajenkins$remotedata$RemoteData$Loading, indexing: $krisajenkins$remotedata$RemoteData$NotAsked},
-		$author$project$Main$makeListEntitiesQuery);
+	return _Utils_Tuple2($author$project$Main$initModelState, $author$project$Main$makeListEntitiesQuery);
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
@@ -9607,6 +9608,183 @@ var $rtfeldman$elm_css$VirtualDom$Styled$toUnstyled = function (vdom) {
 	}
 };
 var $rtfeldman$elm_css$Html$Styled$toUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$toUnstyled;
+var $author$project$Main$ChartConfig = function (a) {
+	return {$: 'ChartConfig', a: a};
+};
+var $author$project$Main$Selected = function (a) {
+	return {$: 'Selected', a: a};
+};
+var $author$project$Utilities$entityToGraphEdgeItemOption = function (e) {
+	return A2(
+		$elm$core$List$map,
+		function (c) {
+			return {source: e.name, target: c};
+		},
+		e.connections);
+};
+var $elm_community$list_extra$List$Extra$findIndexHelp = F3(
+	function (index, predicate, list) {
+		findIndexHelp:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (predicate(x)) {
+					return $elm$core$Maybe$Just(index);
+				} else {
+					var $temp$index = index + 1,
+						$temp$predicate = predicate,
+						$temp$list = xs;
+					index = $temp$index;
+					predicate = $temp$predicate;
+					list = $temp$list;
+					continue findIndexHelp;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$findIndex = $elm_community$list_extra$List$Extra$findIndexHelp(0);
+var $elm_community$list_extra$List$Extra$elemIndex = function (x) {
+	return $elm_community$list_extra$List$Extra$findIndex(
+		$elm$core$Basics$eq(x));
+};
+var $author$project$Utilities$entityToGraphNodeItemOption = F2(
+	function (categories, entity) {
+		return {
+			category: A2($elm_community$list_extra$List$Extra$elemIndex, entity.context, categories),
+			id: $elm$core$Maybe$Just(entity.id),
+			label: $elm$core$Maybe$Nothing,
+			name: $elm$core$Maybe$Just(entity.name),
+			symbolSize: $elm$core$Maybe$Just(20),
+			value: 1,
+			x: $elm$core$Maybe$Nothing,
+			y: $elm$core$Maybe$Nothing
+		};
+	});
+var $elm$core$List$sortBy = _List_sortBy;
+var $elm$core$List$sort = function (xs) {
+	return A2($elm$core$List$sortBy, $elm$core$Basics$identity, xs);
+};
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $elm$core$Set$insert = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
+	});
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm$core$Set$member = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return A2($elm$core$Dict$member, key, dict);
+	});
+var $elm_community$list_extra$List$Extra$uniqueHelp = F4(
+	function (f, existing, remaining, accumulator) {
+		uniqueHelp:
+		while (true) {
+			if (!remaining.b) {
+				return $elm$core$List$reverse(accumulator);
+			} else {
+				var first = remaining.a;
+				var rest = remaining.b;
+				var computedFirst = f(first);
+				if (A2($elm$core$Set$member, computedFirst, existing)) {
+					var $temp$f = f,
+						$temp$existing = existing,
+						$temp$remaining = rest,
+						$temp$accumulator = accumulator;
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				} else {
+					var $temp$f = f,
+						$temp$existing = A2($elm$core$Set$insert, computedFirst, existing),
+						$temp$remaining = rest,
+						$temp$accumulator = A2($elm$core$List$cons, first, accumulator);
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$unique = function (list) {
+	return A4($elm_community$list_extra$List$Extra$uniqueHelp, $elm$core$Basics$identity, $elm$core$Set$empty, list, _List_Nil);
+};
+var $author$project$Utilities$entityListToChartOpts = function (entityList) {
+	var categories = $elm$core$List$sort(
+		$elm_community$list_extra$List$Extra$unique(
+			A2(
+				$elm$core$List$map,
+				function ($) {
+					return $.context;
+				},
+				entityList)));
+	return {
+		legend: _List_fromArray(
+			[
+				{data: categories}
+			]),
+		series: _List_fromArray(
+			[
+				{
+				animation: $elm$core$Maybe$Just(true),
+				categories: A2(
+					$elm$core$List$map,
+					function (c) {
+						return {name: c};
+					},
+					categories),
+				data: A2(
+					$elm$core$List$map,
+					$author$project$Utilities$entityToGraphNodeItemOption(categories),
+					entityList),
+				draggable: $elm$core$Maybe$Just(true),
+				emphasis: $elm$core$Maybe$Nothing,
+				force: $elm$core$Maybe$Just(
+					{
+						edgeLength: $elm$core$Maybe$Just(100),
+						friction: $elm$core$Maybe$Just(0.2),
+						gravity: $elm$core$Maybe$Just(0.2),
+						layoutAnimation: $elm$core$Maybe$Just(true),
+						repulsion: $elm$core$Maybe$Just(50)
+					}),
+				label: $elm$core$Maybe$Just(
+					{
+						formatter: $elm$core$Maybe$Just('{b}'),
+						position: $elm$core$Maybe$Just('right'),
+						show: $elm$core$Maybe$Nothing
+					}),
+				layout: 'force',
+				lineStyle: $elm$core$Maybe$Nothing,
+				links: A2($elm$core$List$concatMap, $author$project$Utilities$entityToGraphEdgeItemOption, entityList),
+				name: $elm$core$Maybe$Nothing,
+				roam: $elm$core$Maybe$Just(true),
+				type_: 'graph'
+			}
+			]),
+		title: $elm$core$Maybe$Nothing,
+		tooltip: $elm$core$Maybe$Just(
+			{show: false})
+	};
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$GotAdminResponse = function (a) {
@@ -9627,40 +9805,101 @@ var $author$project$Admin$Query$rebuild = A4(
 	'rebuild',
 	_List_Nil,
 	$elm$json$Json$Decode$nullable($elm$json$Json$Decode$string));
-var $author$project$Main$rebuildQuery = $author$project$Admin$Query$rebuild;
+var $author$project$AdminHelpers$rebuildQuery = $author$project$Admin$Query$rebuild;
 var $author$project$Main$sendRebuildQuery = A2(
 	$dillonkearns$elm_graphql$Graphql$Http$send,
 	A2(
 		$elm$core$Basics$composeR,
 		$dillonkearns$elm_graphql$Graphql$Http$discardParsedErrorData,
 		A2($elm$core$Basics$composeR, $krisajenkins$remotedata$RemoteData$fromResult, $author$project$Main$GotAdminResponse)),
-	A2($dillonkearns$elm_graphql$Graphql$Http$queryRequest, 'http://127.0.0.1:5000/admin', $author$project$Main$rebuildQuery));
+	A2($dillonkearns$elm_graphql$Graphql$Http$queryRequest, 'http://127.0.0.1:5000/admin', $author$project$AdminHelpers$rebuildQuery));
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'FetchEntityList':
-				return _Utils_Tuple2(
-					{entities: $krisajenkins$remotedata$RemoteData$Loading, indexing: $krisajenkins$remotedata$RemoteData$NotAsked},
-					$author$project$Main$makeListEntitiesQuery);
 			case 'GotEntityListResponse':
 				var entityModel = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{entities: entityModel}),
-					$elm$core$Platform$Cmd$none);
+				if (entityModel.$ === 'Success') {
+					var entityListResponse = entityModel.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								chartConfig: $author$project$Main$ChartConfig(
+									$author$project$Utilities$entityListToChartOpts(entityListResponse)),
+								entities: entityModel,
+								idReferences: entityListResponse
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{entities: entityModel}),
+						$elm$core$Platform$Cmd$none);
+				}
 			case 'FetchAdminResponse':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{indexing: $krisajenkins$remotedata$RemoteData$Loading}),
 					$author$project$Main$sendRebuildQuery);
-			default:
+			case 'GotAdminResponse':
 				var adminModel = msg.a;
+				if (adminModel.$ === 'Success') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{entities: $krisajenkins$remotedata$RemoteData$NotAsked, indexing: adminModel}),
+						$author$project$Main$makeListEntitiesQuery);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{indexing: adminModel}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'GotId':
+				var value = msg.a;
+				var _v3 = A2(
+					$elm$core$Array$get,
+					value,
+					$elm$core$Array$fromList(model.idReferences));
+				if (_v3.$ === 'Just') {
+					var entity = _v3.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								selectedEntity: $author$project$Main$Selected(entity)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{selectedEntity: $author$project$Main$NoEnt}),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'SelectEntity':
+				var selectedEntityModel = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{indexing: adminModel}),
+						{selectedEntity: selectedEntityModel}),
+					$elm$core$Platform$Cmd$none);
+			case 'ShowSidebar':
+				var status = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{displaySidebar: status}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var status = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{displayWarningModal: status}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -9675,12 +9914,13 @@ var $rtfeldman$elm_css$Css$property = F2(
 	function (key, value) {
 		return $rtfeldman$elm_css$Css$Preprocess$AppendProperty(key + (':' + value));
 	});
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_50 = $rtfeldman$elm_css$Css$batch(
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_white = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
 			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
-			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(249, 250, 251, var(--tw-bg-opacity))')
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(255, 255, 255, var(--tw-bg-opacity))')
 		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$content_center = A2($rtfeldman$elm_css$Css$property, 'align-content', 'center');
 var $rtfeldman$elm_css$VirtualDom$Styled$Attribute = F3(
 	function (a, b, c) {
 		return {$: 'Attribute', a: a, b: b, c: c};
@@ -9726,10 +9966,544 @@ var $rtfeldman$elm_css$VirtualDom$Styled$Node = F3(
 var $rtfeldman$elm_css$VirtualDom$Styled$node = $rtfeldman$elm_css$VirtualDom$Styled$Node;
 var $rtfeldman$elm_css$Html$Styled$node = $rtfeldman$elm_css$VirtualDom$Styled$node;
 var $rtfeldman$elm_css$Html$Styled$div = $rtfeldman$elm_css$Html$Styled$node('div');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex = A2($rtfeldman$elm_css$Css$property, 'display', 'flex');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_auto = A2($rtfeldman$elm_css$Css$property, 'flex', '1 1 auto');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_wrap = A2($rtfeldman$elm_css$Css$property, 'flex-wrap', 'wrap');
+var $rtfeldman$elm_css$VirtualDom$Styled$property = F2(
+	function (key, value) {
+		return A3(
+			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2($elm$virtual_dom$VirtualDom$property, key, value),
+			_List_Nil,
+			'');
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			$rtfeldman$elm_css$VirtualDom$Styled$property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$id = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('id');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center = A2($rtfeldman$elm_css$Css$property, 'align-items', 'center');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center = A2($rtfeldman$elm_css$Css$property, 'justify-content', 'center');
+var $rtfeldman$elm_css$Css$Structure$CustomQuery = function (a) {
+	return {$: 'CustomQuery', a: a};
+};
+var $rtfeldman$elm_css$Css$Preprocess$WithMedia = F2(
+	function (a, b) {
+		return {$: 'WithMedia', a: a, b: b};
+	});
+var $rtfeldman$elm_css$Css$Media$withMediaQuery = function (queries) {
+	return $rtfeldman$elm_css$Css$Preprocess$WithMedia(
+		A2($elm$core$List$map, $rtfeldman$elm_css$Css$Structure$CustomQuery, queries));
+};
+var $matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$lg = $rtfeldman$elm_css$Css$Media$withMediaQuery(
+	_List_fromArray(
+		['(min-width: 1024px)']));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ml_1 = A2($rtfeldman$elm_css$Css$property, 'margin-left', '0.25rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$overflow_hidden = A2($rtfeldman$elm_css$Css$property, 'overflow', 'hidden');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$p_6 = A2($rtfeldman$elm_css$Css$property, 'padding', '1.5rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pr_2 = A2($rtfeldman$elm_css$Css$property, 'padding-right', '0.5rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_md = A2($rtfeldman$elm_css$Css$property, 'border-radius', '0.375rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$shadow_xl = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-shadow', '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'),
+			A2($rtfeldman$elm_css$Css$property, 'box-shadow', 'var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_2over3 = A2($rtfeldman$elm_css$Css$property, 'width', '66.666667%');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_screen = A2($rtfeldman$elm_css$Css$property, 'width', '100vw');
+var $author$project$Main$canvasSection = function (content) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$css(
+				_List_fromArray(
+					[
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_white,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_md,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$shadow_xl,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_auto,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_wrap,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_2over3,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ml_1,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$p_6,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$overflow_hidden,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$lg(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pr_2]))
+					]))
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$id('graph'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_screen, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$content_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$overflow_hidden]))
+					]),
+				_List_fromArray(
+					[content]))
+			]));
+};
+var $icidasset$elm_material_icons$Material$Icons$Types$Inherit = {$: 'Inherit'};
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_100 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(243, 244, 246, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_50 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(249, 250, 251, var(--tw-bg-opacity))')
+		]));
+var $rtfeldman$elm_css$Html$Styled$br = $rtfeldman$elm_css$Html$Styled$node('br');
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $rtfeldman$elm_css$Svg$Styled$Internal$css = function (styles) {
+	var classname = $rtfeldman$elm_css$VirtualDom$Styled$getClassname(styles);
+	var classAttribute = A2($elm$virtual_dom$VirtualDom$attribute, 'class', classname);
+	return A3($rtfeldman$elm_css$VirtualDom$Styled$Attribute, classAttribute, styles, classname);
+};
+var $rtfeldman$elm_css$Svg$Styled$Attributes$css = $rtfeldman$elm_css$Svg$Styled$Internal$css;
+var $rtfeldman$elm_css$Html$Styled$dl = $rtfeldman$elm_css$Html$Styled$node('dl');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_col = A2($rtfeldman$elm_css$Css$property, 'flex-direction', 'column');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold = A2($rtfeldman$elm_css$Css$property, 'font-weight', '700');
 var $rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
 	return {$: 'Unstyled', a: a};
 };
 var $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode = $rtfeldman$elm_css$VirtualDom$Styled$Unstyled;
+var $rtfeldman$elm_css$Html$Styled$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode;
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_32 = A2($rtfeldman$elm_css$Css$property, 'height', '8rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_full = A2($rtfeldman$elm_css$Css$property, 'height', '100%');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex = A2($rtfeldman$elm_css$Css$property, 'display', 'inline-flex');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$max_w_md = A2($rtfeldman$elm_css$Css$property, 'max-width', '28rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$overflow_y_hidden = A2($rtfeldman$elm_css$Css$property, 'overflow-y', 'hidden');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$p_4 = A2($rtfeldman$elm_css$Css$property, 'padding', '1rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_2 = A2($rtfeldman$elm_css$Css$property, 'padding-top', '0.5rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_36 = A2($rtfeldman$elm_css$Css$property, 'padding-top', '9rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_8 = A2($rtfeldman$elm_css$Css$property, 'padding-top', '2rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_8 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'padding-left', '2rem'),
+			A2($rtfeldman$elm_css$Css$property, 'padding-right', '2rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$relative = A2($rtfeldman$elm_css$Css$property, 'position', 'relative');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_full = A2($rtfeldman$elm_css$Css$property, 'border-radius', '9999px');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$col_span_2 = A2($rtfeldman$elm_css$Css$property, 'grid-column', 'span 2 / span 2');
+var $rtfeldman$elm_css$Html$Styled$dd = $rtfeldman$elm_css$Html$Styled$node('dd');
+var $rtfeldman$elm_css$Html$Styled$dt = $rtfeldman$elm_css$Html$Styled$node('dt');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mt_0 = A2($rtfeldman$elm_css$Css$property, 'margin-top', '0px');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mt_1 = A2($rtfeldman$elm_css$Css$property, 'margin-top', '0.25rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$sm = $rtfeldman$elm_css$Css$Media$withMediaQuery(
+	_List_fromArray(
+		['(min-width: 640px)']));
+var $rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
+	return $rtfeldman$elm_css$VirtualDom$Styled$Unstyled(
+		$elm$virtual_dom$VirtualDom$text(str));
+};
+var $rtfeldman$elm_css$Html$Styled$text = $rtfeldman$elm_css$VirtualDom$Styled$text;
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_500 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-text-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'color', 'rgba(107, 114, 128, var(--tw-text-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_900 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-text-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'color', 'rgba(17, 24, 39, var(--tw-text-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_sm = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'font-size', '0.875rem'),
+			A2($rtfeldman$elm_css$Css$property, 'line-height', '1.25rem')
+		]));
+var $author$project$Main$rowContent = F2(
+	function (key, value) {
+		return _List_fromArray(
+			[
+				A2(
+				$rtfeldman$elm_css$Html$Styled$dt,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_sm, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_500]))
+					]),
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text(key)
+					])),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$dd,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mt_1,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_sm,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_900,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$sm(
+								_List_fromArray(
+									[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mt_0, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$col_span_2]))
+							]))
+					]),
+				value)
+			]);
+	});
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$gap_4 = A2($rtfeldman$elm_css$Css$property, 'gap', '1rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$grid = A2($rtfeldman$elm_css$Css$property, 'display', 'grid');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$grid_cols_3 = A2($rtfeldman$elm_css$Css$property, 'grid-template-columns', 'repeat(3, minmax(0, 1fr))');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_4 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'padding-left', '1rem'),
+			A2($rtfeldman$elm_css$Css$property, 'padding-right', '1rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_6 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'padding-left', '1.5rem'),
+			A2($rtfeldman$elm_css$Css$property, 'padding-right', '1.5rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_5 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'padding-top', '1.25rem'),
+			A2($rtfeldman$elm_css$Css$property, 'padding-bottom', '1.25rem')
+		]));
+var $author$project$Main$rowStyle = function (bgColor) {
+	return _List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$Attributes$css(
+			_List_fromArray(
+				[
+					bgColor,
+					$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_4,
+					$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_5,
+					$matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$sm(
+					_List_fromArray(
+						[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$grid, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$grid_cols_3, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$gap_4, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_6]))
+				]))
+		]);
+};
+var $rtfeldman$elm_css$VirtualDom$Styled$NodeNS = F4(
+	function (a, b, c, d) {
+		return {$: 'NodeNS', a: a, b: b, c: c, d: d};
+	});
+var $rtfeldman$elm_css$VirtualDom$Styled$nodeNS = $rtfeldman$elm_css$VirtualDom$Styled$NodeNS;
+var $rtfeldman$elm_css$Svg$Styled$node = $rtfeldman$elm_css$VirtualDom$Styled$nodeNS('http://www.w3.org/2000/svg');
+var $rtfeldman$elm_css$Svg$Styled$svg = $rtfeldman$elm_css$Svg$Styled$node('svg');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_base = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'font-size', '1rem'),
+			A2($rtfeldman$elm_css$Css$property, 'line-height', '1.5rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_center = A2($rtfeldman$elm_css$Css$property, 'text-align', 'center');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_700 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-text-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'color', 'rgba(55, 65, 81, var(--tw-text-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_lg = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'font-size', '1.125rem'),
+			A2($rtfeldman$elm_css$Css$property, 'line-height', '1.75rem')
+		]));
+var $author$project$EntityHelpers$toString = function (id) {
+	var string = id.a;
+	return string;
+};
+var $elm$svg$Svg$Attributes$enableBackground = _VirtualDom_attribute('enable-background');
+var $icidasset$elm_material_icons$Material$Icons$Internal$b = $elm$svg$Svg$Attributes$enableBackground;
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $icidasset$elm_material_icons$Material$Icons$Internal$f = $elm$svg$Svg$Attributes$fill;
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$core$Basics$round = _Basics_round;
+var $avh4$elm_color$Color$toCssString = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	var roundTo = function (x) {
+		return $elm$core$Basics$round(x * 1000) / 1000;
+	};
+	var pct = function (x) {
+		return $elm$core$Basics$round(x * 10000) / 100;
+	};
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				'rgba(',
+				$elm$core$String$fromFloat(
+				pct(r)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(g)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(b)),
+				'%,',
+				$elm$core$String$fromFloat(
+				roundTo(a)),
+				')'
+			]));
+};
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $icidasset$elm_material_icons$Material$Icons$Internal$icon = F4(
+	function (attributes, nodes, size, coloring) {
+		var sizeAsString = $elm$core$String$fromInt(size);
+		return A2(
+			$elm$svg$Svg$svg,
+			_Utils_ap(
+				attributes,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$height(sizeAsString),
+						$elm$svg$Svg$Attributes$width(sizeAsString)
+					])),
+			_List_fromArray(
+				[
+					A2(
+					$elm$svg$Svg$g,
+					_List_fromArray(
+						[
+							function () {
+							if (coloring.$ === 'Color') {
+								var color = coloring.a;
+								return $elm$svg$Svg$Attributes$fill(
+									$avh4$elm_color$Color$toCssString(color));
+							} else {
+								return $elm$svg$Svg$Attributes$fill('currentColor');
+							}
+						}()
+						]),
+					nodes)
+				]));
+	});
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $icidasset$elm_material_icons$Material$Icons$Internal$p = $elm$svg$Svg$path;
+var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $icidasset$elm_material_icons$Material$Icons$Internal$v = $elm$svg$Svg$Attributes$viewBox;
+var $icidasset$elm_material_icons$Material$Icons$travel_explore = A2(
+	$icidasset$elm_material_icons$Material$Icons$Internal$icon,
+	_List_fromArray(
+		[
+			$icidasset$elm_material_icons$Material$Icons$Internal$b('new 0 0 24 24'),
+			$icidasset$elm_material_icons$Material$Icons$Internal$v('0 0 24 24')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$icidasset$elm_material_icons$Material$Icons$Internal$f('none')
+				]),
+			_List_Nil),
+			A2(
+			$icidasset$elm_material_icons$Material$Icons$Internal$p,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M19.3,16.9c0.4-0.7,0.7-1.5,0.7-2.4c0-2.5-2-4.5-4.5-4.5S11,12,11,14.5s2,4.5,4.5,4.5c0.9,0,1.7-0.3,2.4-0.7l3.2,3.2 l1.4-1.4L19.3,16.9z M15.5,17c-1.4,0-2.5-1.1-2.5-2.5s1.1-2.5,2.5-2.5s2.5,1.1,2.5,2.5S16.9,17,15.5,17z M12,20v2 C6.48,22,2,17.52,2,12C2,6.48,6.48,2,12,2c4.84,0,8.87,3.44,9.8,8h-2.07c-0.64-2.46-2.4-4.47-4.73-5.41V5c0,1.1-0.9,2-2,2h-2v2 c0,0.55-0.45,1-1,1H8v2h2v3H9l-4.79-4.79C4.08,10.79,4,11.38,4,12C4,16.41,7.59,20,12,20z')
+				]),
+			_List_Nil)
+		]));
+var $rtfeldman$elm_css$VirtualDom$Styled$attribute = F2(
+	function (key, value) {
+		return A3(
+			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2($elm$virtual_dom$VirtualDom$attribute, key, value),
+			_List_Nil,
+			'');
+	});
+var $rtfeldman$elm_css$Svg$Styled$Attributes$viewBox = $rtfeldman$elm_css$VirtualDom$Styled$attribute('viewBox');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_32 = A2($rtfeldman$elm_css$Css$property, 'width', '8rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full = A2($rtfeldman$elm_css$Css$property, 'width', '100%');
+var $author$project$Main$entityDetails = function (model) {
+	if (model.$ === 'Selected') {
+		var entity = model.a;
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$css(
+					_List_fromArray(
+						[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$relative, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_auto, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full]))
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$relative, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_screen, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$max_w_md]))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$css(
+									_List_fromArray(
+										[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_col, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_white, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$overflow_y_hidden]))
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Html$Styled$dl,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											$author$project$Main$rowStyle($matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_50),
+											A2(
+												$author$project$Main$rowContent,
+												'name',
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text(entity.name)
+													]))),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											$author$project$Main$rowStyle($matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_white),
+											A2(
+												$author$project$Main$rowContent,
+												'context',
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text(entity.context)
+													]))),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											$author$project$Main$rowStyle($matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_50),
+											A2(
+												$author$project$Main$rowContent,
+												'graph-id',
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text(
+														$author$project$EntityHelpers$toString(entity.id))
+													]))),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$div,
+											$author$project$Main$rowStyle($matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_white),
+											A2(
+												$author$project$Main$rowContent,
+												'connections',
+												A2(
+													$elm$core$List$concatMap,
+													function (v) {
+														return _List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text(v),
+																A2($rtfeldman$elm_css$Html$Styled$br, _List_Nil, _List_Nil)
+															]);
+													},
+													entity.connections)))
+										]))
+								]))
+						]))
+				]));
+	} else {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_36]))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$css(
+									_List_fromArray(
+										[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_100, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$p_4]))
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$rtfeldman$elm_css$Svg$Styled$svg,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Svg$Styled$Attributes$css(
+											_List_fromArray(
+												[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_32, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_32])),
+											$rtfeldman$elm_css$Svg$Styled$Attributes$viewBox('0 0 24 24')
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$fromUnstyled(
+											A2($icidasset$elm_material_icons$Material$Icons$travel_explore, 24, $icidasset$elm_material_icons$Material$Icons$Types$Inherit))
+										]))
+								]))
+						])),
+					A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_8, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_lg]))
+						]),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('No Entity Found')
+						])),
+					A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_2, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_8, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_700, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_base, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex]))
+						]),
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('No worries! Select a node from the graph to see its properties. You can also filter nodes from the legend.')
+						]))
+				]));
+	}
+};
 var $rtfeldman$elm_css$Css$Global$global = function (snippets) {
 	return $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode(
 		A3(
@@ -10149,34 +10923,54 @@ var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$globalStyles = _L
 				A2($rtfeldman$elm_css$Css$property, '--tw-ring-shadow', '0 0 #0000')
 			]))
 	]);
-var $rtfeldman$elm_css$VirtualDom$Styled$property = F2(
-	function (key, value) {
-		return A3(
-			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
-			A2($elm$virtual_dom$VirtualDom$property, key, value),
-			_List_Nil,
-			'');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_4 = A2($rtfeldman$elm_css$Css$property, 'border-width', '4px');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_gray_300 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-border-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'border-color', 'rgba(209, 213, 219, var(--tw-border-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_gray_400 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-border-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'border-color', 'rgba(156, 163, 175, var(--tw-border-opacity))')
+		]));
+var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$cursor_default = A2($rtfeldman$elm_css$Css$property, 'cursor', 'default');
+var $rtfeldman$elm_css$Css$Preprocess$ExtendSelector = F2(
+	function (a, b) {
+		return {$: 'ExtendSelector', a: a, b: b};
 	});
-var $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			$rtfeldman$elm_css$VirtualDom$Styled$property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $rtfeldman$elm_css$Html$Styled$Attributes$id = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('id');
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $rtfeldman$elm_css$VirtualDom$Styled$style = F2(
-	function (key, val) {
-		return A3(
-			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
-			A2($elm$virtual_dom$VirtualDom$style, key, val),
-			_List_Nil,
-			'');
-	});
-var $rtfeldman$elm_css$Html$Styled$Attributes$style = $rtfeldman$elm_css$VirtualDom$Styled$style;
+var $rtfeldman$elm_css$Css$Structure$PseudoClassSelector = function (a) {
+	return {$: 'PseudoClassSelector', a: a};
+};
+var $rtfeldman$elm_css$Css$pseudoClass = function (_class) {
+	return $rtfeldman$elm_css$Css$Preprocess$ExtendSelector(
+		$rtfeldman$elm_css$Css$Structure$PseudoClassSelector(_class));
+};
+var $rtfeldman$elm_css$Css$focus = $rtfeldman$elm_css$Css$pseudoClass('focus');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_semibold = A2($rtfeldman$elm_css$Css$property, 'font-weight', '600');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_12 = A2($rtfeldman$elm_css$Css$property, 'height', '3rem');
+var $rtfeldman$elm_css$Html$Styled$header = $rtfeldman$elm_css$Html$Styled$node('header');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$hidden = A2($rtfeldman$elm_css$Css$property, 'display', 'none');
+var $rtfeldman$elm_css$Css$hover = $rtfeldman$elm_css$Css$pseudoClass('hover');
+var $rtfeldman$elm_css$Html$Styled$img = $rtfeldman$elm_css$Html$Styled$node('img');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_end = A2($rtfeldman$elm_css$Css$property, 'justify-content', 'flex-end');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$outline_none = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'outline', '2px solid transparent'),
+			A2($rtfeldman$elm_css$Css$property, 'outline-offset', '2px')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_2 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'padding-top', '0.5rem'),
+			A2($rtfeldman$elm_css$Css$property, 'padding-bottom', '0.5rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$p_2 = A2($rtfeldman$elm_css$Css$property, 'padding', '0.5rem');
 var $author$project$Main$FetchAdminResponse = {$: 'FetchAdminResponse'};
-var $author$project$Main$FetchEntityList = {$: 'FetchEntityList'};
 var $rtfeldman$elm_css$Css$Preprocess$WithKeyframes = function (a) {
 	return {$: 'WithKeyframes', a: a};
 };
@@ -10301,79 +11095,6 @@ var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_yellow_700 = $
 			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(180, 83, 9, var(--tw-bg-opacity))')
 		]));
 var $elm$svg$Svg$Attributes$clipRule = _VirtualDom_attribute('clip-rule');
-var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $icidasset$elm_material_icons$Material$Icons$Internal$f = $elm$svg$Svg$Attributes$fill;
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
-var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$core$Basics$round = _Basics_round;
-var $avh4$elm_color$Color$toCssString = function (_v0) {
-	var r = _v0.a;
-	var g = _v0.b;
-	var b = _v0.c;
-	var a = _v0.d;
-	var roundTo = function (x) {
-		return $elm$core$Basics$round(x * 1000) / 1000;
-	};
-	var pct = function (x) {
-		return $elm$core$Basics$round(x * 10000) / 100;
-	};
-	return $elm$core$String$concat(
-		_List_fromArray(
-			[
-				'rgba(',
-				$elm$core$String$fromFloat(
-				pct(r)),
-				'%,',
-				$elm$core$String$fromFloat(
-				pct(g)),
-				'%,',
-				$elm$core$String$fromFloat(
-				pct(b)),
-				'%,',
-				$elm$core$String$fromFloat(
-				roundTo(a)),
-				')'
-			]));
-};
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var $icidasset$elm_material_icons$Material$Icons$Internal$icon = F4(
-	function (attributes, nodes, size, coloring) {
-		var sizeAsString = $elm$core$String$fromInt(size);
-		return A2(
-			$elm$svg$Svg$svg,
-			_Utils_ap(
-				attributes,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$height(sizeAsString),
-						$elm$svg$Svg$Attributes$width(sizeAsString)
-					])),
-			_List_fromArray(
-				[
-					A2(
-					$elm$svg$Svg$g,
-					_List_fromArray(
-						[
-							function () {
-							if (coloring.$ === 'Color') {
-								var color = coloring.a;
-								return $elm$svg$Svg$Attributes$fill(
-									$avh4$elm_color$Color$toCssString(color));
-							} else {
-								return $elm$svg$Svg$Attributes$fill('currentColor');
-							}
-						}()
-						]),
-					nodes)
-				]));
-	});
-var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
-var $icidasset$elm_material_icons$Material$Icons$Internal$p = $elm$svg$Svg$path;
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $icidasset$elm_material_icons$Material$Icons$Internal$v = $elm$svg$Svg$Attributes$viewBox;
 var $icidasset$elm_material_icons$Material$Icons$build = A2(
 	$icidasset$elm_material_icons$Material$Icons$Internal$icon,
 	_List_fromArray(
@@ -10399,7 +11120,6 @@ var $icidasset$elm_material_icons$Material$Icons$build = A2(
 				]),
 			_List_Nil)
 		]));
-var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
 var $icidasset$elm_material_icons$Material$Icons$check_circle_outline = A2(
 	$icidasset$elm_material_icons$Material$Icons$Internal$icon,
 	_List_fromArray(
@@ -10449,18 +11169,6 @@ var $icidasset$elm_material_icons$Material$Icons$error_outline = A2(
 				]),
 			_List_Nil)
 		]));
-var $rtfeldman$elm_css$Css$Preprocess$ExtendSelector = F2(
-	function (a, b) {
-		return {$: 'ExtendSelector', a: a, b: b};
-	});
-var $rtfeldman$elm_css$Css$Structure$PseudoClassSelector = function (a) {
-	return {$: 'PseudoClassSelector', a: a};
-};
-var $rtfeldman$elm_css$Css$pseudoClass = function (_class) {
-	return $rtfeldman$elm_css$Css$Preprocess$ExtendSelector(
-		$rtfeldman$elm_css$Css$Structure$PseudoClassSelector(_class));
-};
-var $rtfeldman$elm_css$Css$hover = $rtfeldman$elm_css$Css$pseudoClass('hover');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -10486,13 +11194,6 @@ var $rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $rtfeldman$elm_css$Css$focus = $rtfeldman$elm_css$Css$pseudoClass('focus');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$outline_none = $rtfeldman$elm_css$Css$batch(
-	_List_fromArray(
-		[
-			A2($rtfeldman$elm_css$Css$property, 'outline', '2px solid transparent'),
-			A2($rtfeldman$elm_css$Css$property, 'outline-offset', '2px')
-		]));
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_2 = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
@@ -10513,21 +11214,6 @@ var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mr_3 = A2($rtfeld
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_5 = A2($rtfeldman$elm_css$Css$property, 'width', '1.25rem');
 var $author$project$Main$rebuildBtnLogoStyle = _List_fromArray(
 	[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_5, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_5, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mr_3]);
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex = A2($rtfeldman$elm_css$Css$property, 'display', 'flex');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center = A2($rtfeldman$elm_css$Css$property, 'align-items', 'center');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_4 = $rtfeldman$elm_css$Css$batch(
-	_List_fromArray(
-		[
-			A2($rtfeldman$elm_css$Css$property, 'padding-left', '1rem'),
-			A2($rtfeldman$elm_css$Css$property, 'padding-right', '1rem')
-		]));
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_2 = $rtfeldman$elm_css$Css$batch(
-	_List_fromArray(
-		[
-			A2($rtfeldman$elm_css$Css$property, 'padding-top', '0.5rem'),
-			A2($rtfeldman$elm_css$Css$property, 'padding-bottom', '0.5rem')
-		]));
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_md = A2($rtfeldman$elm_css$Css$property, 'border-radius', '0.375rem');
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$shadow = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
@@ -10548,42 +11234,6 @@ var $author$project$Main$rebuildBtnStyle = F3(
 				_List_fromArray(
 					[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$shadow, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_4, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_2, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_white, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_md, hoverStyle, focusStyle])));
 	});
-var $icidasset$elm_material_icons$Material$Icons$Types$Inherit = {$: 'Inherit'};
-var $elm$virtual_dom$VirtualDom$attribute = F2(
-	function (key, value) {
-		return A2(
-			_VirtualDom_attribute,
-			_VirtualDom_noOnOrFormAction(key),
-			_VirtualDom_noJavaScriptOrHtmlUri(value));
-	});
-var $rtfeldman$elm_css$Svg$Styled$Internal$css = function (styles) {
-	var classname = $rtfeldman$elm_css$VirtualDom$Styled$getClassname(styles);
-	var classAttribute = A2($elm$virtual_dom$VirtualDom$attribute, 'class', classname);
-	return A3($rtfeldman$elm_css$VirtualDom$Styled$Attribute, classAttribute, styles, classname);
-};
-var $rtfeldman$elm_css$Svg$Styled$Attributes$css = $rtfeldman$elm_css$Svg$Styled$Internal$css;
-var $rtfeldman$elm_css$Html$Styled$fromUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$unstyledNode;
-var $rtfeldman$elm_css$VirtualDom$Styled$NodeNS = F4(
-	function (a, b, c, d) {
-		return {$: 'NodeNS', a: a, b: b, c: c, d: d};
-	});
-var $rtfeldman$elm_css$VirtualDom$Styled$nodeNS = $rtfeldman$elm_css$VirtualDom$Styled$NodeNS;
-var $rtfeldman$elm_css$Svg$Styled$node = $rtfeldman$elm_css$VirtualDom$Styled$nodeNS('http://www.w3.org/2000/svg');
-var $rtfeldman$elm_css$Svg$Styled$svg = $rtfeldman$elm_css$Svg$Styled$node('svg');
-var $rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
-	return $rtfeldman$elm_css$VirtualDom$Styled$Unstyled(
-		$elm$virtual_dom$VirtualDom$text(str));
-};
-var $rtfeldman$elm_css$Html$Styled$text = $rtfeldman$elm_css$VirtualDom$Styled$text;
-var $rtfeldman$elm_css$VirtualDom$Styled$attribute = F2(
-	function (key, value) {
-		return A3(
-			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
-			A2($elm$virtual_dom$VirtualDom$attribute, key, value),
-			_List_Nil,
-			'');
-	});
-var $rtfeldman$elm_css$Svg$Styled$Attributes$viewBox = $rtfeldman$elm_css$VirtualDom$Styled$attribute('viewBox');
 var $author$project$Main$rebuildBtnSvg = F3(
 	function (cssStyle, icon, displayText) {
 		return _List_fromArray(
@@ -10735,11 +11385,400 @@ var $author$project$Main$viewAdminModelResult = function (model) {
 						$author$project$Main$rebuildBtnFocusStyle(
 							_List_fromArray(
 								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_green_500, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_offset_green_200]))),
-						$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$FetchEntityList)
+						$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$FetchAdminResponse)
 					]),
 				A3($author$project$Main$rebuildBtnSvg, $author$project$Main$rebuildBtnLogoStyle, $icidasset$elm_material_icons$Material$Icons$check_circle_outline, 'Rebuilt'));
 	}
 };
+var $author$project$Main$rebuildBtn = function (model) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$css(
+				_List_fromArray(
+					[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$p_2]))
+			]),
+		_List_fromArray(
+			[
+				$author$project$Main$viewAdminModelResult(model)
+			]));
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$src = function (url) {
+	return A2($rtfeldman$elm_css$Html$Styled$Attributes$stringProperty, 'src', url);
+};
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_3xl = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'font-size', '1.875rem'),
+			A2($rtfeldman$elm_css$Css$property, 'line-height', '2.25rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_blue_500 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-text-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'color', 'rgba(59, 130, 246, var(--tw-text-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_12 = A2($rtfeldman$elm_css$Css$property, 'width', '3rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_1over6 = A2($rtfeldman$elm_css$Css$property, 'width', '16.666667%');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_5over6 = A2($rtfeldman$elm_css$Css$property, 'width', '83.333333%');
+var $author$project$Main$header = function (model) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$header,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$css(
+				_List_fromArray(
+					[
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_white,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_2,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_6,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$hidden,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$sm(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex]))
+					]))
+			]),
+		_List_fromArray(
+			[
+				$author$project$Main$rebuildBtn(model),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_5over6, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_blue_500, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_3xl, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_semibold]))
+					]),
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$text('Orbital')
+					])),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$relative, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_1over6, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_end]))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$button,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$css(
+								_List_fromArray(
+									[
+										$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$relative,
+										$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_12,
+										$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_12,
+										$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_full,
+										$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$overflow_hidden,
+										$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_4,
+										$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_gray_400,
+										$rtfeldman$elm_css$Css$hover(
+										_List_fromArray(
+											[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$cursor_default, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_gray_300])),
+										$rtfeldman$elm_css$Css$focus(
+										_List_fromArray(
+											[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_gray_300, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$outline_none]))
+									]))
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Html$Styled$img,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$src('https://source.unsplash.com/uJ8LNVCBjFQ/400x400')
+									]),
+								_List_Nil)
+							]))
+					]))
+			]));
+};
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_row = A2($rtfeldman$elm_css$Css$property, 'flex-direction', 'row');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$md = $rtfeldman$elm_css$Css$Media$withMediaQuery(
+	_List_fromArray(
+		['(min-width: 768px)']));
+var $author$project$Main$homePage = function (contents) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$css(
+				_List_fromArray(
+					[
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_col,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$md(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_row]))
+					]))
+			]),
+		contents);
+};
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_300 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(209, 213, 219, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_screen = A2($rtfeldman$elm_css$Css$property, 'height', '100vh');
+var $author$project$Main$mainPage = F2(
+	function (model, contents) {
+		if (model) {
+			return A2($rtfeldman$elm_css$Html$Styled$div, _List_Nil, _List_Nil);
+		} else {
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_col, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_screen, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$overflow_y_hidden, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_300]))
+					]),
+				contents);
+		}
+	});
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_200 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(229, 231, 235, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_t = A2($rtfeldman$elm_css$Css$property, 'border-top-width', '1px');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_grow = A2($rtfeldman$elm_css$Css$property, 'flex-grow', '1');
+var $rtfeldman$elm_css$Html$Styled$main_ = $rtfeldman$elm_css$Html$Styled$node('main');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pb_6 = A2($rtfeldman$elm_css$Css$property, 'padding-bottom', '1.5rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pr_6 = A2($rtfeldman$elm_css$Css$property, 'padding-right', '1.5rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_6 = A2($rtfeldman$elm_css$Css$property, 'padding-top', '1.5rem');
+var $author$project$Main$mainSection = function (canvas) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$css(
+				_List_fromArray(
+					[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_200, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$overflow_hidden, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$border_t, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_row]))
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$rtfeldman$elm_css$Html$Styled$main_,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_grow, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_6, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pr_6, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pb_6, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_row, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex_auto]))
+					]),
+				canvas)
+			]));
+};
+var $rtfeldman$elm_css$Html$Styled$aside = $rtfeldman$elm_css$Html$Styled$node('aside');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$block = A2($rtfeldman$elm_css$Css$property, 'display', 'block');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_96 = A2($rtfeldman$elm_css$Css$property, 'width', '24rem');
+var $author$project$Main$sideBar = F2(
+	function (model, contents) {
+		if (model) {
+			return A2(
+				$rtfeldman$elm_css$Html$Styled$aside,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$relative,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_white,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_md,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_full,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_96,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$hidden,
+								$matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$sm(
+								_List_fromArray(
+									[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$block, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$shadow_xl]))
+							]))
+					]),
+				contents);
+		} else {
+			return A2($rtfeldman$elm_css$Html$Styled$aside, _List_Nil, _List_Nil);
+		}
+	});
+var $rtfeldman$elm_css$Html$Styled$h2 = $rtfeldman$elm_css$Html$Styled$node('h2');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_300 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-text-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'color', 'rgba(209, 213, 219, var(--tw-text-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_xl = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'font-size', '1.25rem'),
+			A2($rtfeldman$elm_css$Css$property, 'line-height', '1.75rem')
+		]));
+var $author$project$Main$sideBarHeader = A2(
+	$rtfeldman$elm_css$Html$Styled$h2,
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$Attributes$css(
+			_List_fromArray(
+				[
+					$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$p_6,
+					$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_xl,
+					$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold,
+					$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_white,
+					$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$content_center,
+					$rtfeldman$elm_css$Css$hover(
+					_List_fromArray(
+						[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_300]))
+				]))
+		]),
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$text('Telescope')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_between = A2($rtfeldman$elm_css$Css$property, 'justify-content', 'space-between');
+var $author$project$Main$sideBarHeaderPanel = function (contents) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$css(
+				_List_fromArray(
+					[
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_500,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_between,
+						$matheus23$elm_default_tailwind_modules$Tailwind$Breakpoints$sm(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_6]))
+					]))
+			]),
+		contents);
+};
+var $author$project$Main$ShowSidebar = function (a) {
+	return {$: 'ShowSidebar', a: a};
+};
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_900 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
+			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(30, 58, 138, var(--tw-bg-opacity))')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_16 = A2($rtfeldman$elm_css$Css$property, 'height', '4rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_2 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'padding-left', '0.5rem'),
+			A2($rtfeldman$elm_css$Css$property, 'padding-right', '0.5rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_3 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'padding-top', '0.75rem'),
+			A2($rtfeldman$elm_css$Css$property, 'padding-bottom', '0.75rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-offset-shadow', 'var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color)'),
+			A2($rtfeldman$elm_css$Css$property, '--tw-ring-shadow', 'var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color)'),
+			A2($rtfeldman$elm_css$Css$property, 'box-shadow', 'var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_r_lg = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'border-top-right-radius', '0.5rem'),
+			A2($rtfeldman$elm_css$Css$property, 'border-bottom-right-radius', '0.5rem')
+		]));
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$z_50 = A2($rtfeldman$elm_css$Css$property, 'z-index', '50');
+var $author$project$Main$sideBarShowBtnStyle = $rtfeldman$elm_css$Html$Styled$Attributes$css(
+	_List_fromArray(
+		[
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_700,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$z_50,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mt_1,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_3,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$px_2,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_16,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_xl,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_white,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_r_lg,
+			$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex,
+			$rtfeldman$elm_css$Css$hover(
+			_List_fromArray(
+				[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_900])),
+			$rtfeldman$elm_css$Css$focus(
+			_List_fromArray(
+				[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$outline_none, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$ring_blue_500]))
+		]));
+var $author$project$Main$sideBarShowBtnElement = F2(
+	function (onClickEventMsg, displayText) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$button,
+			_List_fromArray(
+				[
+					$author$project$Main$sideBarShowBtnStyle,
+					$rtfeldman$elm_css$Html$Styled$Events$onClick(onClickEventMsg)
+				]),
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text(displayText)
+				]));
+	});
+var $author$project$Main$sideBarShowBtn = function (model) {
+	if (model) {
+		return A2(
+			$author$project$Main$sideBarShowBtnElement,
+			$author$project$Main$ShowSidebar(false),
+			'<');
+	} else {
+		return A2(
+			$author$project$Main$sideBarShowBtnElement,
+			$author$project$Main$ShowSidebar(true),
+			'>');
+	}
+};
+var $rtfeldman$elm_css$Html$Styled$a = $rtfeldman$elm_css$Html$Styled$node('a');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$absolute = A2($rtfeldman$elm_css$Css$property, 'position', 'absolute');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bottom_0 = A2($rtfeldman$elm_css$Css$property, 'bottom', '0px');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_3 = A2($rtfeldman$elm_css$Css$property, 'padding-top', '0.75rem');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_4 = $rtfeldman$elm_css$Css$batch(
+	_List_fromArray(
+		[
+			A2($rtfeldman$elm_css$Css$property, 'padding-top', '1rem'),
+			A2($rtfeldman$elm_css$Css$property, 'padding-bottom', '1rem')
+		]));
+var $author$project$Main$upgradePanel = A2(
+	$rtfeldman$elm_css$Html$Styled$div,
+	_List_fromArray(
+		[
+			$rtfeldman$elm_css$Html$Styled$Attributes$css(
+			_List_fromArray(
+				[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_white, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_base, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_semibold, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_3]))
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$rtfeldman$elm_css$Html$Styled$a,
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$Attributes$css(
+					_List_fromArray(
+						[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$absolute, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bottom_0, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_blue_700, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_white, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$items_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$py_4]))
+				]),
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text('Upgrade to Pro!')
+				]))
+		]));
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_200 = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
@@ -10752,41 +11791,19 @@ var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_red_600 = $rtf
 			A2($rtfeldman$elm_css$Css$property, '--tw-bg-opacity', '1'),
 			A2($rtfeldman$elm_css$Css$property, 'background-color', 'rgba(220, 38, 38, var(--tw-bg-opacity))')
 		]));
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold = A2($rtfeldman$elm_css$Css$property, 'font-weight', '700');
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_10 = A2($rtfeldman$elm_css$Css$property, 'height', '2.5rem');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_between = A2($rtfeldman$elm_css$Css$property, 'justify-content', 'space-between');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center = A2($rtfeldman$elm_css$Css$property, 'justify-content', 'center');
+var $rtfeldman$elm_css$Html$Styled$li = $rtfeldman$elm_css$Html$Styled$node('li');
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mb_2 = A2($rtfeldman$elm_css$Css$property, 'margin-bottom', '0.5rem');
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mr_4 = A2($rtfeldman$elm_css$Css$property, 'margin-right', '1rem');
 var $rtfeldman$elm_css$Html$Styled$p = $rtfeldman$elm_css$Html$Styled$node('p');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$p_4 = A2($rtfeldman$elm_css$Css$property, 'padding', '1rem');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$rounded_full = A2($rtfeldman$elm_css$Css$property, 'border-radius', '9999px');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_gray_500 = $rtfeldman$elm_css$Css$batch(
-	_List_fromArray(
-		[
-			A2($rtfeldman$elm_css$Css$property, '--tw-text-opacity', '1'),
-			A2($rtfeldman$elm_css$Css$property, 'color', 'rgba(107, 114, 128, var(--tw-text-opacity))')
-		]));
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_red_600 = $rtfeldman$elm_css$Css$batch(
 	_List_fromArray(
 		[
 			A2($rtfeldman$elm_css$Css$property, '--tw-text-opacity', '1'),
 			A2($rtfeldman$elm_css$Css$property, 'color', 'rgba(220, 38, 38, var(--tw-text-opacity))')
 		]));
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_sm = $rtfeldman$elm_css$Css$batch(
-	_List_fromArray(
-		[
-			A2($rtfeldman$elm_css$Css$property, 'font-size', '0.875rem'),
-			A2($rtfeldman$elm_css$Css$property, 'line-height', '1.25rem')
-		]));
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_xs = $rtfeldman$elm_css$Css$batch(
-	_List_fromArray(
-		[
-			A2($rtfeldman$elm_css$Css$property, 'font-size', '0.75rem'),
-			A2($rtfeldman$elm_css$Css$property, 'line-height', '1rem')
-		]));
+var $rtfeldman$elm_css$Html$Styled$ul = $rtfeldman$elm_css$Html$Styled$node('ul');
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_10 = A2($rtfeldman$elm_css$Css$property, 'width', '2.5rem');
-var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full = A2($rtfeldman$elm_css$Css$property, 'width', '100%');
 var $icidasset$elm_material_icons$Material$Icons$warning = A2(
 	$icidasset$elm_material_icons$Material$Icons$Internal$icon,
 	_List_fromArray(
@@ -10812,7 +11829,7 @@ var $icidasset$elm_material_icons$Material$Icons$warning = A2(
 			_List_Nil)
 		]));
 var $author$project$Main$buildErrorMsg = F2(
-	function (eType, eMsg) {
+	function (eType, eMsgs) {
 		return A2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
@@ -10873,24 +11890,32 @@ var $author$project$Main$buildErrorMsg = F2(
 										[
 											$rtfeldman$elm_css$Html$Styled$Attributes$css(
 											_List_fromArray(
-												[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mb_2, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold]))
+												[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$mb_2, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$font_bold, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_lg]))
 										]),
 									_List_fromArray(
 										[
 											$rtfeldman$elm_css$Html$Styled$text(eType)
 										])),
 									A2(
-									$rtfeldman$elm_css$Html$Styled$p,
+									$rtfeldman$elm_css$Html$Styled$ul,
 									_List_fromArray(
 										[
 											$rtfeldman$elm_css$Html$Styled$Attributes$css(
 											_List_fromArray(
-												[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_xs]))
+												[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_base]))
 										]),
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text(eMsg)
-										]))
+									A2(
+										$elm$core$List$map,
+										function (msg) {
+											return A2(
+												$rtfeldman$elm_css$Html$Styled$li,
+												_List_Nil,
+												_List_fromArray(
+													[
+														$rtfeldman$elm_css$Html$Styled$text(msg)
+													]));
+										},
+										eMsgs))
 								])),
 							A2(
 							$rtfeldman$elm_css$Html$Styled$div,
@@ -10907,7 +11932,8 @@ var $author$project$Main$buildErrorMsg = F2(
 									_List_Nil,
 									_List_fromArray(
 										[
-											$rtfeldman$elm_css$Html$Styled$text('x')
+											$rtfeldman$elm_css$Html$Styled$fromUnstyled(
+											A2($icidasset$elm_material_icons$Material$Icons$refresh, 24, $icidasset$elm_material_icons$Material$Icons$Types$Inherit))
 										]))
 								]))
 						]))
@@ -10928,673 +11954,194 @@ var $author$project$Main$buildHttpErrorMessage = function (httpError) {
 			return 'Request failed with status code: ' + ($elm$core$String$fromInt(metadata.statusCode) + ('. Error: ' + body));
 		default:
 			var error = httpError.a;
-			return 'Bad payload received: ' + $elm$core$Debug$toString(error);
+			return 'Bad payload received: ' + $elm$json$Json$Decode$errorToString(error);
 	}
 };
 var $author$project$Main$buildFailureMsg = function (parsedData) {
 	if (parsedData.$ === 'GraphqlError') {
 		var graphqlErrors = parsedData.b;
 		return A2(
-			$elm$core$List$map,
-			function (err) {
-				return A2($author$project$Main$buildErrorMsg, 'Graphql Error', err.message);
-			},
-			graphqlErrors);
-	} else {
-		var httpError = parsedData.a;
-		return _List_fromArray(
-			[
-				A2(
-				$author$project$Main$buildErrorMsg,
-				'Http Error',
-				$author$project$Main$buildHttpErrorMessage(httpError))
-			]);
-	}
-};
-var $author$project$Main$entityToGraphEdgeItemOption = function (e) {
-	return A2(
-		$elm$core$List$map,
-		function (c) {
-			return {source: e.name, target: c};
-		},
-		e.connections);
-};
-var $elm_community$list_extra$List$Extra$findIndexHelp = F3(
-	function (index, predicate, list) {
-		findIndexHelp:
-		while (true) {
-			if (!list.b) {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (predicate(x)) {
-					return $elm$core$Maybe$Just(index);
-				} else {
-					var $temp$index = index + 1,
-						$temp$predicate = predicate,
-						$temp$list = xs;
-					index = $temp$index;
-					predicate = $temp$predicate;
-					list = $temp$list;
-					continue findIndexHelp;
-				}
-			}
-		}
-	});
-var $elm_community$list_extra$List$Extra$findIndex = $elm_community$list_extra$List$Extra$findIndexHelp(0);
-var $elm_community$list_extra$List$Extra$elemIndex = function (x) {
-	return $elm_community$list_extra$List$Extra$findIndex(
-		$elm$core$Basics$eq(x));
-};
-var $author$project$Main$entityToGraphNodeItemOption = F2(
-	function (l, e) {
-		return {
-			category: A2($elm_community$list_extra$List$Extra$elemIndex, e.context, l),
-			label: $elm$core$Maybe$Nothing,
-			name: $elm$core$Maybe$Just(e.name),
-			symbolSize: $elm$core$Maybe$Just(20),
-			value: 1,
-			x: $elm$core$Maybe$Nothing,
-			y: $elm$core$Maybe$Nothing
-		};
-	});
-var $elm$core$List$sortBy = _List_sortBy;
-var $elm$core$List$sort = function (xs) {
-	return A2($elm$core$List$sortBy, $elm$core$Basics$identity, xs);
-};
-var $elm$core$Set$Set_elm_builtin = function (a) {
-	return {$: 'Set_elm_builtin', a: a};
-};
-var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
-var $elm$core$Set$insert = F2(
-	function (key, _v0) {
-		var dict = _v0.a;
-		return $elm$core$Set$Set_elm_builtin(
-			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
-	});
-var $elm$core$Dict$member = F2(
-	function (key, dict) {
-		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (_v0.$ === 'Just') {
-			return true;
-		} else {
-			return false;
-		}
-	});
-var $elm$core$Set$member = F2(
-	function (key, _v0) {
-		var dict = _v0.a;
-		return A2($elm$core$Dict$member, key, dict);
-	});
-var $elm_community$list_extra$List$Extra$uniqueHelp = F4(
-	function (f, existing, remaining, accumulator) {
-		uniqueHelp:
-		while (true) {
-			if (!remaining.b) {
-				return $elm$core$List$reverse(accumulator);
-			} else {
-				var first = remaining.a;
-				var rest = remaining.b;
-				var computedFirst = f(first);
-				if (A2($elm$core$Set$member, computedFirst, existing)) {
-					var $temp$f = f,
-						$temp$existing = existing,
-						$temp$remaining = rest,
-						$temp$accumulator = accumulator;
-					f = $temp$f;
-					existing = $temp$existing;
-					remaining = $temp$remaining;
-					accumulator = $temp$accumulator;
-					continue uniqueHelp;
-				} else {
-					var $temp$f = f,
-						$temp$existing = A2($elm$core$Set$insert, computedFirst, existing),
-						$temp$remaining = rest,
-						$temp$accumulator = A2($elm$core$List$cons, first, accumulator);
-					f = $temp$f;
-					existing = $temp$existing;
-					remaining = $temp$remaining;
-					accumulator = $temp$accumulator;
-					continue uniqueHelp;
-				}
-			}
-		}
-	});
-var $elm_community$list_extra$List$Extra$unique = function (list) {
-	return A4($elm_community$list_extra$List$Extra$uniqueHelp, $elm$core$Basics$identity, $elm$core$Set$empty, list, _List_Nil);
-};
-var $author$project$Main$entityListToChartOpts = function (entityList) {
-	var categories = $elm$core$List$sort(
-		$elm_community$list_extra$List$Extra$unique(
+			$author$project$Main$buildErrorMsg,
+			'Graphql Error',
 			A2(
 				$elm$core$List$map,
-				function (e) {
-					return e.context;
+				function ($) {
+					return $.message;
 				},
-				entityList)));
-	return {
-		legend: _List_fromArray(
-			[
-				{data: categories}
-			]),
-		series: _List_fromArray(
-			[
-				{
-				animation: $elm$core$Maybe$Just(true),
-				categories: A2(
-					$elm$core$List$map,
-					function (c) {
-						return {name: c};
-					},
-					categories),
-				data: A2(
-					$elm$core$List$map,
-					$author$project$Main$entityToGraphNodeItemOption(categories),
-					entityList),
-				draggable: $elm$core$Maybe$Just(true),
-				emphasis: $elm$core$Maybe$Nothing,
-				force: $elm$core$Maybe$Just(
-					{
-						edgeLength: $elm$core$Maybe$Just(100),
-						friction: $elm$core$Maybe$Just(0.2),
-						gravity: $elm$core$Maybe$Just(0.2),
-						layoutAnimation: $elm$core$Maybe$Just(true),
-						repulsion: $elm$core$Maybe$Just(50)
-					}),
-				label: $elm$core$Maybe$Just(
-					{
-						formatter: $elm$core$Maybe$Just('{b}'),
-						position: $elm$core$Maybe$Just('right'),
-						show: $elm$core$Maybe$Nothing
-					}),
-				layout: 'force',
-				lineStyle: $elm$core$Maybe$Nothing,
-				links: A2($elm$core$List$concatMap, $author$project$Main$entityToGraphEdgeItemOption, entityList),
-				name: $elm$core$Maybe$Nothing,
-				roam: $elm$core$Maybe$Just(true),
-				type_: 'graph'
-			}
-			]),
-		title: $elm$core$Maybe$Nothing,
-		tooltip: $elm$core$Maybe$Just(
-			{show: false})
-	};
+				graphqlErrors));
+	} else {
+		var httpError = parsedData.a;
+		return A2(
+			$author$project$Main$buildErrorMsg,
+			'Http Error',
+			_List_fromArray(
+				[
+					$author$project$Main$buildHttpErrorMessage(httpError)
+				]));
+	}
 };
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var $author$project$Main$legendOptionEncoder = function (legendOption) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'data',
-				A2($elm$json$Json$Encode$list, $elm$json$Json$Encode$string, legendOption.data))
-			]));
-};
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $author$project$Main$categoryItemOptionEncoder = function (categoryItemOption) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'name',
-				$elm$json$Json$Encode$string(categoryItemOption.name))
-			]));
-};
-var $elm$json$Json$Encode$float = _Json_wrap;
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$Main$lineStyleOptionEncoder = function (lineStyleOption) {
-	return A2(
-		$elm$core$Basics$composeL,
-		$elm$json$Json$Encode$object,
-		$elm$core$List$filterMap($elm$core$Basics$identity))(
-		_List_fromArray(
-			[
-				A2(
-				$elm$core$Maybe$andThen,
-				function (color) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'color',
-							$elm$json$Json$Encode$string(color)));
-				},
-				lineStyleOption.color),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (curveness) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'curveness',
-							$elm$json$Json$Encode$float(curveness)));
-				},
-				lineStyleOption.curveness),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (width) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'width',
-							$elm$json$Json$Encode$int(width)));
-				},
-				lineStyleOption.width)
-			]));
-};
-var $author$project$Main$emphasisOptionEncoder = function (emphasisOption) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'focus',
-				$elm$json$Json$Encode$string(emphasisOption.focus)),
-				_Utils_Tuple2(
-				'lineStyle',
-				$author$project$Main$lineStyleOptionEncoder(emphasisOption.lineStyle))
-			]));
-};
-var $author$project$Main$forceOptionEncoder = function (forceOption) {
-	return A2(
-		$elm$core$Basics$composeL,
-		$elm$json$Json$Encode$object,
-		$elm$core$List$filterMap($elm$core$Basics$identity))(
-		_List_fromArray(
-			[
-				A2(
-				$elm$core$Maybe$andThen,
-				function (el) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'edgeLength',
-							$elm$json$Json$Encode$int(el)));
-				},
-				forceOption.edgeLength),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (f) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'friction',
-							$elm$json$Json$Encode$float(f)));
-				},
-				forceOption.friction),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (g) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'gravity',
-							$elm$json$Json$Encode$float(g)));
-				},
-				forceOption.gravity),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (la) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'layoutAnimation',
-							$elm$json$Json$Encode$bool(la)));
-				},
-				forceOption.layoutAnimation),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (r) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'repulsion',
-							$elm$json$Json$Encode$int(r)));
-				},
-				forceOption.repulsion)
-			]));
-};
-var $author$project$Main$graphEdgeItemOptionEncoder = function (graphEdgeItemOption) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'source',
-				$elm$json$Json$Encode$string(graphEdgeItemOption.source)),
-				_Utils_Tuple2(
-				'target',
-				$elm$json$Json$Encode$string(graphEdgeItemOption.target))
-			]));
-};
-var $author$project$Main$labelOptionEncoder = function (labelOption) {
-	return A2(
-		$elm$core$Basics$composeL,
-		$elm$json$Json$Encode$object,
-		$elm$core$List$filterMap($elm$core$Basics$identity))(
-		_List_fromArray(
-			[
-				A2(
-				$elm$core$Maybe$andThen,
-				function (p) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'position',
-							$elm$json$Json$Encode$string(p)));
-				},
-				labelOption.position),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (f) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'formatter',
-							$elm$json$Json$Encode$string(f)));
-				},
-				labelOption.formatter),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (s) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'show',
-							$elm$json$Json$Encode$bool(s)));
-				},
-				labelOption.show)
-			]));
-};
-var $author$project$Main$graphNodeItemOptionEncoder = function (gnio) {
-	return A2(
-		$elm$core$Basics$composeL,
-		$elm$json$Json$Encode$object,
-		$elm$core$List$filterMap($elm$core$Basics$identity))(
-		_List_fromArray(
-			[
-				A2(
-				$elm$core$Maybe$andThen,
-				function (n) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'name',
-							$elm$json$Json$Encode$string(n)));
-				},
-				gnio.name),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'value',
-					$elm$json$Json$Encode$float(gnio.value))),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (x) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'x',
-							$elm$json$Json$Encode$float(x)));
-				},
-				gnio.x),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (y) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'y',
-							$elm$json$Json$Encode$float(y)));
-				},
-				gnio.y),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (c) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'category',
-							$elm$json$Json$Encode$int(c)));
-				},
-				gnio.category),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (s) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'symbolSize',
-							$elm$json$Json$Encode$float(s)));
-				},
-				gnio.symbolSize),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (l) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'label',
-							$author$project$Main$labelOptionEncoder(l)));
-				},
-				gnio.label)
-			]));
-};
-var $author$project$Main$seriesOptionEncoder = function (seriesOption) {
-	return A2(
-		$elm$core$Basics$composeL,
-		$elm$json$Json$Encode$object,
-		$elm$core$List$filterMap($elm$core$Basics$identity))(
-		_List_fromArray(
-			[
-				A2(
-				$elm$core$Maybe$andThen,
-				function (a) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'animation',
-							$elm$json$Json$Encode$bool(a)));
-				},
-				seriesOption.animation),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'categories',
-					A2($elm$json$Json$Encode$list, $author$project$Main$categoryItemOptionEncoder, seriesOption.categories))),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'data',
-					A2($elm$json$Json$Encode$list, $author$project$Main$graphNodeItemOptionEncoder, seriesOption.data))),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (d) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'draggable',
-							$elm$json$Json$Encode$bool(d)));
-				},
-				seriesOption.draggable),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (e) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'emphasis',
-							$author$project$Main$emphasisOptionEncoder(e)));
-				},
-				seriesOption.emphasis),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (f) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'force',
-							$author$project$Main$forceOptionEncoder(f)));
-				},
-				seriesOption.force),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (l) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'label',
-							$author$project$Main$labelOptionEncoder(l)));
-				},
-				seriesOption.label),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'layout',
-					$elm$json$Json$Encode$string(seriesOption.layout))),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (ls) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'lineStyle',
-							$author$project$Main$lineStyleOptionEncoder(ls)));
-				},
-				seriesOption.lineStyle),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'links',
-					A2($elm$json$Json$Encode$list, $author$project$Main$graphEdgeItemOptionEncoder, seriesOption.links))),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (n) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'name',
-							$elm$json$Json$Encode$string(n)));
-				},
-				seriesOption.name),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (r) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'roam',
-							$elm$json$Json$Encode$bool(r)));
-				},
-				seriesOption.roam),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'type',
-					$elm$json$Json$Encode$string(seriesOption.type_)))
-			]));
-};
-var $author$project$Main$titleOptionEncoder = function (titleOption) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'text',
-				$elm$json$Json$Encode$string(titleOption.text)),
-				_Utils_Tuple2(
-				'subtext',
-				$elm$json$Json$Encode$string(titleOption.subtext)),
-				_Utils_Tuple2(
-				'top',
-				$elm$json$Json$Encode$string(titleOption.top)),
-				_Utils_Tuple2(
-				'left',
-				$elm$json$Json$Encode$string(titleOption.left))
-			]));
-};
-var $author$project$Main$tooltipOptionEncoder = function (tooltipOption) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'show',
-				$elm$json$Json$Encode$bool(tooltipOption.show))
-			]));
-};
-var $author$project$Main$encodeChartOptions = function (chartOptions) {
-	return A2(
-		$elm$core$Basics$composeL,
-		$elm$json$Json$Encode$object,
-		$elm$core$List$filterMap($elm$core$Basics$identity))(
-		_List_fromArray(
-			[
-				A2(
-				$elm$core$Maybe$andThen,
-				function (title) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'title',
-							$author$project$Main$titleOptionEncoder(title)));
-				},
-				chartOptions.title),
-				A2(
-				$elm$core$Maybe$andThen,
-				function (t) {
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(
-							'tooltip',
-							$author$project$Main$tooltipOptionEncoder(t)));
-				},
-				chartOptions.tooltip),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'legend',
-					A2($elm$json$Json$Encode$list, $author$project$Main$legendOptionEncoder, chartOptions.legend))),
-				$elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					'series',
-					A2($elm$json$Json$Encode$list, $author$project$Main$seriesOptionEncoder, chartOptions.series)))
-			]));
-};
-var $rtfeldman$elm_css$Html$Styled$Attributes$property = $rtfeldman$elm_css$VirtualDom$Styled$property;
-var $author$project$Main$setGraphOptions = function (chartOptions) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$node,
-		'echart-element',
-		_List_fromArray(
-			[
-				A2(
-				$rtfeldman$elm_css$Html$Styled$Attributes$property,
-				'option',
-				$author$project$Main$encodeChartOptions(chartOptions))
-			]));
-};
+var $rtfeldman$elm_css$Svg$Styled$circle = $rtfeldman$elm_css$Svg$Styled$node('circle');
+var $rtfeldman$elm_css$Svg$Styled$Attributes$cx = $rtfeldman$elm_css$VirtualDom$Styled$attribute('cx');
+var $rtfeldman$elm_css$Svg$Styled$Attributes$cy = $rtfeldman$elm_css$VirtualDom$Styled$attribute('cy');
+var $rtfeldman$elm_css$Svg$Styled$Attributes$d = $rtfeldman$elm_css$VirtualDom$Styled$attribute('d');
+var $rtfeldman$elm_css$Svg$Styled$Attributes$fill = $rtfeldman$elm_css$VirtualDom$Styled$attribute('fill');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$opacity_25 = A2($rtfeldman$elm_css$Css$property, 'opacity', '0.25');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$opacity_75 = A2($rtfeldman$elm_css$Css$property, 'opacity', '0.75');
+var $rtfeldman$elm_css$Svg$Styled$path = $rtfeldman$elm_css$Svg$Styled$node('path');
+var $rtfeldman$elm_css$Svg$Styled$Attributes$r = $rtfeldman$elm_css$VirtualDom$Styled$attribute('r');
+var $rtfeldman$elm_css$Svg$Styled$Attributes$stroke = $rtfeldman$elm_css$VirtualDom$Styled$attribute('stroke');
+var $rtfeldman$elm_css$Svg$Styled$Attributes$strokeWidth = $rtfeldman$elm_css$VirtualDom$Styled$attribute('stroke-width');
+var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_1over3 = A2($rtfeldman$elm_css$Css$property, 'width', '33.333333%');
 var $author$project$Main$viewEntityListModelResult = function (model) {
-	switch (model.$) {
+	var _v0 = model.entities;
+	switch (_v0.$) {
 		case 'NotAsked':
 			return $rtfeldman$elm_css$Html$Styled$text('I didn\'t ask');
 		case 'Loading':
-			return $rtfeldman$elm_css$Html$Styled$text('Loading...');
-		case 'Failure':
-			var e = model.a;
 			return A2(
 				$rtfeldman$elm_css$Html$Styled$div,
-				_List_Nil,
-				$author$project$Main$buildFailureMsg(e));
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_1over3]))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$css(
+								_List_fromArray(
+									[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_lg, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex]))
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('Hold on tight!')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$css(
+								_List_fromArray(
+									[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_8]))
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$rtfeldman$elm_css$Svg$Styled$svg,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Svg$Styled$Attributes$css(
+										_List_fromArray(
+											[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$animate_spin, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$h_32, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_32])),
+										$rtfeldman$elm_css$Svg$Styled$Attributes$viewBox('0 0 24 24'),
+										$rtfeldman$elm_css$Svg$Styled$Attributes$fill('none')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Svg$Styled$circle,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Svg$Styled$Attributes$css(
+												_List_fromArray(
+													[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$opacity_25])),
+												$rtfeldman$elm_css$Svg$Styled$Attributes$r('10'),
+												$rtfeldman$elm_css$Svg$Styled$Attributes$cx('12'),
+												$rtfeldman$elm_css$Svg$Styled$Attributes$cy('12'),
+												$rtfeldman$elm_css$Svg$Styled$Attributes$stroke('currentColor'),
+												$rtfeldman$elm_css$Svg$Styled$Attributes$strokeWidth('4')
+											]),
+										_List_Nil),
+										A2(
+										$rtfeldman$elm_css$Svg$Styled$path,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Svg$Styled$Attributes$css(
+												_List_fromArray(
+													[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$opacity_75])),
+												$rtfeldman$elm_css$Svg$Styled$Attributes$fill('currentColor'),
+												$rtfeldman$elm_css$Svg$Styled$Attributes$d('M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z')
+											]),
+										_List_Nil)
+									]))
+							]))
+					]));
+		case 'Failure':
+			var e = _v0.a;
+			return $author$project$Main$buildFailureMsg(e);
 		default:
-			var entityList = model.a;
+			var _v1 = model.chartConfig;
 			return A2(
-				$author$project$Main$setGraphOptions,
-				$author$project$Main$entityListToChartOpts(entityList),
-				_List_Nil);
+				$rtfeldman$elm_css$Html$Styled$div,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_1over3]))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$css(
+								_List_fromArray(
+									[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_lg, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex]))
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$text('I got no options!')
+							])),
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$css(
+								_List_fromArray(
+									[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_8]))
+							]),
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$fromUnstyled(
+								A2($icidasset$elm_material_icons$Material$Icons$warning, 96, $icidasset$elm_material_icons$Material$Icons$Types$Inherit))
+							]))
+					]));
 	}
 };
 var $author$project$Main$view = function (model) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$div,
-		_List_fromArray(
-			[
-				$rtfeldman$elm_css$Html$Styled$Attributes$css(
-				_List_fromArray(
-					[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$bg_gray_50])),
-				A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'display', 'flex')
-			]),
+	return $author$project$Main$homePage(
 		_List_fromArray(
 			[
 				$rtfeldman$elm_css$Css$Global$global($matheus23$elm_default_tailwind_modules$Tailwind$Utilities$globalStyles),
 				A2(
-				$rtfeldman$elm_css$Html$Styled$div,
+				$author$project$Main$mainPage,
+				model.displayWarningModal,
 				_List_fromArray(
 					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$id('graph'),
-						A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'width', '1200px'),
-						A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'height', '800px')
-					]),
-				_List_fromArray(
-					[
-						$author$project$Main$viewEntityListModelResult(model.entities)
-					])),
-				A2(
-				$rtfeldman$elm_css$Html$Styled$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Main$viewAdminModelResult(model.indexing)
+						$author$project$Main$header(model.indexing),
+						$author$project$Main$mainSection(
+						_List_fromArray(
+							[
+								A2(
+								$author$project$Main$sideBar,
+								model.displaySidebar,
+								_List_fromArray(
+									[
+										$author$project$Main$sideBarHeaderPanel(
+										_List_fromArray(
+											[$author$project$Main$sideBarHeader])),
+										$author$project$Main$entityDetails(model.selectedEntity),
+										$author$project$Main$upgradePanel
+									])),
+								$author$project$Main$sideBarShowBtn(model.displaySidebar),
+								$author$project$Main$canvasSection(
+								$author$project$Main$viewEntityListModelResult(model))
+							]))
 					]))
 			]));
 };

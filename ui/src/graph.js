@@ -12,25 +12,30 @@ customElements.define('echart-element',
         constructor() {
             super();
             this._option = null;
-            console.log("contructor called")
         }
 
         render(option) {
           const dom = document.getElementById('graph');
           const instance = echarts.getInstanceByDom(dom);
+          const elem = this;
 
-          console.log("fetched instance: " + instance)
           if (instance) {
-            instance.showLoading();
-            console.log("disposing...instance " + instance)
             echarts.dispose(instance);
           }
-          if (!instance) {
-
-          }
           const chart = echarts.init(dom);
-          console.log("chart init'd..." + chart)
           chart.setOption(option);
+          chart.on('click', {dataType: 'node'}, function (params) {
+            console.log("You clicked " + params.name + ", index: " + params.dataIndex);
+
+            elem.dispatchEvent(
+              new CustomEvent('nodeClick', {
+                bubbles: false,
+                detail: {
+                  id: params.dataIndex,
+                }
+              })
+            )
+          });
         }
 
         connectedCallback () {
@@ -42,7 +47,6 @@ customElements.define('echart-element',
         }
 
         get option () {
-            console.log("get option")
             return this._option
         }
 

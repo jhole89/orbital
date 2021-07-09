@@ -9,7 +9,7 @@ import Json.Decode as Decode exposing (Decoder)
 
 
 type alias Id =
-    Entity.Scalar.Id
+    Entity.Scalar.Entity
 
 
 codecs : Entity.Scalar.Codecs Id

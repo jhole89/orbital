@@ -1,329 +1,26 @@
 module Main exposing (main)
 
-import Admin.Query as AdminQuery
+import AdminHelpers exposing (AdminResponse, rebuildQuery)
+import Array
 import Browser
 import Css
-import Debug
-import Entity.Object
-import Entity.Object.Entity as Entity
-import Entity.Query as EntityQuery
-import Entity.Scalar exposing (Id(..))
+import ECharts exposing (ChartOptions, GraphEdgeItemOption, GraphNodeItemOption, encodeChartOptions)
 import Graphql.Http exposing (Error, HttpError(..))
 import Graphql.Http.GraphqlError exposing (GraphqlError, PossiblyParsedData(..))
-import Graphql.Operation exposing (RootQuery)
-import Graphql.OptionalArgument as OptionalArgument
-import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
-import Html.Styled.Events exposing (onClick)
-import Http
-import Json.Encode as Encode
-import List
-import List.Extra
+import EntityHelpers exposing (Entity, EntityListResponse, listEntitiesQuery, toString)
+import Html.Styled.Events as Events
+import Json.Decode as Decode exposing (errorToString)
 import Material.Icons as Icons
 import Material.Icons.Types exposing (Coloring(..), Icon)
 import RemoteData exposing (RemoteData)
-import Entity.Object.Entity as Entity
 import Svg.Styled as Svg
-import Svg.Styled.Attributes exposing (css, d, r, viewBox)
+import Svg.Styled.Attributes as SvgAttr
 import Tailwind.Utilities as Tw
-import Css.Global
-import Html.Styled as Html exposing (Attribute)
-import Html.Styled.Attributes as Attr
-
--- INBOUND TYPES
-
-type alias Data =
-    { nodes: List GraphNodeItemOption
-    , links: List GraphEdgeItemOption
-    , categories: List CategoryItemOption
-    }
-
-type alias GraphEdgeItemOption =
-    { source: String
-    , target: String
-    }
-
-type alias GraphNodeItemOption =
-    { name: Maybe String
-    , value: Float
-    , x: Maybe Float
-    , y: Maybe Float
-    , category: Maybe Int
-    , symbolSize: Maybe Float
-    , label: Maybe LabelOption
-    }
-
-type alias CategoryItemOption =
-    { name: String
-    }
-
-type alias Entity =
-    { id : Id
-    , name : String
-    , context : String
-    , connections: List String
-    }
-
-type alias AdminResponse =
-    Maybe String
-
-type alias EntityResponse =
-    Entity
-
-type alias EntityListResponse =
-    List EntityResponse
-
-
--- TARGET TYPES
-
-type alias ChartOptions =
-    { title: Maybe TitleOption
-    , tooltip: Maybe TooltipOption
-    , legend: List LegendOption
-    , series: List SeriesOption
-    }
-
-type alias TitleOption =
-    { text: String
-    , subtext: String
-    , top: String
-    , left: String
-    }
-
-type alias TooltipOption =
-    { show: Bool
-    }
-
-type alias LegendOption =
-    { data: List String
-    }
-
-type alias SeriesOption =
-    { animation: Maybe Bool
-    , categories: List CategoryItemOption
-    , data: List GraphNodeItemOption
-    , draggable: Maybe Bool
-    , emphasis: Maybe EmphasisOption
-    , force: Maybe ForceOption
-    , label: Maybe LabelOption
-    , layout: String
-    , lineStyle: Maybe LineStyleOption
-    , links: List GraphEdgeItemOption
-    , name: Maybe String
-    , roam: Maybe Bool
-    , type_: String
-    }
-
-type alias LabelOption =
-    { position: Maybe String
-    , formatter: Maybe String
-    , show: Maybe Bool
-    }
-
-type alias LineStyleOption =
-    { color: Maybe String
-    , curveness: Maybe Float
-    , width: Maybe Int
-    }
-
-type alias EmphasisOption =
-    { focus: String
-    , lineStyle: LineStyleOption
-    }
-
-type alias ForceOption =
-    { edgeLength: Maybe Int
-    , friction: Maybe Float
-    , gravity: Maybe Float
-    , layoutAnimation: Maybe Bool
-    , repulsion: Maybe Int
-    }
-
-entitySelection : SelectionSet Entity Entity.Object.Entity
-entitySelection =
-    SelectionSet.succeed Entity
-        |> with Entity.id
-        |> with Entity.name
-        |> with Entity.context
-        |> with (Entity.connections (\_ -> {id = OptionalArgument.Absent, context = OptionalArgument.Absent} ) Entity.name)
-
-
--- ENCODERS
-
-encodeChartOptions : ChartOptions -> Encode.Value
-encodeChartOptions chartOptions =
-    (Encode.object << List.filterMap identity)
-        [ chartOptions.title |> Maybe.andThen (\title -> Just ( "title", titleOptionEncoder title ))
-        , chartOptions.tooltip |> Maybe.andThen (\t -> Just ( "tooltip", tooltipOptionEncoder t ))
-        , Just( "legend", Encode.list legendOptionEncoder chartOptions.legend)
-        , Just( "series", Encode.list seriesOptionEncoder chartOptions.series )
-        ]
-
-titleOptionEncoder : TitleOption -> Encode.Value
-titleOptionEncoder titleOption =
-    Encode.object
-        [ ( "text", Encode.string titleOption.text )
-        , ( "subtext", Encode.string titleOption.subtext )
-        , ( "top", Encode.string titleOption.top )
-        , ( "left", Encode.string titleOption.left )
-        ]
-
-tooltipOptionEncoder : TooltipOption -> Encode.Value
-tooltipOptionEncoder tooltipOption =
-    Encode.object
-        [ ("show", Encode.bool tooltipOption.show )
-        ]
-
-legendOptionEncoder : LegendOption -> Encode.Value
-legendOptionEncoder legendOption = Encode.object [ ( "data", Encode.list Encode.string legendOption.data ) ]
-
-seriesOptionEncoder : SeriesOption -> Encode.Value
-seriesOptionEncoder seriesOption =
-    (Encode.object << List.filterMap identity)
-        [ seriesOption.animation |> Maybe.andThen (\a -> Just ("animation", Encode.bool a))
-        , Just ( "categories", Encode.list categoryItemOptionEncoder seriesOption.categories )
-        , Just ( "data", Encode.list graphNodeItemOptionEncoder seriesOption.data )
-        , seriesOption.draggable |> Maybe.andThen (\d -> Just ( "draggable", Encode.bool d))
-        , seriesOption.emphasis |> Maybe.andThen (\e -> Just ( "emphasis", emphasisOptionEncoder e ))
-        , seriesOption.force |> Maybe.andThen (\f -> Just ("force", forceOptionEncoder f ))
-        , seriesOption.label |> Maybe.andThen (\l -> Just ( "label", labelOptionEncoder l ))
-        , Just ( "layout", Encode.string seriesOption.layout )
-        , seriesOption.lineStyle |> Maybe.andThen (\ls -> Just ( "lineStyle", lineStyleOptionEncoder ls ))
-        , Just ( "links", Encode.list graphEdgeItemOptionEncoder seriesOption.links )
-        , seriesOption.name |> Maybe.andThen (\n -> Just ( "name", Encode.string n ))
-        , seriesOption.roam |> Maybe.andThen (\r -> Just ("roam", Encode.bool r ))
-        , Just ( "type", Encode.string seriesOption.type_ )
-        ]
-
-labelOptionEncoder : LabelOption -> Encode.Value
-labelOptionEncoder labelOption =
-    (Encode.object << List.filterMap identity)
-        [ labelOption.position |> Maybe.andThen (\p -> Just ( "position", Encode.string p ))
-        , labelOption.formatter |> Maybe.andThen (\f -> Just ( "formatter", Encode.string f ))
-        , labelOption.show |> Maybe.andThen (\s -> Just ( "show", Encode.bool s ))
-        ]
-
-lineStyleOptionEncoder : LineStyleOption -> Encode.Value
-lineStyleOptionEncoder lineStyleOption =
-    (Encode.object << List.filterMap identity)
-        [ lineStyleOption.color
-            |> Maybe.andThen (\color -> Just ( "color", Encode.string color ))
-        , lineStyleOption.curveness
-            |> Maybe.andThen (\curveness -> Just ( "curveness", Encode.float curveness ))
-        , lineStyleOption.width
-            |> Maybe.andThen (\width -> Just ( "width", Encode.int width ))
-        ]
-
-emphasisOptionEncoder : EmphasisOption -> Encode.Value
-emphasisOptionEncoder emphasisOption =
-    Encode.object
-        [ ( "focus", Encode.string emphasisOption.focus )
-        , ( "lineStyle", lineStyleOptionEncoder emphasisOption.lineStyle)
-        ]
-
-forceOptionEncoder : ForceOption -> Encode.Value
-forceOptionEncoder forceOption =
-    (Encode.object << List.filterMap identity)
-        [ forceOption.edgeLength |> Maybe.andThen (\el -> Just ("edgeLength", Encode.int el))
-        , forceOption.friction |> Maybe.andThen (\f -> Just ("friction", Encode.float f))
-        , forceOption.gravity |> Maybe.andThen (\g -> Just ("gravity", Encode.float g))
-        , forceOption.layoutAnimation |> Maybe.andThen (\la -> Just ("layoutAnimation", Encode.bool la))
-        , forceOption.repulsion |> Maybe.andThen (\r -> Just ("repulsion", Encode.int r))
-        ]
-
-graphNodeItemOptionEncoder : GraphNodeItemOption -> Encode.Value
-graphNodeItemOptionEncoder gnio =
-    (Encode.object << List.filterMap identity)
-        [ gnio.name |> Maybe.andThen (\n -> Just( "name", Encode.string n ))
-        , Just( "value", Encode.float gnio.value )
-        , gnio.x |> Maybe.andThen (\x -> Just ( "x", Encode.float x ))
-        , gnio.y |> Maybe.andThen (\y -> Just ( "y", Encode.float y ))
-        , gnio.category |> Maybe.andThen (\c -> Just( "category", Encode.int c ))
-        , gnio.symbolSize |> Maybe.andThen (\s -> Just ( "symbolSize", Encode.float s ))
-        , gnio.label |> Maybe.andThen (\l -> Just ("label", labelOptionEncoder l))
-        ]
-
-graphEdgeItemOptionEncoder : GraphEdgeItemOption -> Encode.Value
-graphEdgeItemOptionEncoder graphEdgeItemOption =
-    Encode.object
-        [ ( "source", Encode.string graphEdgeItemOption.source )
-        , ( "target", Encode.string graphEdgeItemOption.target )
-        ]
-
-categoryItemOptionEncoder : CategoryItemOption -> Encode.Value
-categoryItemOptionEncoder categoryItemOption =
-    Encode.object
-        [ ( "name", Encode.string categoryItemOption.name ) ]
-
--- FUNCTIONS
-
-entityListToChartOpts : EntityListResponse -> ChartOptions
-entityListToChartOpts entityList =
-    let
-        categories = List.sort (List.Extra.unique (List.map (\e -> e.context) entityList))
-    in
-        { title = Nothing
-        , legend = [{ data = categories }]
-        , tooltip =
-            Just { show = False
-            }
-        , series = [
-            { animation = Just True
-            , categories = List.map (\c -> { name = c }) categories
-            , data = List.map (entityToGraphNodeItemOption categories) entityList
-            , draggable = Just True
-            , emphasis = Nothing
-            , force =
-                Just
-                    { edgeLength = Just 100
-                    , friction = Just 0.2
-                    , gravity = Just 0.2
-                    , layoutAnimation = Just True
-                    , repulsion = Just 50
-                    }
-            , label =
-                Just
-                    { position = Just "right"
-                    , formatter = Just "{b}"
-                    , show = Nothing
-                    }
-            , layout = "force"
-            , lineStyle = Nothing
-            , links = List.concatMap entityToGraphEdgeItemOption entityList
-            , name = Nothing
-            , roam = Just True
-            , type_ = "graph"
-            }]
-        }
-
-
-entityToGraphNodeItemOption : List String -> Entity -> GraphNodeItemOption
-entityToGraphNodeItemOption l e =
-    { name = Just e.name
-    , category = List.Extra.elemIndex e.context l
-    , value = 1
-    , x = Nothing
-    , y = Nothing
-    , symbolSize = Just 20
-    , label = Nothing
-    }
-
-entityToGraphEdgeItemOption: Entity -> List GraphEdgeItemOption
-entityToGraphEdgeItemOption e =
-    List.map (\c -> { source = e.name, target = c}) e.connections
-
-
--- GRAPHQL
-
-
-rebuildQuery : SelectionSet AdminResponse RootQuery
-rebuildQuery = AdminQuery.rebuild
-
-listEntitiesQuery : SelectionSet EntityListResponse RootQuery
-listEntitiesQuery = EntityQuery.list ( entitySelection )
-
-getEntityQuery : String -> SelectionSet (Maybe EntityResponse) RootQuery
-getEntityQuery id =
-    EntityQuery.entity { id = (Id id) } entitySelection
+import Tailwind.Breakpoints as Bp
+import Css.Global exposing (global)
+import Html.Styled as Html
+import Html.Styled.Attributes as HtmlAttr
+import Utilities exposing (entityListToChartOpts)
 
 
 makeListEntitiesQuery : Cmd Msg
@@ -347,12 +44,11 @@ sendRebuildQuery =
             )
 
 
-
 -- ELM ARCHITECTURE
 
 main : Program () Model Msg
 main =
-  Browser.element
+    Browser.element
     { init = init
     , view = view >> Html.toUnstyled
     , update = update
@@ -363,51 +59,114 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { entities = RemoteData.Loading
-      , indexing = RemoteData.NotAsked
-      }
+    ( initModelState
     , makeListEntitiesQuery
     )
+
+initModelState : Model
+initModelState =
+    { entities = RemoteData.Loading
+    , indexing = RemoteData.NotAsked
+    , chartConfig = NoOpt
+    , selectedEntity = NoEnt
+    , idReferences = []
+    , displaySidebar = True
+    , displayWarningModal = False
+    }
 
 -- MODEL
 
 type alias EntityListModel = RemoteData (Graphql.Http.Error ()) EntityListResponse
 type alias AdminModel = RemoteData (Graphql.Http.Error ()) AdminResponse
 
+type alias IdReferenceIndex = List Entity
+type alias SidebarDisplayModel = Bool
+type alias WarningDisplayModel = Bool
+
+type ChartOptionsModel =
+    ChartConfig ChartOptions
+    | NoOpt
+type SelectedEntityModel =
+    Selected Entity
+    | NoEnt
+
 type alias Model =
     { entities: EntityListModel
     , indexing: AdminModel
+    , chartConfig: ChartOptionsModel
+    , idReferences: IdReferenceIndex
+    , selectedEntity: SelectedEntityModel
+    , displaySidebar: SidebarDisplayModel
+    , displayWarningModal: WarningDisplayModel
     }
 
 -- UPDATE
 
 
-type Msg
-    = FetchEntityList
-    | GotEntityListResponse EntityListModel
+type Msg =
+    GotEntityListResponse EntityListModel
     | FetchAdminResponse
     | GotAdminResponse AdminModel
+    | GotId Int
+    | SelectEntity SelectedEntityModel
+    | ShowSidebar Bool
+    | ShowWarningModal Bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FetchEntityList ->
-            ( { entities = RemoteData.Loading
-              , indexing = RemoteData.NotAsked
-              }
-            , makeListEntitiesQuery
-            )
         GotEntityListResponse entityModel ->
-            ( { model | entities = entityModel }
-            , Cmd.none
-            )
+            case entityModel of
+                RemoteData.Success entityListResponse ->
+                    ( { model
+                        | entities = entityModel
+                        , chartConfig = ChartConfig (entityListToChartOpts entityListResponse)
+                        , idReferences = entityListResponse
+                      }
+                      , Cmd.none
+                    )
+                _ ->
+                    ( { model | entities = entityModel }
+                    , Cmd.none
+                    )
         FetchAdminResponse ->
             ( { model | indexing = RemoteData.Loading }
             , sendRebuildQuery
             )
         GotAdminResponse adminModel ->
-            ( { model | indexing = adminModel }
+            case adminModel of
+                RemoteData.Success _ ->
+                    ( { model
+                        | indexing = adminModel
+                        , entities = RemoteData.NotAsked
+                      }
+                    , makeListEntitiesQuery
+                    )
+                _ ->
+                    ( { model | indexing = adminModel }
+                    , Cmd.none
+                    )
+        GotId value ->
+            case model.idReferences |> Array.fromList |> Array.get value of
+                Just entity ->
+                    ( { model | selectedEntity = Selected entity }
+                    , Cmd.none
+                    )
+                Nothing ->
+                    ( { model | selectedEntity = NoEnt }
+                    , Cmd.none
+                    )
+        SelectEntity selectedEntityModel ->
+            ( { model | selectedEntity = selectedEntityModel }
+            , Cmd.none
+            )
+        ShowSidebar status ->
+            ( { model | displaySidebar = status }
+            , Cmd.none
+            )
+        ShowWarningModal status ->
+            ( { model | displayWarningModal = status }
             , Cmd.none
             )
 
@@ -417,133 +176,161 @@ update msg model =
 
 view : Model -> Html.Html Msg
 view model =
-    Html.div
-        [ Attr.css
-            [ Tw.bg_gray_50 ]
-        , Attr.style "display" "flex"
-        ]
-        [ Css.Global.global Tw.globalStyles
-        , Html.div
-            [ Attr.id "graph"
-            , Attr.style "width" "1200px"
-            , Attr.style "height" "800px"
-            ]
-            [ viewEntityListModelResult model.entities
-            ]
-        , Html.div [] [ viewAdminModelResult model.indexing ]
-        ]
-
-viewEntityListModelResult : EntityListModel -> Html.Html Msg
-viewEntityListModelResult model =
-    case model of
-        RemoteData.NotAsked ->
-            Html.text "I didn't ask"
-
-        RemoteData.Loading ->
-            Html.text "Loading..."
-
-        RemoteData.Failure e ->
-            Html.div [] (buildFailureMsg e)
-
-        RemoteData.Success entityList ->
-            setGraphOptions (entityListToChartOpts entityList) []
-
-setGraphOptions : ChartOptions -> List (Html.Html msg) -> Html.Html msg
-setGraphOptions chartOptions =
-    Html.node "echart-element" [ Attr.property "option" <| encodeChartOptions chartOptions ]
-
-
-buildFailureMsg: Error parsedData -> List (Html.Html Msg)
-buildFailureMsg parsedData =
-    case parsedData of
-        Graphql.Http.GraphqlError _ graphqlErrors ->
-            List.map (\err -> buildErrorMsg "Graphql Error" err.message) graphqlErrors
-
-        Graphql.Http.HttpError httpError ->
-            [ buildErrorMsg "Http Error" (buildHttpErrorMessage httpError) ]
-
-buildErrorMsg: String -> String -> Html.Html Msg
-buildErrorMsg eType eMsg =
-    Html.div
-        [ Attr.css
-            [ Tw.flex
-            , Tw.bg_red_200
-            , Tw.p_4
-            ]
-        ]
-        [ Html.div
-            [ Attr.css [ Tw.mr_4 ] ]
-            [ Html.div
-                [ Attr.css
-                    [ Tw.h_10
-                    , Tw.w_10
-                    , Tw.text_white
-                    , Tw.bg_red_600
-                    , Tw.rounded_full
-                    , Tw.flex
-                    , Tw.justify_center
-                    , Tw.items_center
+    homePage
+        [ global Tw.globalStyles
+        , mainPage model.displayWarningModal
+            [ header model.indexing
+            , mainSection
+                [ sideBar
+                    model.displaySidebar
+                    [ sideBarHeaderPanel
+                        [ sideBarHeader ]
+                    , entityDetails model.selectedEntity
+                    , upgradePanel
                     ]
-                ]
-                [ Html.fromUnstyled (Icons.warning 24 Inherit) ]
-            ]
-        , Html.div
-            [ Attr.css
-                [ Tw.flex
-                , Tw.justify_between
-                , Tw.w_full
+                , sideBarShowBtn model.displaySidebar
+                , canvasSection
+                    <| viewEntityListModelResult
+                    <| model
                 ]
             ]
-            [ Html.div
-                [ Attr.css [ Tw.text_red_600 ] ]
-                [ Html.p
-                    [ Attr.css
-                        [ Tw.mb_2
-                        , Tw.font_bold
+        ]
+
+homePage : List (Html.Html Msg) -> Html.Html Msg
+homePage contents =
+    Html.div
+        [ HtmlAttr.css
+            [ Tw.flex
+            , Tw.flex_col
+            , Bp.md [ Tw.flex_row ]
+            ]
+        ] contents
+
+mainPage : WarningDisplayModel -> List (Html.Html Msg) -> Html.Html Msg
+mainPage model contents =
+    case model of
+        True ->
+            Html.div [][]
+        False ->
+            Html.div
+                [ HtmlAttr.css
+                    [ Tw.w_full
+                    , Tw.flex
+                    , Tw.flex_col
+                    , Tw.h_screen
+                    , Tw.overflow_y_hidden
+                    , Tw.bg_gray_300
+                    ]
+                ] contents
+
+
+-- SIDEBAR
+
+sideBar: SidebarDisplayModel -> List (Html.Html Msg) -> Html.Html Msg
+sideBar model contents =
+    case model of
+        True ->
+            Html.aside
+                [ HtmlAttr.css
+                    [ Tw.relative
+                    , Tw.bg_white
+                    , Tw.rounded_md
+                    , Tw.h_full
+                    , Tw.w_96
+                    , Tw.flex
+                    , Tw.hidden
+                    , Bp.sm
+                        [ Tw.block
+                        , Tw.shadow_xl
                         ]
                     ]
-                    [ Html.text eType ]
-                , Html.p [ Attr.css [ Tw.text_xs ] ] [ Html.text eMsg ]
-                ]
-            , Html.div
-                [ Attr.css
-                    [ Tw.text_sm
-                    , Tw.text_gray_500
-                    ]
-                ]
-                [ Html.button [] [ Html.text "x" ] ]
+                ] contents
+        False ->
+            Html.aside [][]
+
+sideBarHeaderPanel : List (Html.Html Msg) -> Html.Html Msg
+sideBarHeaderPanel contents =
+    Html.div
+        [ HtmlAttr.css
+            [ Tw.flex
+            , Tw.bg_blue_500
+            , Tw.justify_between
+            , Bp.sm [ Tw.px_6 ]
+            ]
+        ] contents
+
+sideBarHeader : Html.Html Msg
+sideBarHeader =
+    Html.h2
+        [ HtmlAttr.css
+            [ Tw.p_6
+            , Tw.text_xl
+            , Tw.font_bold
+            , Tw.text_white
+            , Tw.content_center
+            , Css.hover [ Tw.text_gray_300 ]
+            ]
+        ]
+        [ Html.text "Telescope" ]
+
+sideBarShowBtn : SidebarDisplayModel -> Html.Html Msg
+sideBarShowBtn model =
+    case model of
+        True ->
+            sideBarShowBtnElement (ShowSidebar False) "<"
+        False ->
+            sideBarShowBtnElement (ShowSidebar True) ">"
+
+sideBarShowBtnElement : Msg -> String -> Html.Html Msg
+sideBarShowBtnElement onClickEventMsg displayText =
+    Html.button
+        [ sideBarShowBtnStyle
+        , Events.onClick onClickEventMsg
+        ]
+        [ Html.text displayText ]
+
+sideBarShowBtnStyle : Html.Attribute Msg
+sideBarShowBtnStyle =
+    HtmlAttr.css
+        [ Tw.bg_blue_700
+        , Tw.z_50
+        , Tw.mt_1
+        , Tw.py_3
+        , Tw.px_2
+        , Tw.h_16
+        , Tw.text_xl
+        , Tw.font_bold
+        , Tw.text_white
+        , Tw.rounded_r_lg
+        , Tw.flex
+        , Css.hover [ Tw.bg_blue_900 ]
+        , Css.focus
+            [ Tw.outline_none
+            , Tw.ring
+            , Tw.ring_blue_500
             ]
         ]
 
-
-buildHttpErrorMessage : HttpError -> String
-buildHttpErrorMessage httpError =
-    case httpError of
-        Graphql.Http.BadUrl message ->
-            message
-
-        Graphql.Http.Timeout ->
-            "Server is taking too long to respond. Please try again later."
-
-        Graphql.Http.NetworkError ->
-            "Unable to reach server."
-
-        Graphql.Http.BadStatus metadata body ->
-            "Request failed with status code: " ++ String.fromInt metadata.statusCode ++ ". Error: " ++ body
-
-        Graphql.Http.BadPayload error ->
-            "Bad payload received: " ++ Debug.toString error
+rebuildBtn : AdminModel -> Html.Html Msg
+rebuildBtn model =
+    Html.div
+        [ HtmlAttr.css
+            [ Tw.flex
+            , Tw.p_2
+            ]
+        ]
+        [ viewAdminModelResult model ]
 
 viewAdminModelResult : AdminModel -> Html.Html Msg
 viewAdminModelResult model =
     case model of
         RemoteData.NotAsked ->
             Html.button
-                [ rebuildBtnStyle 
+                [ rebuildBtnStyle
                     [ Tw.bg_blue_500 ]
                     ( Css.hover [ Tw.bg_blue_700 ] )
                     ( rebuildBtnFocusStyle [ Tw.ring_blue_500, Tw.ring_offset_blue_200 ] )
-                , onClick FetchAdminResponse
+                , Events.onClick FetchAdminResponse
                 ]
                 ( rebuildBtnSvg rebuildBtnLogoStyle Icons.build "Rebuild" )
 
@@ -562,7 +349,7 @@ viewAdminModelResult model =
                     [ Tw.bg_red_500 ]
                     ( Css.hover [ Tw.bg_red_700 ] )
                     ( rebuildBtnFocusStyle [ Tw.ring_red_500, Tw.ring_offset_red_200 ] )
-                , onClick FetchAdminResponse
+                , Events.onClick FetchAdminResponse
                 ]
                 ( rebuildBtnSvg rebuildBtnLogoStyle Icons.error_outline ("Error: " ++ Debug.toString e) )
 
@@ -572,14 +359,14 @@ viewAdminModelResult model =
                     [ Tw.bg_green_500 ]
                     ( Css.hover [ Tw.bg_green_700 ] )
                     ( rebuildBtnFocusStyle [ Tw.ring_green_500, Tw.ring_offset_green_200 ] )
-                , onClick FetchEntityList
+                , Events.onClick FetchAdminResponse
                 ]
                 (rebuildBtnSvg rebuildBtnLogoStyle Icons.check_circle_outline "Rebuilt")
 
-rebuildBtnStyle : List (Css.Style) -> Css.Style -> Css.Style -> Attribute msg
+rebuildBtnStyle : List (Css.Style) -> Css.Style -> Css.Style -> Html.Attribute msg
 rebuildBtnStyle cssStyles hoverStyle focusStyle =
-    Attr.css
-        ( cssStyles ++ 
+    HtmlAttr.css
+        ( cssStyles ++
             [ Tw.flex
             , Tw.items_center
             , Tw.shadow
@@ -594,19 +381,19 @@ rebuildBtnStyle cssStyles hoverStyle focusStyle =
 
 rebuildBtnFocusStyle: List (Css.Style) -> Css.Style
 rebuildBtnFocusStyle focusStyles =
-    Css.focus 
+    Css.focus
         ( focusStyles ++
             [ Tw.outline_none
             , Tw.ring_2
             , Tw.ring_offset_2
-            ] 
+            ]
         )
 
 rebuildBtnSvg : List (Css.Style) -> Icon msg -> String -> List (Html.Html msg)
 rebuildBtnSvg cssStyle icon displayText =
     [ Svg.svg
-        [ css cssStyle
-        , viewBox "0 0 24 24"
+        [ SvgAttr.css cssStyle
+        , SvgAttr.viewBox "0 0 24 24"
         ]
         [ Html.fromUnstyled (icon 24 Inherit) ]
     , Html.text displayText
@@ -617,4 +404,482 @@ rebuildBtnLogoStyle =
     [ Tw.h_5
     , Tw.w_5
     , Tw.mr_3
+    ]
+
+upgradePanel : Html.Html Msg
+upgradePanel =
+    Html.div
+        [ HtmlAttr.css
+            [ Tw.text_white
+            , Tw.text_base
+            , Tw.font_semibold
+            , Tw.pt_3
+            ]
+        ]
+        [ Html.a
+            [ HtmlAttr.css
+                [ Tw.absolute
+                , Tw.w_full
+                , Tw.bottom_0
+                , Tw.bg_blue_700
+                , Tw.text_white
+                , Tw.flex
+                , Tw.items_center
+                , Tw.justify_center
+                , Tw.py_4
+                ]
+            ]
+            [ Html.text "Upgrade to Pro!" ]
+        ]
+
+
+header : AdminModel -> Html.Html Msg
+header model =
+    Html.header
+        [ HtmlAttr.css
+            [ Tw.w_full
+            , Tw.items_center
+            , Tw.bg_white
+            , Tw.py_2
+            , Tw.px_6
+            , Tw.hidden
+            , Bp.sm [ Tw.flex ]
+            ]
+        ]
+        [ rebuildBtn model
+        , Html.div
+            [ HtmlAttr.css
+                [ Tw.w_5over6
+                , Tw.justify_center
+                , Tw.flex
+                , Tw.text_blue_500
+                , Tw.text_3xl
+                , Tw.font_semibold
+                ]
+            ]
+            [ Html.text "Orbital" ]
+        , Html.div
+            [ HtmlAttr.css
+                [ Tw.relative
+                , Tw.w_1over6
+                , Tw.flex
+                , Tw.justify_end
+                ]
+            ]
+            [ Html.button
+                [ HtmlAttr.css
+                    [ Tw.relative
+                    , Tw.w_12
+                    , Tw.h_12
+                    , Tw.rounded_full
+                    , Tw.overflow_hidden
+                    , Tw.border_4
+                    , Tw.border_gray_400
+                    , Css.hover
+                        [ Tw.cursor_default
+                        , Tw.border_gray_300
+                        ]
+                    , Css.focus
+                        [ Tw.border_gray_300
+                        , Tw.outline_none
+                        ]
+                    ]
+                ]
+                [ Html.img [ HtmlAttr.src "https://source.unsplash.com/uJ8LNVCBjFQ/400x400" ][] ]
+            ]
+        ]
+
+mainSection : List (Html.Html Msg) -> Html.Html Msg
+mainSection canvas =
+    Html.div
+        [ HtmlAttr.css
+            [ Tw.bg_gray_200
+            , Tw.w_full
+            , Tw.overflow_hidden
+            , Tw.h_full
+            , Tw.border_t
+            , Tw.flex
+            , Tw.flex_row
+            ]
+        ]
+        [ Html.main_
+            [ HtmlAttr.css
+                [ Tw.w_full
+                , Tw.h_full
+                , Tw.flex
+                , Tw.flex_grow
+                , Tw.pt_6
+                , Tw.pr_6
+                , Tw.pb_6
+                , Tw.flex_row
+                , Tw.flex_auto
+                ]
+            ]
+            canvas
+        ]
+
+canvasSection : Html.Html Msg -> Html.Html Msg
+canvasSection content =
+    Html.div
+        [ HtmlAttr.css
+            [ Tw.bg_white
+            , Tw.rounded_md
+            , Tw.shadow_xl
+            , Tw.flex
+            , Tw.flex_auto
+            , Tw.flex_wrap
+            , Tw.w_2over3
+            , Tw.ml_1
+            , Tw.p_6
+            , Tw.overflow_hidden
+            , Bp.lg [ Tw.pr_2 ]
+            ]
+        ]
+        [ Html.div
+            [ HtmlAttr.id "graph"
+            , HtmlAttr.css
+                [ Tw.flex
+                , Tw.w_screen
+                , Tw.content_center
+                , Tw.justify_center
+                , Tw.items_center
+                , Tw.overflow_hidden
+                ]
+            ]
+            [ content ]
+        ]
+
+viewEntityListModelResult : Model -> Html.Html Msg
+viewEntityListModelResult model =
+    case model.entities of
+        RemoteData.NotAsked ->
+            Html.text "I didn't ask"
+
+        RemoteData.Loading ->
+            Html.div
+                [ HtmlAttr.css
+                    [ Tw.w_1over3
+                    ]
+                ]
+                [ Html.div
+                    [ HtmlAttr.css
+                        [ Tw.w_full
+                        , Tw.text_center
+                        , Tw.justify_center
+                        , Tw.text_lg
+                        , Tw.inline_flex
+                        ]
+                    ]
+                    [ Html.text "Hold on tight!" ]
+                , Html.div
+                    [ HtmlAttr.css
+                        [ Tw.w_full
+                        , Tw.justify_center
+                        , Tw.inline_flex
+                        , Tw.flex
+                        , Tw.pt_8
+                        ]
+                    ]
+                    [ Svg.svg
+                        [ SvgAttr.css
+                            [ Tw.animate_spin
+                            , Tw.h_32
+                            , Tw.w_32
+                            ]
+                        , SvgAttr.viewBox "0 0 24 24"
+                        , SvgAttr.fill "none"
+                        ]
+                        [ Svg.circle
+                            [ SvgAttr.css
+                                [ Tw.opacity_25 ]
+                            , SvgAttr.r "10"
+                            , SvgAttr.cx "12"
+                            , SvgAttr.cy "12"
+                            , SvgAttr.stroke "currentColor"
+                            , SvgAttr.strokeWidth "4"
+                            ]
+                            []
+                        , Svg.path
+                            [ SvgAttr.css
+                                [ Tw.opacity_75 ]
+                            , SvgAttr.fill "currentColor"
+                            , SvgAttr.d "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ]
+                            []
+                        ]
+                    ]
+                ]
+
+        RemoteData.Failure e ->
+            buildFailureMsg e
+
+        RemoteData.Success _ ->
+            case model.chartConfig of
+                --ChartConfig chartOpts ->
+                --    setGraphOptions chartOpts []
+                _ ->
+                    Html.div
+                        [ HtmlAttr.css
+                            [ Tw.w_1over3
+                            ]
+                        ]
+                        [ Html.div
+                            [ HtmlAttr.css
+                                [ Tw.w_full
+                                , Tw.text_center
+                                , Tw.justify_center
+                                , Tw.text_lg
+                                , Tw.inline_flex
+                                ]
+                            ]
+                            [ Html.text "I got no options!" ]
+                        , Html.div
+                            [ HtmlAttr.css
+                                [ Tw.w_full
+                                , Tw.justify_center
+                                , Tw.inline_flex
+                                , Tw.flex
+                                , Tw.pt_8
+                                ]
+                            ]
+                            [ Html.fromUnstyled (Icons.warning 96 Inherit)
+                            ]
+                        ]
+
+setGraphOptions : ChartOptions -> List (Html.Html Msg) -> Html.Html Msg
+setGraphOptions chartOptions =
+    Html.node "echart-element"
+    [ HtmlAttr.property "option" <| encodeChartOptions <| chartOptions
+    , onNodeClick GotId
+    ]
+
+onNodeClick : (Int -> a) -> Html.Attribute a
+onNodeClick event =
+    Events.on "nodeClick"
+        <| Decode.map event detailDataIndexDecoder
+
+detailDataIndexDecoder: Decode.Decoder Int
+detailDataIndexDecoder =
+    Decode.at [ "detail", "id" ] Decode.int
+
+buildFailureMsg: Error parsedData -> Html.Html Msg
+buildFailureMsg parsedData =
+    case parsedData of
+        Graphql.Http.GraphqlError _ graphqlErrors ->
+            buildErrorMsg "Graphql Error" (List.map .message graphqlErrors)
+
+        Graphql.Http.HttpError httpError ->
+            buildErrorMsg "Http Error" [ buildHttpErrorMessage httpError ]
+
+buildErrorMsg: String -> List (String) -> Html.Html Msg
+buildErrorMsg eType eMsgs =
+    Html.div
+        [ HtmlAttr.css
+            [ Tw.flex
+            , Tw.bg_red_200
+            , Tw.p_4
+            ]
+        ]
+        [ Html.div
+            [ HtmlAttr.css [ Tw.mr_4 ] ]
+            [ Html.div
+                [ HtmlAttr.css
+                    [ Tw.h_10
+                    , Tw.w_10
+                    , Tw.text_white
+                    , Tw.bg_red_600
+                    , Tw.rounded_full
+                    , Tw.flex
+                    , Tw.justify_center
+                    , Tw.items_center
+                    ]
+                ]
+                [ Html.fromUnstyled (Icons.warning 24 Inherit) ]
+            ]
+        , Html.div
+            [ HtmlAttr.css
+                [ Tw.flex
+                , Tw.justify_between
+                , Tw.w_full
+                ]
+            ]
+            [ Html.div
+                [ HtmlAttr.css [ Tw.text_red_600 ] ]
+                [ Html.p
+                    [ HtmlAttr.css
+                        [ Tw.mb_2
+                        , Tw.font_bold
+                        , Tw.text_lg
+                        ]
+                    ]
+                    [ Html.text eType ]
+                , Html.ul
+                    [ HtmlAttr.css
+                        [ Tw.text_base ]
+                    ]
+                    (List.map (\msg -> Html.li [][ Html.text msg ]) eMsgs)
+                ]
+            , Html.div
+                [ HtmlAttr.css
+                    [ Tw.text_sm
+                    , Tw.text_gray_500
+                    ]
+                ]
+                [ Html.button [] [ Html.fromUnstyled (Icons.refresh 24 Inherit) ] ]
+            ]
+        ]
+
+buildHttpErrorMessage : HttpError -> String
+buildHttpErrorMessage httpError =
+    case httpError of
+        Graphql.Http.BadUrl message ->
+            message
+
+        Graphql.Http.Timeout ->
+            "Server is taking too long to respond. Please try again later."
+
+        Graphql.Http.NetworkError ->
+            "Unable to reach server."
+
+        Graphql.Http.BadStatus metadata body ->
+            "Request failed with status code: " ++ String.fromInt metadata.statusCode ++ ". Error: " ++ body
+
+        Graphql.Http.BadPayload error ->
+            "Bad payload received: " ++ errorToString error
+
+entityDetails : SelectedEntityModel -> Html.Html Msg
+entityDetails model =
+    case model of
+        Selected entity ->
+            Html.div
+                [ HtmlAttr.css
+                    [ Tw.relative
+                    , Tw.flex
+                    , Tw.flex_auto
+                    , Tw.w_full
+                    ]
+                ]
+                [ Html.div
+                    [ HtmlAttr.css
+                        [ Tw.relative
+                        , Tw.w_screen
+                        , Tw.max_w_md
+                        ]
+                    ]
+                    [ Html.div
+                        [ HtmlAttr.css
+                            [ Tw.h_full
+                            , Tw.flex
+                            , Tw.flex_col
+                            , Tw.bg_white
+                            , Tw.overflow_y_hidden
+                            ]
+                        ]
+                        [ Html.dl
+                            []
+                            [ Html.div (rowStyle Tw.bg_gray_50) (rowContent "name" [ Html.text entity.name ])
+                            , Html.div (rowStyle Tw.bg_white) (rowContent "context" [ Html.text entity.context ])
+                            , Html.div (rowStyle Tw.bg_gray_50) (rowContent "graph-id" [ Html.text <| toString entity.id ])
+                            , Html.div
+                                (rowStyle Tw.bg_white)
+                                (rowContent "connections"
+                                    <| List.concatMap (\v -> [ Html.text v, Html.br [][] ]) entity.connections
+                                )
+                            ]
+                        ]
+                    ]
+                ]
+        NoEnt ->
+            Html.div []
+                [ Html.div
+                    [ HtmlAttr.css
+                        [ Tw.justify_center
+                        , Tw.inline_flex
+                        , Tw.flex
+                        , Tw.w_full
+                        , Tw.pt_36
+                        ]
+                    ]
+                    [ Html.div
+                        [ HtmlAttr.css
+                            [ Tw.bg_gray_100
+                            , Tw.rounded_full
+                            , Tw.flex
+                            , Tw.p_4
+                            ]
+                        ]
+                        [ Svg.svg
+                            [ SvgAttr.css
+                                [ Tw.h_32
+                                , Tw.w_32
+                                ]
+                            , SvgAttr.viewBox "0 0 24 24"
+                            ]
+                            [ Html.fromUnstyled (Icons.travel_explore 24 Inherit) ]
+                        ]
+                    ]
+                , Html.div
+                    [ HtmlAttr.css
+                        [ Tw.pt_8
+                        , Tw.justify_center
+                        , Tw.w_full
+                        , Tw.inline_flex
+                        , Tw.font_bold
+                        , Tw.text_lg
+                        ]
+                    ]
+                    [ Html.text "No Entity Found" ]
+                , Html.div
+                    [ HtmlAttr.css
+                        [ Tw.pt_2
+                        , Tw.px_8
+                        , Tw.text_gray_700
+                        , Tw.text_base
+                        , Tw.justify_center
+                        , Tw.text_center
+                        , Tw.w_full
+                        , Tw.inline_flex
+                        ]
+                    ]
+                    [ Html.text "No worries! Select a node from the graph to see its properties. You can also filter nodes from the legend." ]
+                ]
+
+
+rowStyle : Css.Style -> List (Html.Attribute Msg)
+rowStyle bgColor =
+    [ HtmlAttr.css
+        [ bgColor
+        , Tw.px_4
+        , Tw.py_5
+        , Bp.sm
+            [ Tw.grid
+            , Tw.grid_cols_3
+            , Tw.gap_4
+            , Tw.px_6
+            ]
+        ]
+    ]
+
+rowContent : String -> List (Html.Html Msg) -> List (Html.Html Msg)
+rowContent key value =
+    [ Html.dt
+        [ HtmlAttr.css
+            [ Tw.text_sm
+            , Tw.font_bold
+            , Tw.text_gray_500
+            ]
+        ]
+        [ Html.text key ]
+    , Html.dd
+        [ HtmlAttr.css
+            [ Tw.mt_1
+            , Tw.text_sm
+            , Tw.text_gray_900
+            , Bp.sm
+                [ Tw.mt_0
+                , Tw.col_span_2
+                ]
+            ]
+        ]
+        value
     ]

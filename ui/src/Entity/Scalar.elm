@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Entity.Scalar exposing (Codecs, Id(..), defaultCodecs, defineCodecs, unwrapCodecs, unwrapEncoder)
+module Entity.Scalar exposing (Codecs, Entity(..), defaultCodecs, defineCodecs, unwrapCodecs, unwrapEncoder)
 
 import Graphql.Codec exposing (Codec)
 import Graphql.Internal.Builder.Object as Object
@@ -11,7 +11,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
-type Id
+type Entity
     = Id String
 
 
@@ -46,7 +46,7 @@ type alias RawCodecs valueId =
     { codecId : Codec valueId }
 
 
-defaultCodecs : RawCodecs Id
+defaultCodecs : RawCodecs Entity
 defaultCodecs =
     { codecId =
         { encoder = \(Id raw) -> Encode.string raw
