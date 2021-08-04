@@ -11989,6 +11989,448 @@ var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$opacity_25 = A2($
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$opacity_75 = A2($rtfeldman$elm_css$Css$property, 'opacity', '0.75');
 var $rtfeldman$elm_css$Svg$Styled$path = $rtfeldman$elm_css$Svg$Styled$node('path');
 var $rtfeldman$elm_css$Svg$Styled$Attributes$r = $rtfeldman$elm_css$VirtualDom$Styled$attribute('r');
+var $author$project$Main$GotId = function (a) {
+	return {$: 'GotId', a: a};
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $author$project$ECharts$legendOptionEncoder = function (legendOption) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'data',
+				A2($elm$json$Json$Encode$list, $elm$json$Json$Encode$string, legendOption.data))
+			]));
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $author$project$ECharts$categoryItemOptionEncoder = function (categoryItemOption) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'name',
+				$elm$json$Json$Encode$string(categoryItemOption.name))
+			]));
+};
+var $elm$json$Json$Encode$float = _Json_wrap;
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$ECharts$lineStyleOptionEncoder = function (lineStyleOption) {
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (color) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'color',
+							$elm$json$Json$Encode$string(color)));
+				},
+				lineStyleOption.color),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (curveness) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'curveness',
+							$elm$json$Json$Encode$float(curveness)));
+				},
+				lineStyleOption.curveness),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (width) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'width',
+							$elm$json$Json$Encode$int(width)));
+				},
+				lineStyleOption.width)
+			]));
+};
+var $author$project$ECharts$emphasisOptionEncoder = function (emphasisOption) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'focus',
+				$elm$json$Json$Encode$string(emphasisOption.focus)),
+				_Utils_Tuple2(
+				'lineStyle',
+				$author$project$ECharts$lineStyleOptionEncoder(emphasisOption.lineStyle))
+			]));
+};
+var $author$project$ECharts$forceOptionEncoder = function (forceOption) {
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (el) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'edgeLength',
+							$elm$json$Json$Encode$int(el)));
+				},
+				forceOption.edgeLength),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (f) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'friction',
+							$elm$json$Json$Encode$float(f)));
+				},
+				forceOption.friction),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (g) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'gravity',
+							$elm$json$Json$Encode$float(g)));
+				},
+				forceOption.gravity),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (la) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'layoutAnimation',
+							$elm$json$Json$Encode$bool(la)));
+				},
+				forceOption.layoutAnimation),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (r) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'repulsion',
+							$elm$json$Json$Encode$int(r)));
+				},
+				forceOption.repulsion)
+			]));
+};
+var $author$project$ECharts$graphEdgeItemOptionEncoder = function (graphEdgeItemOption) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'source',
+				$elm$json$Json$Encode$string(graphEdgeItemOption.source)),
+				_Utils_Tuple2(
+				'target',
+				$elm$json$Json$Encode$string(graphEdgeItemOption.target))
+			]));
+};
+var $author$project$ECharts$labelOptionEncoder = function (labelOption) {
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (p) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'position',
+							$elm$json$Json$Encode$string(p)));
+				},
+				labelOption.position),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (f) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'formatter',
+							$elm$json$Json$Encode$string(f)));
+				},
+				labelOption.formatter),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (s) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'show',
+							$elm$json$Json$Encode$bool(s)));
+				},
+				labelOption.show)
+			]));
+};
+var $author$project$ECharts$graphNodeItemOptionEncoder = function (gnio) {
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (n) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'name',
+							$elm$json$Json$Encode$string(n)));
+				},
+				gnio.name),
+				$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					'value',
+					$elm$json$Json$Encode$float(gnio.value))),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (x) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'x',
+							$elm$json$Json$Encode$float(x)));
+				},
+				gnio.x),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (y) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'y',
+							$elm$json$Json$Encode$float(y)));
+				},
+				gnio.y),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (c) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'category',
+							$elm$json$Json$Encode$int(c)));
+				},
+				gnio.category),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (s) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'symbolSize',
+							$elm$json$Json$Encode$float(s)));
+				},
+				gnio.symbolSize),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (l) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'label',
+							$author$project$ECharts$labelOptionEncoder(l)));
+				},
+				gnio.label)
+			]));
+};
+var $author$project$ECharts$seriesOptionEncoder = function (seriesOption) {
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (a) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'animation',
+							$elm$json$Json$Encode$bool(a)));
+				},
+				seriesOption.animation),
+				$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					'categories',
+					A2($elm$json$Json$Encode$list, $author$project$ECharts$categoryItemOptionEncoder, seriesOption.categories))),
+				$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					'data',
+					A2($elm$json$Json$Encode$list, $author$project$ECharts$graphNodeItemOptionEncoder, seriesOption.data))),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (d) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'draggable',
+							$elm$json$Json$Encode$bool(d)));
+				},
+				seriesOption.draggable),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (e) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'emphasis',
+							$author$project$ECharts$emphasisOptionEncoder(e)));
+				},
+				seriesOption.emphasis),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (f) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'force',
+							$author$project$ECharts$forceOptionEncoder(f)));
+				},
+				seriesOption.force),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (l) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'label',
+							$author$project$ECharts$labelOptionEncoder(l)));
+				},
+				seriesOption.label),
+				$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					'layout',
+					$elm$json$Json$Encode$string(seriesOption.layout))),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (ls) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'lineStyle',
+							$author$project$ECharts$lineStyleOptionEncoder(ls)));
+				},
+				seriesOption.lineStyle),
+				$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					'links',
+					A2($elm$json$Json$Encode$list, $author$project$ECharts$graphEdgeItemOptionEncoder, seriesOption.links))),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (n) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'name',
+							$elm$json$Json$Encode$string(n)));
+				},
+				seriesOption.name),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (r) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'roam',
+							$elm$json$Json$Encode$bool(r)));
+				},
+				seriesOption.roam),
+				$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string(seriesOption.type_)))
+			]));
+};
+var $author$project$ECharts$titleOptionEncoder = function (titleOption) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'text',
+				$elm$json$Json$Encode$string(titleOption.text)),
+				_Utils_Tuple2(
+				'subtext',
+				$elm$json$Json$Encode$string(titleOption.subtext)),
+				_Utils_Tuple2(
+				'top',
+				$elm$json$Json$Encode$string(titleOption.top)),
+				_Utils_Tuple2(
+				'left',
+				$elm$json$Json$Encode$string(titleOption.left))
+			]));
+};
+var $author$project$ECharts$tooltipOptionEncoder = function (tooltipOption) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'show',
+				$elm$json$Json$Encode$bool(tooltipOption.show))
+			]));
+};
+var $author$project$ECharts$encodeChartOptions = function (chartOptions) {
+	return A2(
+		$elm$core$Basics$composeL,
+		$elm$json$Json$Encode$object,
+		$elm$core$List$filterMap($elm$core$Basics$identity))(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$Maybe$andThen,
+				function (title) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'title',
+							$author$project$ECharts$titleOptionEncoder(title)));
+				},
+				chartOptions.title),
+				A2(
+				$elm$core$Maybe$andThen,
+				function (t) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							'tooltip',
+							$author$project$ECharts$tooltipOptionEncoder(t)));
+				},
+				chartOptions.tooltip),
+				$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					'legend',
+					A2($elm$json$Json$Encode$list, $author$project$ECharts$legendOptionEncoder, chartOptions.legend))),
+				$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					'series',
+					A2($elm$json$Json$Encode$list, $author$project$ECharts$seriesOptionEncoder, chartOptions.series)))
+			]));
+};
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $author$project$Main$detailDataIndexDecoder = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['detail', 'id']),
+	$elm$json$Json$Decode$int);
+var $author$project$Main$onNodeClick = function (event) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$Events$on,
+		'nodeClick',
+		A2($elm$json$Json$Decode$map, event, $author$project$Main$detailDataIndexDecoder));
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$property = $rtfeldman$elm_css$VirtualDom$Styled$property;
+var $author$project$Main$setGraphOptions = function (chartOptions) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$node,
+		'echart-element',
+		_List_fromArray(
+			[
+				A2(
+				$rtfeldman$elm_css$Html$Styled$Attributes$property,
+				'option',
+				$author$project$ECharts$encodeChartOptions(chartOptions)),
+				$author$project$Main$onNodeClick($author$project$Main$GotId)
+			]));
+};
 var $rtfeldman$elm_css$Svg$Styled$Attributes$stroke = $rtfeldman$elm_css$VirtualDom$Styled$attribute('stroke');
 var $rtfeldman$elm_css$Svg$Styled$Attributes$strokeWidth = $rtfeldman$elm_css$VirtualDom$Styled$attribute('stroke-width');
 var $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_1over3 = A2($rtfeldman$elm_css$Css$property, 'width', '33.333333%');
@@ -12075,42 +12517,47 @@ var $author$project$Main$viewEntityListModelResult = function (model) {
 			return $author$project$Main$buildFailureMsg(e);
 		default:
 			var _v1 = model.chartConfig;
-			return A2(
-				$rtfeldman$elm_css$Html$Styled$div,
-				_List_fromArray(
-					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$css(
-						_List_fromArray(
-							[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_1over3]))
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$css(
-								_List_fromArray(
-									[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_lg, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex]))
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('I got no options!')
-							])),
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$Attributes$css(
-								_List_fromArray(
-									[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_8]))
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$fromUnstyled(
-								A2($icidasset$elm_material_icons$Material$Icons$warning, 96, $icidasset$elm_material_icons$Material$Icons$Types$Inherit))
-							]))
-					]));
+			if (_v1.$ === 'ChartConfig') {
+				var chartOpts = _v1.a;
+				return A2($author$project$Main$setGraphOptions, chartOpts, _List_Nil);
+			} else {
+				return A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$Attributes$css(
+							_List_fromArray(
+								[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_1over3]))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$css(
+									_List_fromArray(
+										[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$text_lg, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex]))
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$text('I got no options!')
+								])),
+							A2(
+							$rtfeldman$elm_css$Html$Styled$div,
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$Attributes$css(
+									_List_fromArray(
+										[$matheus23$elm_default_tailwind_modules$Tailwind$Utilities$w_full, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$justify_center, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$inline_flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$flex, $matheus23$elm_default_tailwind_modules$Tailwind$Utilities$pt_8]))
+								]),
+							_List_fromArray(
+								[
+									$rtfeldman$elm_css$Html$Styled$fromUnstyled(
+									A2($icidasset$elm_material_icons$Material$Icons$warning, 96, $icidasset$elm_material_icons$Material$Icons$Types$Inherit))
+								]))
+						]));
+			}
 	}
 };
 var $author$project$Main$view = function (model) {

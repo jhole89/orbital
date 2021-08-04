@@ -615,8 +615,8 @@ viewEntityListModelResult model =
 
         RemoteData.Success _ ->
             case model.chartConfig of
-                --ChartConfig chartOpts ->
-                --    setGraphOptions chartOpts []
+                ChartConfig chartOpts ->
+                    setGraphOptions chartOpts []
                 _ ->
                     Html.div
                         [ HtmlAttr.css
