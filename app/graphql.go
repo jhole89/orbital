@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func resolveRelationships(id interface{}, p graphql.ResolveParams) ([]*database.Entity, error){
+func resolveRelationships(id interface{}, p graphql.ResolveParams) ([]*database.Entity, error) {
 	context, ok := p.Args["context"].(string)
 	if ok {
 		entities, err := graph.GetRelationships(id, context)
@@ -27,15 +27,15 @@ func createEntityHandler() (*handler.Handler, error) {
 			Name: "Entity",
 			Fields: graphql.Fields{
 				"id": &graphql.Field{
-					Type: graphql.NewNonNull(graphql.ID),
+					Type:        graphql.NewNonNull(graphql.ID),
 					Description: "The ID of the Entity",
 				},
 				"name": &graphql.Field{
-					Type: graphql.NewNonNull(graphql.String),
+					Type:        graphql.NewNonNull(graphql.String),
 					Description: "The name of the Entity",
 				},
 				"context": &graphql.Field{
-					Type: graphql.NewNonNull(graphql.String),
+					Type:        graphql.NewNonNull(graphql.String),
 					Description: "The context of the Entity",
 				},
 			},
@@ -50,12 +50,12 @@ func createEntityHandler() (*handler.Handler, error) {
 		Description: "Get Entity connections by ID",
 		Args: graphql.FieldConfigArgument{
 			"id": &graphql.ArgumentConfig{
-				Type: graphql.ID,
+				Type:        graphql.ID,
 				Description: "The ID of the Entity",
 			},
 			"context": &graphql.ArgumentConfig{
-				Type: graphql.String,
-				Description: "The context of the Connection",
+				Type:         graphql.String,
+				Description:  "The context of the Connection",
 				DefaultValue: "owns",
 			},
 		},
@@ -85,7 +85,7 @@ func createEntityHandler() (*handler.Handler, error) {
 			Description: "Get entity by ID",
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.ID),
+					Type:        graphql.NewNonNull(graphql.ID),
 					Description: "The ID of the Entity",
 				},
 			},
