@@ -1,0 +1,30 @@
+{
+  "name": "orbital-ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@webcomponents/custom-elements": "^1.4.3",
+    "echarts": "^5.1.1",
+    "elm": "^0.19.1-5",
+    "elm-format": "^0.8.4",
+    "jquery": "^3.5.1",
+    "tailwindcss": "^2.1.2"
+  },
+  "devDependencies": {
+    "@dillonkearns/elm-graphql": "^4.2.0",
+    "webpack": "^5.11.1",
+    "webpack-cli": "^4.3.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist && rm -f src/main.js",
+    "build": "npm run clean && elm make src/Main.elm --output=src/main.js && webpack --config webpack.config.js",
+    "server": "elm reactor",
+    "buildAndServe": "npm run build && npm run server",
+    "gen-graphql-entity": "elm-graphql http://localhost:5000/entity --base Entity",
+    "gen-graphql-admin": "elm-graphql http://localhost:5000/admin --base Admin"
+  },
+  "author": "Joel Lutman",
+  "license": "ISC"
+}
