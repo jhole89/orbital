@@ -112,8 +112,7 @@ app/main
 
 ui/node_modules/
 ui/dist/
-ui/src/main.js
-ui/elm-stuff/
-ui/elm-stuff
+/ui/src/js/main.js
+/ui/elm-stuff/
 
 .env
