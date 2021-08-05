@@ -46,7 +46,7 @@ jobs:
         run: go test -coverprofile=coverage.txt -covermode=atomic . ./connectors/...
 
       - name: report
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2.0.2
         with:
           directory: app/
           file: app/coverage.txt
