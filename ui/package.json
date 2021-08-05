@@ -2,7 +2,6 @@
   "name": "orbital-ui",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "dependencies": {
     "@webcomponents/custom-elements": "^1.4.3",
     "echarts": "^5.1.1",
@@ -13,15 +12,20 @@
   },
   "devDependencies": {
     "@dillonkearns/elm-graphql": "^4.2.0",
-    "webpack": "^5.11.1",
-    "webpack-cli": "^4.3.1"
+    "elm-webpack-loader": "^8.0.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.3.2",
+    "loader-utils": "^2.0.0",
+    "webpack": "^5.48.0",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^3.11.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "clean": "rm -rf dist && rm -f src/main.js",
-    "build": "npm run clean && elm make src/Main.elm --output=src/main.js && webpack --config webpack.config.js",
-    "server": "elm reactor",
-    "buildAndServe": "npm run build && npm run server",
+    "clean": "rm -rf dist",
+    "build": "webpack --config webpack.config.js --mode production",
+    "watch": "webpack --mode development --watch",
+    "dev": "webpack serve --mode development --port 3000",
     "gen-graphql-entity": "elm-graphql http://localhost:5000/entity --base Entity",
     "gen-graphql-admin": "elm-graphql http://localhost:5000/admin --base Admin"
   },
