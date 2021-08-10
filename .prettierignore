@@ -1,5 +1,6 @@
 *.*
 Dockerfile
+docker-compose.yml
 !*.js
 !*.json
 !*.md

@@ -117,9 +117,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: docs-format
         uses: creyD/prettier_action@v3.3
         with:
-          prettier_options: --check --config .prettierrc --ignore-path .prettierignore
-          file_pattern: "."
+          prettier_options: --check . --config ./.prettierrc --ignore-path ./.prettierignore
