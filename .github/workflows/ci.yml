@@ -124,4 +124,4 @@ jobs:
         uses: creyD/prettier_action@v3.3
         with:
           dry: true
-          prettier_options: --config ./.prettierrc --ignore-path ./.prettierignore
+          prettier_options: --write . --config ./.prettierrc --ignore-path ./.prettierignore
