@@ -65,6 +65,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - name: install
+        working-directory: ui
+        id: ui-install
+        run: npm install
+
       - name: build
         working-directory: ui
         id: ui-build
@@ -117,3 +122,4 @@ jobs:
         uses: creyD/prettier_action@v3.3
         with:
           prettier_options: --check --config .prettierrc --ignore-path .prettierignore
+          file_pattern: "."
