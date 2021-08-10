@@ -43,7 +43,6 @@ jobs:
                 org.opencontainers.image.revision=${{ github.sha }}
                 org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: |
-            ${{ github.repository }}-app:latest
             ghcr.io/${{ github.repository }}-app:latest
           push: true
           secrets: |
@@ -55,7 +54,6 @@ jobs:
           context: ui
           push: true
           tags: |
-            ${{ github.repository }}-ui:latest
             ghcr.io/${{ github.repository }}-ui:latest
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.GHCR_TOKEN }}
