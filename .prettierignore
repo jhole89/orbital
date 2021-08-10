@@ -1,11 +1,11 @@
 *.*
 Dockerfile
-docker-compose.yml
 !*.js
 !*.json
 !*.md
 !*.ts
 !*.yml
+docker-compose.yml
 
 app
 ui

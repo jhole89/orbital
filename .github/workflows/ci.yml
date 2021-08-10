@@ -123,4 +123,5 @@ jobs:
       - name: docs-format
         uses: creyD/prettier_action@v3.3
         with:
-          prettier_options: --check . --config ./.prettierrc --ignore-path ./.prettierignore
+          dry: true
+          prettier_options: --config ./.prettierrc --ignore-path ./.prettierignore
