@@ -5,6 +5,7 @@ Dockerfile
 !*.md
 !*.ts
 !*.yml
+!.github
 docker-compose.yml
 
 app

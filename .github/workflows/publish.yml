@@ -39,9 +39,9 @@ jobs:
         with:
           context: app
           labels: |
-                org.opencontainers.image.authors=${{ github.repository_owner }}
-                org.opencontainers.image.revision=${{ github.sha }}
-                org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.authors=${{ github.repository_owner }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: |
             ghcr.io/${{ github.repository }}-app:latest
           push: true

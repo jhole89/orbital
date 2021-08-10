@@ -3,7 +3,7 @@ name: Versioned Release Pipeline
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   gh-release:

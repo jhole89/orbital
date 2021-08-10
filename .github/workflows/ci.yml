@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: ['1.15']
+        go: ["1.15"]
     name: Go ${{ matrix.go }} pipeline
 
     steps:
@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [ '14', '16' ]
+        node: ["14", "16"]
     name: node ${{ matrix.node }} pipeline
 
     steps:
