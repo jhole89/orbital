@@ -39,8 +39,8 @@ jobs:
           context: app
           push: true
           tags: |
-            ${{ github.repository_owner }}/${{ github.repository }}/app:latest
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/app:latest
+            ${{ github.repository }}/app:latest
+            ghcr.io/${{ github.repository }}/app:latest
 
       - name: Build and push UI
         uses: docker/build-push-action@v2
@@ -48,5 +48,5 @@ jobs:
           context: ui
           push: true
           tags: |
-            ${{ github.repository_owner }}/${{ github.repository }}/ui:latest
-            ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/ui:latest
+            ${{ github.repository }}/ui:latest
+            ghcr.io/${{ github.repository }}/ui:latest
