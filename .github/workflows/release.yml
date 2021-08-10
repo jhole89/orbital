@@ -45,16 +45,22 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: app
-          push: true
+          labels: |
+            org.opencontainers.image.authors=${{ github.repository_owner }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: |
-            ${{ github.repository }}-app:${{ github.ref }}
             ghcr.io/${{ github.repository }}-app:${{ github.ref }}
+          push: true
 
       - name: Build and push UI
         uses: docker/build-push-action@v2
         with:
           context: ui
-          push: true
+          labels: |
+            org.opencontainers.image.authors=${{ github.repository_owner }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: |
-            ${{ github.repository }}-ui:${{ github.ref }}
             ghcr.io/${{ github.repository }}-ui:${{ github.ref }}
+          push: true

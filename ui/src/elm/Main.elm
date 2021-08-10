@@ -4,10 +4,13 @@ import AdminHelpers exposing (AdminResponse, rebuildQuery)
 import Array
 import Browser
 import Css
+import Css.Global exposing (global)
 import ECharts exposing (ChartOptions, GraphEdgeItemOption, GraphNodeItemOption, encodeChartOptions)
+import EntityHelpers exposing (Entity, EntityListResponse, listEntitiesQuery, toString)
 import Graphql.Http exposing (Error, HttpError(..))
 import Graphql.Http.GraphqlError exposing (GraphqlError, PossiblyParsedData(..))
-import EntityHelpers exposing (Entity, EntityListResponse, listEntitiesQuery, toString)
+import Html.Styled as Html
+import Html.Styled.Attributes as HtmlAttr
 import Html.Styled.Events as Events
 import Json.Decode as Decode exposing (errorToString)
 import Material.Icons as Icons
@@ -15,11 +18,8 @@ import Material.Icons.Types exposing (Coloring(..), Icon)
 import RemoteData exposing (RemoteData)
 import Svg.Styled as Svg
 import Svg.Styled.Attributes as SvgAttr
-import Tailwind.Utilities as Tw
 import Tailwind.Breakpoints as Bp
-import Css.Global exposing (global)
-import Html.Styled as Html
-import Html.Styled.Attributes as HtmlAttr
+import Tailwind.Utilities as Tw
 import Utilities exposing (entityListToChartOpts)
 
 
@@ -33,6 +33,7 @@ makeListEntitiesQuery =
                 >> GotEntityListResponse
             )
 
+
 sendRebuildQuery : Cmd Msg
 sendRebuildQuery =
     rebuildQuery
@@ -44,24 +45,30 @@ sendRebuildQuery =
             )
 
 
+
 -- ELM ARCHITECTURE
+
 
 main : Program () Model Msg
 main =
     Browser.element
-    { init = init
-    , view = view >> Html.toUnstyled
-    , update = update
-    , subscriptions = \_ -> Sub.none
-    }
+        { init = init
+        , view = view >> Html.toUnstyled
+        , update = update
+        , subscriptions = \_ -> Sub.none
+        }
 
- -- INIT
+
+
+-- INIT
+
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( initModelState
     , makeListEntitiesQuery
     )
+
 
 initModelState : Model
 initModelState =
@@ -74,37 +81,58 @@ initModelState =
     , displayWarningModal = False
     }
 
+
+
 -- MODEL
 
-type alias EntityListModel = RemoteData (Graphql.Http.Error ()) EntityListResponse
-type alias AdminModel = RemoteData (Graphql.Http.Error ()) AdminResponse
 
-type alias IdReferenceIndex = List Entity
-type alias SidebarDisplayModel = Bool
-type alias WarningDisplayModel = Bool
+type alias EntityListModel =
+    RemoteData (Graphql.Http.Error ()) EntityListResponse
 
-type ChartOptionsModel =
-    ChartConfig ChartOptions
+
+type alias AdminModel =
+    RemoteData (Graphql.Http.Error ()) AdminResponse
+
+
+type alias IdReferenceIndex =
+    List Entity
+
+
+type alias SidebarDisplayModel =
+    Bool
+
+
+type alias WarningDisplayModel =
+    Bool
+
+
+type ChartOptionsModel
+    = ChartConfig ChartOptions
     | NoOpt
-type SelectedEntityModel =
-    Selected Entity
+
+
+type SelectedEntityModel
+    = Selected Entity
     | NoEnt
 
+
 type alias Model =
-    { entities: EntityListModel
-    , indexing: AdminModel
-    , chartConfig: ChartOptionsModel
-    , idReferences: IdReferenceIndex
-    , selectedEntity: SelectedEntityModel
-    , displaySidebar: SidebarDisplayModel
-    , displayWarningModal: WarningDisplayModel
+    { entities : EntityListModel
+    , indexing : AdminModel
+    , chartConfig : ChartOptionsModel
+    , idReferences : IdReferenceIndex
+    , selectedEntity : SelectedEntityModel
+    , displaySidebar : SidebarDisplayModel
+    , displayWarningModal : WarningDisplayModel
     }
+
+
 
 -- UPDATE
 
 
-type Msg =
-    GotEntityListResponse EntityListModel
+type Msg
+    = GotEntityListResponse EntityListModel
     | FetchAdminResponse
     | GotAdminResponse AdminModel
     | GotId Int
@@ -124,16 +152,19 @@ update msg model =
                         , chartConfig = ChartConfig (entityListToChartOpts entityListResponse)
                         , idReferences = entityListResponse
                       }
-                      , Cmd.none
+                    , Cmd.none
                     )
+
                 _ ->
                     ( { model | entities = entityModel }
                     , Cmd.none
                     )
+
         FetchAdminResponse ->
             ( { model | indexing = RemoteData.Loading }
             , sendRebuildQuery
             )
+
         GotAdminResponse adminModel ->
             case adminModel of
                 RemoteData.Success _ ->
@@ -143,32 +174,39 @@ update msg model =
                       }
                     , makeListEntitiesQuery
                     )
+
                 _ ->
                     ( { model | indexing = adminModel }
                     , Cmd.none
                     )
+
         GotId value ->
             case model.idReferences |> Array.fromList |> Array.get value of
                 Just entity ->
                     ( { model | selectedEntity = Selected entity }
                     , Cmd.none
                     )
+
                 Nothing ->
                     ( { model | selectedEntity = NoEnt }
                     , Cmd.none
                     )
+
         SelectEntity selectedEntityModel ->
             ( { model | selectedEntity = selectedEntityModel }
             , Cmd.none
             )
+
         ShowSidebar status ->
             ( { model | displaySidebar = status }
             , Cmd.none
             )
+
         ShowWarningModal status ->
             ( { model | displayWarningModal = status }
             , Cmd.none
             )
+
 
 
 -- VIEW
@@ -189,12 +227,13 @@ view model =
                     , upgradePanel
                     ]
                 , sideBarShowBtn model.displaySidebar
-                , canvasSection
-                    <| viewEntityListModelResult
-                    <| model
+                , canvasSection <|
+                    viewEntityListModelResult <|
+                        model
                 ]
             ]
         ]
+
 
 homePage : List (Html.Html Msg) -> Html.Html Msg
 homePage contents =
@@ -204,13 +243,16 @@ homePage contents =
             , Tw.flex_col
             , Bp.md [ Tw.flex_row ]
             ]
-        ] contents
+        ]
+        contents
+
 
 mainPage : WarningDisplayModel -> List (Html.Html Msg) -> Html.Html Msg
 mainPage model contents =
     case model of
         True ->
-            Html.div [][]
+            Html.div [] []
+
         False ->
             Html.div
                 [ HtmlAttr.css
@@ -221,12 +263,15 @@ mainPage model contents =
                     , Tw.overflow_y_hidden
                     , Tw.bg_gray_300
                     ]
-                ] contents
+                ]
+                contents
+
 
 
 -- SIDEBAR
 
-sideBar: SidebarDisplayModel -> List (Html.Html Msg) -> Html.Html Msg
+
+sideBar : SidebarDisplayModel -> List (Html.Html Msg) -> Html.Html Msg
 sideBar model contents =
     case model of
         True ->
@@ -244,9 +289,12 @@ sideBar model contents =
                         , Tw.shadow_xl
                         ]
                     ]
-                ] contents
+                ]
+                contents
+
         False ->
-            Html.aside [][]
+            Html.aside [] []
+
 
 sideBarHeaderPanel : List (Html.Html Msg) -> Html.Html Msg
 sideBarHeaderPanel contents =
@@ -257,7 +305,9 @@ sideBarHeaderPanel contents =
             , Tw.justify_between
             , Bp.sm [ Tw.px_6 ]
             ]
-        ] contents
+        ]
+        contents
+
 
 sideBarHeader : Html.Html Msg
 sideBarHeader =
@@ -273,13 +323,16 @@ sideBarHeader =
         ]
         [ Html.text "Telescope" ]
 
+
 sideBarShowBtn : SidebarDisplayModel -> Html.Html Msg
 sideBarShowBtn model =
     case model of
         True ->
             sideBarShowBtnElement (ShowSidebar False) "<"
+
         False ->
             sideBarShowBtnElement (ShowSidebar True) ">"
+
 
 sideBarShowBtnElement : Msg -> String -> Html.Html Msg
 sideBarShowBtnElement onClickEventMsg displayText =
@@ -288,6 +341,7 @@ sideBarShowBtnElement onClickEventMsg displayText =
         , Events.onClick onClickEventMsg
         ]
         [ Html.text displayText ]
+
 
 sideBarShowBtnStyle : Html.Attribute Msg
 sideBarShowBtnStyle =
@@ -311,6 +365,7 @@ sideBarShowBtnStyle =
             ]
         ]
 
+
 rebuildBtn : AdminModel -> Html.Html Msg
 rebuildBtn model =
     Html.div
@@ -321,6 +376,7 @@ rebuildBtn model =
         ]
         [ viewAdminModelResult model ]
 
+
 viewAdminModelResult : AdminModel -> Html.Html Msg
 viewAdminModelResult model =
     case model of
@@ -328,68 +384,83 @@ viewAdminModelResult model =
             Html.button
                 [ rebuildBtnStyle
                     [ Tw.bg_blue_500 ]
-                    ( Css.hover [ Tw.bg_blue_700 ] )
-                    ( rebuildBtnFocusStyle [ Tw.ring_blue_500, Tw.ring_offset_blue_200 ] )
+                    (Css.hover [ Tw.bg_blue_700 ])
+                    (rebuildBtnFocusStyle [ Tw.ring_blue_500, Tw.ring_offset_blue_200 ])
                 , Events.onClick FetchAdminResponse
                 ]
-                ( rebuildBtnSvg rebuildBtnLogoStyle Icons.build "Rebuild" )
+                (rebuildBtnSvg rebuildBtnLogoStyle Icons.build "Rebuild")
 
         RemoteData.Loading ->
             Html.button
                 [ rebuildBtnStyle
                     [ Tw.bg_yellow_500, Tw.cursor_not_allowed ]
-                    ( Css.hover [ Tw.bg_yellow_700 ] )
-                    ( rebuildBtnFocusStyle [ Tw.ring_yellow_500, Tw.ring_offset_yellow_200 ] )
+                    (Css.hover [ Tw.bg_yellow_700 ])
+                    (rebuildBtnFocusStyle [ Tw.ring_yellow_500, Tw.ring_offset_yellow_200 ])
                 ]
-                ( rebuildBtnSvg ( Tw.animate_spin :: rebuildBtnLogoStyle ) Icons.refresh "Building" )
+                (rebuildBtnSvg (Tw.animate_spin :: rebuildBtnLogoStyle) Icons.refresh "Building")
 
         RemoteData.Failure e ->
             Html.button
                 [ rebuildBtnStyle
                     [ Tw.bg_red_500 ]
-                    ( Css.hover [ Tw.bg_red_700 ] )
-                    ( rebuildBtnFocusStyle [ Tw.ring_red_500, Tw.ring_offset_red_200 ] )
+                    (Css.hover [ Tw.bg_red_700 ])
+                    (rebuildBtnFocusStyle [ Tw.ring_red_500, Tw.ring_offset_red_200 ])
                 , Events.onClick FetchAdminResponse
                 ]
-                ( rebuildBtnSvg rebuildBtnLogoStyle Icons.error_outline ("Error: " ++ Debug.toString e) )
+                (rebuildBtnSvg rebuildBtnLogoStyle
+                    Icons.error_outline
+                    ("Error: "
+                        ++ (case e of
+                                Graphql.Http.GraphqlError _ graphqlErrors ->
+                                    List.map .message graphqlErrors
+                                        |> String.concat
+
+                                Graphql.Http.HttpError httpError ->
+                                    buildHttpErrorMessage httpError
+                           )
+                    )
+                )
 
         RemoteData.Success _ ->
             Html.button
                 [ rebuildBtnStyle
                     [ Tw.bg_green_500 ]
-                    ( Css.hover [ Tw.bg_green_700 ] )
-                    ( rebuildBtnFocusStyle [ Tw.ring_green_500, Tw.ring_offset_green_200 ] )
+                    (Css.hover [ Tw.bg_green_700 ])
+                    (rebuildBtnFocusStyle [ Tw.ring_green_500, Tw.ring_offset_green_200 ])
                 , Events.onClick FetchAdminResponse
                 ]
                 (rebuildBtnSvg rebuildBtnLogoStyle Icons.check_circle_outline "Rebuilt")
 
-rebuildBtnStyle : List (Css.Style) -> Css.Style -> Css.Style -> Html.Attribute msg
+
+rebuildBtnStyle : List Css.Style -> Css.Style -> Css.Style -> Html.Attribute msg
 rebuildBtnStyle cssStyles hoverStyle focusStyle =
     HtmlAttr.css
-        ( cssStyles ++
-            [ Tw.flex
-            , Tw.items_center
-            , Tw.shadow
-            , Tw.px_4
-            , Tw.py_2
-            , Tw.text_white
-            , Tw.rounded_md
-            , hoverStyle
-            , focusStyle
-            ]
+        (cssStyles
+            ++ [ Tw.flex
+               , Tw.items_center
+               , Tw.shadow
+               , Tw.px_4
+               , Tw.py_2
+               , Tw.text_white
+               , Tw.rounded_md
+               , hoverStyle
+               , focusStyle
+               ]
         )
 
-rebuildBtnFocusStyle: List (Css.Style) -> Css.Style
+
+rebuildBtnFocusStyle : List Css.Style -> Css.Style
 rebuildBtnFocusStyle focusStyles =
     Css.focus
-        ( focusStyles ++
-            [ Tw.outline_none
-            , Tw.ring_2
-            , Tw.ring_offset_2
-            ]
+        (focusStyles
+            ++ [ Tw.outline_none
+               , Tw.ring_2
+               , Tw.ring_offset_2
+               ]
         )
 
-rebuildBtnSvg : List (Css.Style) -> Icon msg -> String -> List (Html.Html msg)
+
+rebuildBtnSvg : List Css.Style -> Icon msg -> String -> List (Html.Html msg)
 rebuildBtnSvg cssStyle icon displayText =
     [ Svg.svg
         [ SvgAttr.css cssStyle
@@ -399,12 +470,14 @@ rebuildBtnSvg cssStyle icon displayText =
     , Html.text displayText
     ]
 
-rebuildBtnLogoStyle : List (Css.Style)
+
+rebuildBtnLogoStyle : List Css.Style
 rebuildBtnLogoStyle =
     [ Tw.h_5
     , Tw.w_5
     , Tw.mr_3
     ]
+
 
 upgradePanel : Html.Html Msg
 upgradePanel =
@@ -485,9 +558,10 @@ header model =
                         ]
                     ]
                 ]
-                [ Html.img [ HtmlAttr.src "https://source.unsplash.com/uJ8LNVCBjFQ/400x400" ][] ]
+                [ Html.img [ HtmlAttr.src "https://source.unsplash.com/uJ8LNVCBjFQ/400x400" ] [] ]
             ]
         ]
+
 
 mainSection : List (Html.Html Msg) -> Html.Html Msg
 mainSection canvas =
@@ -517,6 +591,7 @@ mainSection canvas =
             ]
             canvas
         ]
+
 
 canvasSection : Html.Html Msg -> Html.Html Msg
 canvasSection content =
@@ -548,6 +623,7 @@ canvasSection content =
             ]
             [ content ]
         ]
+
 
 viewEntityListModelResult : Model -> Html.Html Msg
 viewEntityListModelResult model =
@@ -617,6 +693,7 @@ viewEntityListModelResult model =
             case model.chartConfig of
                 ChartConfig chartOpts ->
                     setGraphOptions chartOpts []
+
                 _ ->
                     Html.div
                         [ HtmlAttr.css
@@ -646,23 +723,27 @@ viewEntityListModelResult model =
                             ]
                         ]
 
+
 setGraphOptions : ChartOptions -> List (Html.Html Msg) -> Html.Html Msg
 setGraphOptions chartOptions =
     Html.node "echart-element"
-    [ HtmlAttr.property "option" <| encodeChartOptions <| chartOptions
-    , onNodeClick GotId
-    ]
+        [ HtmlAttr.property "option" <| encodeChartOptions <| chartOptions
+        , onNodeClick GotId
+        ]
+
 
 onNodeClick : (Int -> a) -> Html.Attribute a
 onNodeClick event =
-    Events.on "nodeClick"
-        <| Decode.map event detailDataIndexDecoder
+    Events.on "nodeClick" <|
+        Decode.map event detailDataIndexDecoder
 
-detailDataIndexDecoder: Decode.Decoder Int
+
+detailDataIndexDecoder : Decode.Decoder Int
 detailDataIndexDecoder =
     Decode.at [ "detail", "id" ] Decode.int
 
-buildFailureMsg: Error parsedData -> Html.Html Msg
+
+buildFailureMsg : Error parsedData -> Html.Html Msg
 buildFailureMsg parsedData =
     case parsedData of
         Graphql.Http.GraphqlError _ graphqlErrors ->
@@ -671,7 +752,8 @@ buildFailureMsg parsedData =
         Graphql.Http.HttpError httpError ->
             buildErrorMsg "Http Error" [ buildHttpErrorMessage httpError ]
 
-buildErrorMsg: String -> List (String) -> Html.Html Msg
+
+buildErrorMsg : String -> List String -> Html.Html Msg
 buildErrorMsg eType eMsgs =
     Html.div
         [ HtmlAttr.css
@@ -717,7 +799,7 @@ buildErrorMsg eType eMsgs =
                     [ HtmlAttr.css
                         [ Tw.text_base ]
                     ]
-                    (List.map (\msg -> Html.li [][ Html.text msg ]) eMsgs)
+                    (List.map (\msg -> Html.li [] [ Html.text msg ]) eMsgs)
                 ]
             , Html.div
                 [ HtmlAttr.css
@@ -728,6 +810,7 @@ buildErrorMsg eType eMsgs =
                 [ Html.button [] [ Html.fromUnstyled (Icons.refresh 24 Inherit) ] ]
             ]
         ]
+
 
 buildHttpErrorMessage : HttpError -> String
 buildHttpErrorMessage httpError =
@@ -746,6 +829,7 @@ buildHttpErrorMessage httpError =
 
         Graphql.Http.BadPayload error ->
             "Bad payload received: " ++ errorToString error
+
 
 entityDetails : SelectedEntityModel -> Html.Html Msg
 entityDetails model =
@@ -782,13 +866,14 @@ entityDetails model =
                             , Html.div (rowStyle Tw.bg_gray_50) (rowContent "graph-id" [ Html.text <| toString entity.id ])
                             , Html.div
                                 (rowStyle Tw.bg_white)
-                                (rowContent "connections"
-                                    <| List.concatMap (\v -> [ Html.text v, Html.br [][] ]) entity.connections
+                                (rowContent "connections" <|
+                                    List.concatMap (\v -> [ Html.text v, Html.br [] [] ]) entity.connections
                                 )
                             ]
                         ]
                     ]
                 ]
+
         NoEnt ->
             Html.div []
                 [ Html.div
@@ -859,6 +944,7 @@ rowStyle bgColor =
             ]
         ]
     ]
+
 
 rowContent : String -> List (Html.Html Msg) -> List (Html.Html Msg)
 rowContent key value =

@@ -1,0 +1,10 @@
+*.*
+Dockerfile
+!*.js
+!*.json
+!*.md
+!*.ts
+!*.yml
+
+app
+ui

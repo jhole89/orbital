@@ -1,0 +1,14 @@
+*.*
+Dockerfile
+!*.js
+!*.json
+!*.md
+!*.ts
+!*.yml
+
+node_modules
+elm-stuff
+coverage
+src/elm/Admin
+src/elm/Entity
+dist

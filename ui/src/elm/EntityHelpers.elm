@@ -13,15 +13,18 @@ import Graphql.SelectionSet as SelectionSet exposing (SelectionSet, with)
 type alias EntityListResponse =
     List EntityResponse
 
+
 type alias EntityResponse =
     Entity
+
 
 type alias Entity =
     { id : Id
     , name : String
     , context : String
-    , connections: List String
+    , connections : List String
     }
+
 
 entitySelection : SelectionSet Entity Entity.Object.Entity
 entitySelection =
@@ -29,14 +32,18 @@ entitySelection =
         |> with Entity.id
         |> with Entity.name
         |> with Entity.context
-        |> with (Entity.connections (\_ -> {id = OptionalArgument.Absent, context = OptionalArgument.Absent} ) Entity.name)
+        |> with (Entity.connections (\_ -> { id = OptionalArgument.Absent, context = OptionalArgument.Absent }) Entity.name)
+
 
 listEntitiesQuery : SelectionSet EntityListResponse RootQuery
-listEntitiesQuery = Entity.Query.list ( entitySelection )
+listEntitiesQuery =
+    Entity.Query.list entitySelection
+
 
 getEntityQuery : String -> SelectionSet (Maybe EntityResponse) RootQuery
 getEntityQuery id =
-    Entity.Query.entity { id = (Id id) } entitySelection
+    Entity.Query.entity { id = Id id } entitySelection
+
 
 toString : Id -> String
 toString id =

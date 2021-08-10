@@ -45,15 +45,15 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}-app:latest
           push: true
-          secrets: |
-              GIT_AUTH_TOKEN=${{ secrets.GHCR_TOKEN }}
 
       - name: Build and push UI
         uses: docker/build-push-action@v2
         with:
           context: ui
-          push: true
+          labels: |
+            org.opencontainers.image.authors=${{ github.repository_owner }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: |
             ghcr.io/${{ github.repository }}-ui:latest
-          secrets: |
-            GIT_AUTH_TOKEN=${{ secrets.GHCR_TOKEN }}
+          push: true
