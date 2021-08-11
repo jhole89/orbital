@@ -15,7 +15,7 @@ checks:
   method-complexity:
     enabled: true
     config:
-      threshold: 5
+      threshold: 10
   method-count:
     enabled: true
     config:
@@ -46,6 +46,7 @@ plugins:
     enabled: true
   golint:
     enabled: true
+    min_confidence: 0.5
   govet:
     enabled: true
 
