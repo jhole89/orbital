@@ -43,12 +43,12 @@ jobs:
       - name: test
         working-directory: app
         id: go-test
-        run: go test -coverprofile=coverage.txt -covermode=atomic . ./connectors/...
+        run: go test -coverprofile=coverage.txt -covermode=atomic ./... ./connectors/... ./database/...
 
       - name: report
-        uses: codecov/codecov-action@v2.0.2
+        uses: codecov/codecov-action@v2
         with:
-          file: coverage.txt
+          file: app/coverage.txt
           fail_ci_if_error: true
 
   js-check:
