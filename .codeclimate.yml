@@ -46,7 +46,7 @@ plugins:
     enabled: true
   golint:
     enabled: true
-    min_confidence: 0.2
+    min_confidence: 0
   govet:
     enabled: true
 
