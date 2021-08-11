@@ -6,6 +6,7 @@ Dockerfile
 !*.ts
 !*.yml
 !.github
+.github/workflows/*.yml
 docker-compose.yml
 
 app
