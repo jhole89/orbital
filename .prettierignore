@@ -1,0 +1,12 @@
+*.*
+Dockerfile
+!*.js
+!*.json
+!*.md
+!*.ts
+!*.yml
+!.github
+docker-compose.yml
+
+app
+ui

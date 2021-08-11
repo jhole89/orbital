@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: ['1.15']
+        go: ["1.15"]
     name: Go ${{ matrix.go }} pipeline
 
     steps:
@@ -48,20 +48,80 @@ jobs:
       - name: report
         uses: codecov/codecov-action@v2.0.2
         with:
-          directory: app/
-          file: app/coverage.txt
+          file: coverage.txt
           fail_ci_if_error: true
 
-  docker-check:
+  js-check:
     runs-on: ubuntu-latest
-    name: Docker Build Pipeline
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["14", "16"]
+    name: node ${{ matrix.node }} pipeline
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: install
+        working-directory: ui
+        id: ui-install
+        run: npm install
+
+      - name: build
+        working-directory: ui
+        id: ui-build
+        run: npm run build
+
+      - name: format
+        working-directory: ui
+        id: ui-fmt
+        run: npm run lint:prettier
+
+  docker-app-check:
+    runs-on: ubuntu-latest
+    name: Docker App Pipeline
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build Image
-        uses: docker/build-push-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build App Image
+        uses: docker/build-push-action@v2
         with:
-          path: app
-          repository: jhole89/orbital
+          context: app
           push: false
+
+  docker-ui-check:
+    runs-on: ubuntu-latest
+    name: Docker UI Pipeline
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build UI Image
+        uses: docker/build-push-action@v2
+        with:
+          context: ui
+          push: false
+
+  docs-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: docs-format
+        uses: creyD/prettier_action@v3.3
+        with:
+          dry: true
+          prettier_options: --write . --config ./.prettierrc --ignore-path ./.prettierignore

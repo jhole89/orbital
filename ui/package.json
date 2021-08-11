@@ -8,7 +8,7 @@
     "elm": "^0.19.1-5",
     "elm-format": "^0.8.4",
     "jquery": "^3.5.1",
-    "tailwindcss": "^2.1.2"
+    "tailwindcss": "^2.2.7"
   },
   "devDependencies": {
     "@dillonkearns/elm-graphql": "^4.2.0",
@@ -16,6 +16,8 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.3.2",
     "loader-utils": "^2.0.0",
+    "prettier": "^2.3.2",
+    "prettier-plugin-elm": "^0.7.0",
     "webpack": "^5.48.0",
     "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2"
@@ -24,10 +26,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf dist",
     "build": "webpack --config webpack.config.js --mode production",
+    "lint:prettier": "prettier --check .",
     "watch": "webpack --mode development --watch",
     "dev": "webpack serve --mode development --port 3000",
-    "gen-graphql-entity": "elm-graphql http://localhost:5000/entity --base Entity",
-    "gen-graphql-admin": "elm-graphql http://localhost:5000/admin --base Admin"
+    "gen-graphql:entity": "elm-graphql http://localhost:5000/entity --base Entity",
+    "gen-graphql:admin": "elm-graphql http://localhost:5000/admin --base Admin"
   },
   "author": "Joel Lutman",
   "license": "ISC"

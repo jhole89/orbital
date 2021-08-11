@@ -8,20 +8,22 @@ import List.Extra
 entityListToChartOpts : EntityListResponse -> ChartOptions
 entityListToChartOpts entityList =
     let
-        categories = List.sort (List.Extra.unique (List.map .context entityList))
+        categories =
+            List.sort (List.Extra.unique (List.map .context entityList))
     in
-        { title = Nothing
-        , legend = [{ data = categories }]
-        , tooltip =
-            Just { show = False
+    { title = Nothing
+    , legend = [ { data = categories } ]
+    , tooltip =
+        Just
+            { show = False
             }
-        , series = [
-            { animation = Just True
-            , categories = List.map (\c -> { name = c }) categories
-            , data = List.map (entityToGraphNodeItemOption categories) entityList
-            , draggable = Just True
-            , emphasis = Nothing
-            , force =
+    , series =
+        [ { animation = Just True
+          , categories = List.map (\c -> { name = c }) categories
+          , data = List.map (entityToGraphNodeItemOption categories) entityList
+          , draggable = Just True
+          , emphasis = Nothing
+          , force =
                 Just
                     { edgeLength = Just 100
                     , friction = Just 0.2
@@ -29,20 +31,21 @@ entityListToChartOpts entityList =
                     , layoutAnimation = Just True
                     , repulsion = Just 50
                     }
-            , label =
+          , label =
                 Just
                     { position = Just "right"
                     , formatter = Just "{b}"
                     , show = Nothing
                     }
-            , layout = "force"
-            , lineStyle = Nothing
-            , links = List.concatMap entityToGraphEdgeItemOption entityList
-            , name = Nothing
-            , roam = Just True
-            , type_ = "graph"
-            }]
-        }
+          , layout = "force"
+          , lineStyle = Nothing
+          , links = List.concatMap entityToGraphEdgeItemOption entityList
+          , name = Nothing
+          , roam = Just True
+          , type_ = "graph"
+          }
+        ]
+    }
 
 
 entityToGraphNodeItemOption : List String -> Entity -> GraphNodeItemOption
@@ -57,7 +60,7 @@ entityToGraphNodeItemOption categories entity =
     , label = Nothing
     }
 
-entityToGraphEdgeItemOption: Entity -> List GraphEdgeItemOption
-entityToGraphEdgeItemOption e =
-    List.map (\c -> { source = e.name, target = c}) e.connections
 
+entityToGraphEdgeItemOption : Entity -> List GraphEdgeItemOption
+entityToGraphEdgeItemOption e =
+    List.map (\c -> { source = e.name, target = c }) e.connections
