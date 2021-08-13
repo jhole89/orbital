@@ -1,0 +1,19 @@
+{{- $systemNamespace := default .Release.Namespace .Values.systemNamespace }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.app.name }}
+  namespace: {{ $systemNamespace | quote }}
+  labels:
+    app.kubernetes.io/component: app
+    {{- include "orbital.commonLabels" . | nindent 4 }}
+spec:
+  type: {{ .Values.app.service.type }}
+  ports:
+    - port: {{ .Values.app.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "orbital.selectorLabels" . | nindent 4 }}

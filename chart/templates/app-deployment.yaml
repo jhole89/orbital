@@ -1,0 +1,70 @@
+{{- $systemNamespace := default .Release.Namespace .Values.systemNamespace }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+  namespace: {{ $systemNamespace | quote }}
+  labels:
+    app.kubernetes.io/component: app
+    {{- include "orbital.commonLabels" . | nindent 4 }}
+spec:
+{{- if not .Values.app.autoscaling.enabled }}
+  replicas: {{ .Values.app.replicas }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "orbital.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "orbital.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.app.secrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "orbital.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Values.app.name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.app.repository }}:{{ .Values.app.tag }}"
+          imagePullPolicy: {{ .Values.app.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+{{/*          livenessProbe: {}*/}}
+{{/*            {{- if .Values.httpProbe }}*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /*/}}
+{{/*              port: http*/}}
+{{/*            {{- end }}*/}}
+{{/*            timeoutSeconds: 5*/}}
+{{/*          readinessProbe: {}*/}}
+{{/*            {{- if .Values.httpProbe }}*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /*/}}
+{{/*              port: http*/}}
+{{/*            {{- end }}*/}}
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

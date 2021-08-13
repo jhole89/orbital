@@ -1,0 +1,8 @@
+{{/*{{- $systemNamespace := default .Release.Namespace .Values.systemNamespace }}*/}}
+
+{{/*apiVersion: v1*/}}
+{{/*kind: Namespace*/}}
+{{/*metadata:*/}}
+{{/*  name: {{ include ".fullname" . }}*/}}
+{{/*  labels:*/}}
+{{/*    role: orbital-system*/}}
