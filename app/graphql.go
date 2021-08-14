@@ -11,6 +11,9 @@ import (
 func resolveRelationships(id interface{}, p graphql.ResolveParams) ([]*database.Entity, error) {
 	context, ok := p.Args["context"].(string)
 	if ok {
+		if graphErr != nil {
+			return nil, graphConnectionErr()
+		}
 		entities, err := graph.GetRelationships(id, context)
 		if err != nil {
 			return nil, err
@@ -92,6 +95,9 @@ func createEntityHandler() (*handler.Handler, error) {
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				id, ok := p.Args["id"].(string)
 				if ok {
+					if graphErr != nil {
+						return nil, graphConnectionErr()
+					}
 					entity, err := graph.GetEntity(id)
 					if err != nil {
 						return nil, err
@@ -105,6 +111,9 @@ func createEntityHandler() (*handler.Handler, error) {
 			Type:        nonNullEntityListType,
 			Description: "Get list of Entities",
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if graphErr != nil {
+					return nil, graphConnectionErr()
+				}
 				return graph.ListEntities()
 			},
 		},

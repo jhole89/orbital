@@ -65,3 +65,7 @@ func loadNode(graph database.Graph, node *connectors.Node) (*database.Entity, er
 	}
 	return entityFrom, nil
 }
+
+func graphConnectionErr() error {
+	return fmt.Errorf("connection error: database unavailable")
+}
