@@ -8,17 +8,17 @@ import (
 )
 
 var (
-	conf  Config
-	graph database.Graph
-	err   error
+	conf     Config
+	graph    database.Graph
+	graphErr error
 )
 
 func main() {
 	conf.getConf()
 
-	graph, err = database.GetGraph(conf.Database.Type, conf.Database.Endpoint)
-	if err != nil {
-		log.Println(err)
+	graph, graphErr = database.GetGraph(conf.Database.Type, conf.Database.Endpoint)
+	if graphErr != nil {
+		log.Println(graphErr)
 	}
 
 	dh, err := createEntityHandler()
@@ -32,10 +32,6 @@ func main() {
 		log.Println(err)
 	}
 	http.Handle("/admin", disableCors(ah))
-
-	if err = reIndex(graph, conf.Lakes); err != nil {
-		log.Println(err)
-	}
 
 	log.Printf("Launching Orbital API at http://127.0.0.1:%d\n", conf.Service.Port)
 	if err = http.ListenAndServe(fmt.Sprintf(":%d", conf.Service.Port), nil); err != nil {

@@ -14,7 +14,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_REGION=${AWS_REGION}
     ports:
-      - 5000:5000
+      - "5000:5000"
 #  ui:
 #    build: ui
 #    ports:

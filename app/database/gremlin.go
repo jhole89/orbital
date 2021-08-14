@@ -34,7 +34,7 @@ func newGremlin(dsn string) (Graph, error) {
 		conn, err := grammes.DialWithWebSocket(dsn, grammes.WithErrorChannel(errs))
 		if err != nil {
 			if retryCount == 0 {
-				log.Println("Unable to connect to Gremlin database at: " + err.Error())
+				log.Println("Unable to connect to Gremlin database at: " + dsn)
 				return &Gremlin{}, err
 			}
 
