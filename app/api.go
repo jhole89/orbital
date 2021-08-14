@@ -1,20 +1,34 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/etherlabsio/healthcheck/v2"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 	"github.com/jhole89/orbital/database"
 	"net/http"
+	"time"
+)
+
+var healthCheckHandler = healthcheck.Handler(
+	healthcheck.WithTimeout(5*time.Second),
+	healthcheck.WithChecker(
+		"database", healthcheck.CheckerFunc(
+			func(ctx context.Context) error {
+				return graphErr
+			},
+		),
+	),
 )
 
 func resolveRelationships(id interface{}, p graphql.ResolveParams) ([]*database.Entity, error) {
-	context, ok := p.Args["context"].(string)
+	nodeContext, ok := p.Args["context"].(string)
 	if ok {
 		if graphErr != nil {
 			return nil, graphConnectionErr()
 		}
-		entities, err := graph.GetRelationships(id, context)
+		entities, err := graph.GetRelationships(id, nodeContext)
 		if err != nil {
 			return nil, err
 		}

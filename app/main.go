@@ -21,6 +21,8 @@ func main() {
 		log.Println(graphErr)
 	}
 
+	http.Handle("/healthz", healthCheckHandler)
+
 	dh, err := createEntityHandler()
 	if err != nil {
 		log.Println(err)
