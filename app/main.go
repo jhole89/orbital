@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	conf  Config
-	graph database.Graph
-	graphErr   error
+	conf     Config
+	graph    database.Graph
+	graphErr error
 )
 
 func main() {
