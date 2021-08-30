@@ -8,7 +8,7 @@ require (
 	github.com/etherlabsio/healthcheck/v2 v2.0.0
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/graphql-go/graphql v0.7.9
+	github.com/graphql-go/graphql v0.8.0
 	github.com/graphql-go/handler v0.2.3
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/northwesternmutual/grammes v1.2.0
